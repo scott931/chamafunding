@@ -1,0 +1,11 @@
+{
+    "name": "Crowdfunding",
+    "alias": "crowdfunding",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Crowdfunding\\Providers\\CrowdfundingServiceProvider"
+    ],
+    "files": []
+}

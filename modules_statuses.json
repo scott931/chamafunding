@@ -1,0 +1,11 @@
+{
+    "UserManagement": true,
+    "Payments": true,
+    "Subscriptions": true,
+    "Savings": true,
+    "Crowdfunding": true,
+    "Finance": true,
+    "Reports": true,
+    "Notifications": true,
+    "Admin": true
+}
