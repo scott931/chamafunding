@@ -9,6 +9,7 @@ use App\Models\FinancialTransaction;
 use App\Models\CampaignContribution;
 use App\Models\SavingsAccount;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
@@ -39,14 +40,55 @@ class AdminController extends Controller
             'new_campaigns_this_month' => Campaign::whereMonth('created_at', now()->month)->count(),
         ];
 
-        // Funding over time (last 30 days)
-        $fundingOverTime = FinancialTransaction::where('transaction_type', 'payment')
+        // Funding over time (last 30 days) - Include both FinancialTransaction and CampaignContribution
+        $ftFunding = FinancialTransaction::where('transaction_type', 'payment')
             ->where('status', 'completed')
             ->where('created_at', '>=', now()->subDays(30))
             ->selectRaw('DATE(created_at) as date, SUM(amount) as total')
             ->groupBy('date')
-            ->orderBy('date')
+            ->get()
+            ->keyBy('date');
+
+        // Get contributions and merge with FinancialTransactions
+        $contributions = CampaignContribution::where('status', 'succeeded')
+            ->where('created_at', '>=', now()->subDays(30))
             ->get();
+
+        $fundingOverTime = collect();
+
+        // Create date range for last 30 days
+        for ($i = 29; $i >= 0; $i--) {
+            $date = now()->subDays($i)->format('Y-m-d');
+            $total = 0;
+
+            // Add FinancialTransaction amount
+            if ($ftFunding->has($date)) {
+                $total += $ftFunding[$date]->total;
+            }
+
+            // Add contributions that don't have FinancialTransaction
+            foreach ($contributions as $contribution) {
+                if ($contribution->created_at->format('Y-m-d') === $date) {
+                    // Check if this contribution has a corresponding FinancialTransaction
+                    $hasFT = false;
+                    if ($contribution->transaction_id) {
+                        $hasFT = FinancialTransaction::where('external_transaction_id', $contribution->transaction_id)
+                            ->where('transaction_type', 'payment')
+                            ->whereDate('created_at', $date)
+                            ->exists();
+                    }
+
+                    if (!$hasFT) {
+                        $total += $contribution->amount;
+                    }
+                }
+            }
+
+            $fundingOverTime->push((object) [
+                'date' => $date,
+                'total' => $total
+            ]);
+        }
 
         // New campaigns and users over time (last 30 days)
         $growthData = [
@@ -220,6 +262,36 @@ class AdminController extends Controller
     }
 
     /**
+     * Update campaign details (dates, goal, etc.).
+     */
+    public function updateCampaign(Request $request, $id)
+    {
+        $campaign = Campaign::findOrFail($id);
+
+        $validated = $request->validate([
+            'title' => 'sometimes|string|max:255',
+            'category' => 'sometimes|string|in:emergency,project,community,education,health,environment',
+            'description' => 'sometimes|string|min:10',
+            'goal_amount' => 'sometimes|numeric|min:100',
+            'currency' => 'sometimes|string|size:3',
+            'deadline' => 'nullable|date',
+            'starts_at' => 'nullable|date',
+            'ends_at' => 'nullable|date|after:starts_at',
+            'status' => 'sometimes|string|in:draft,active,successful,failed,closed,suspended',
+        ]);
+
+        // Convert goal_amount from dollars to cents if provided
+        if (isset($validated['goal_amount'])) {
+            $validated['goal_amount'] = (int)($validated['goal_amount'] * 100);
+        }
+
+        // Update the campaign
+        $campaign->update($validated);
+
+        return back()->with('success', 'Campaign updated successfully.');
+    }
+
+    /**
      * Show user details.
      */
     public function showUser($id)
@@ -274,17 +346,18 @@ class AdminController extends Controller
      */
     public function transactions(Request $request)
     {
-        $query = FinancialTransaction::with(['user', 'campaign', 'savingsAccount']);
+        // Get FinancialTransaction records
+        $ftQuery = FinancialTransaction::with(['user', 'campaign', 'savingsAccount']);
 
         if ($request->has('type') && $request->type) {
-            $query->where('transaction_type', $request->type);
+            $ftQuery->where('transaction_type', $request->type);
         }
         if ($request->has('status') && $request->status) {
-            $query->where('status', $request->status);
+            $ftQuery->where('status', $request->status);
         }
         if ($request->has('search') && $request->search) {
             $search = $request->search;
-            $query->where(function ($q) use ($search) {
+            $ftQuery->where(function ($q) use ($search) {
                 $q->where('reference', 'like', "%{$search}%")
                   ->orWhereHas('user', function ($userQuery) use ($search) {
                       $userQuery->where('name', 'like', "%{$search}%")
@@ -293,7 +366,98 @@ class AdminController extends Controller
             });
         }
 
-        $transactions = $query->orderByDesc('created_at')->paginate(50);
+        $financialTransactions = $ftQuery->get();
+
+        // Get CampaignContribution records (only payments that don't have FinancialTransaction)
+        $ccQuery = CampaignContribution::with(['campaign', 'user'])
+            ->where('status', 'succeeded');
+
+        if ($request->has('type') && $request->type === 'payment') {
+            // Only include contributions when filtering for payments
+        } elseif ($request->has('type') && $request->type) {
+            // If filtering for non-payment types, exclude contributions
+            $ccQuery->whereRaw('1 = 0'); // No results
+        }
+
+        if ($request->has('search') && $request->search) {
+            $search = $request->search;
+            $ccQuery->where(function ($q) use ($search) {
+                $q->whereHas('user', function ($userQuery) use ($search) {
+                    $userQuery->where('name', 'like', "%{$search}%")
+                             ->orWhere('email', 'like', "%{$search}%");
+                });
+            });
+        }
+
+        $contributions = $ccQuery->get();
+
+        // Create a collection to hold all transactions
+        $allTransactions = collect();
+
+        // Add FinancialTransactions
+        foreach ($financialTransactions as $transaction) {
+            $allTransactions->push($transaction);
+        }
+
+        // Add Contributions (as FinancialTransaction-like objects)
+        foreach ($contributions as $contribution) {
+            // Check if this contribution already has a corresponding FinancialTransaction
+            $hasFinancialTransaction = false;
+            if ($contribution->transaction_id) {
+                $hasFinancialTransaction = FinancialTransaction::where('external_transaction_id', $contribution->transaction_id)
+                    ->where('transaction_type', 'payment')
+                    ->exists();
+            }
+
+            if (!$hasFinancialTransaction) {
+                // Create a virtual FinancialTransaction-like object from the contribution
+                $virtualTransaction = (object) [
+                    'id' => 'cc_' . $contribution->id,
+                    'reference' => 'CONT-' . $contribution->id,
+                    'transaction_type' => 'payment',
+                    'user' => $contribution->user,
+                    'campaign' => $contribution->campaign,
+                    'savingsAccount' => null,
+                    'amount' => $contribution->amount,
+                    'fee_amount' => 0, // Contributions don't track fees separately
+                    'net_amount' => $contribution->amount,
+                    'currency' => $contribution->currency ?? 'USD',
+                    'payment_method' => $this->getPaymentMethodFromProcessor($contribution->payment_processor),
+                    'payment_provider' => $contribution->payment_processor,
+                    'status' => 'completed',
+                    'created_at' => $contribution->created_at,
+                    'updated_at' => $contribution->updated_at,
+                    'is_virtual' => true, // Flag to identify virtual transactions
+                ];
+                $allTransactions->push($virtualTransaction);
+            }
+        }
+
+        // Sort by created_at descending
+        $allTransactions = $allTransactions->sortByDesc(function($transaction) {
+            return $transaction->created_at instanceof \Carbon\Carbon
+                ? $transaction->created_at->timestamp
+                : strtotime($transaction->created_at);
+        })->values();
+
+        // Manual pagination
+        $perPage = 50;
+        $currentPage = $request->get('page', 1);
+        $total = $allTransactions->count();
+        $offset = ($currentPage - 1) * $perPage;
+        $paginated = $allTransactions->slice($offset, $perPage)->values();
+
+        // Create a LengthAwarePaginator instance
+        $transactions = new \Illuminate\Pagination\LengthAwarePaginator(
+            $paginated,
+            $total,
+            $perPage,
+            $currentPage,
+            [
+                'path' => $request->url(),
+                'query' => $request->query(),
+            ]
+        );
 
         return view('admin::transactions.index', compact('transactions'));
     }
@@ -308,9 +472,287 @@ class AdminController extends Controller
 
     /**
      * Reported Content Queue (Placeholder).
+     * Note: Reports functionality has been moved to ReportsController.
+     * This method is kept for backwards compatibility but should not be used.
      */
     public function reports()
     {
-        return view('admin::reports.index');
+        // Redirect to the new reports controller
+        return redirect()->route('admin.reports.index');
+    }
+
+    /**
+     * Get comprehensive admin dashboard statistics (API endpoint)
+     */
+    public function dashboardStats(): JsonResponse
+    {
+        // Count FinancialTransaction payments
+        $transactionPayments = FinancialTransaction::where('transaction_type', 'payment')
+            ->where('status', 'completed')
+            ->count();
+
+        // Count contributions that don't have FinancialTransaction records
+        $allContributions = CampaignContribution::where('status', 'succeeded')->get();
+        $contributionPaymentsCount = 0;
+        $contributionVolume = 0;
+
+        foreach ($allContributions as $contribution) {
+            // Check if this contribution already has a FinancialTransaction
+            $hasFinancialTransaction = FinancialTransaction::where('external_transaction_id', $contribution->transaction_id)
+                ->where('transaction_type', 'payment')
+                ->exists();
+
+            if (!$hasFinancialTransaction) {
+                $contributionPaymentsCount++;
+                $contributionVolume += $contribution->amount;
+            }
+        }
+
+        // Total volume from FinancialTransaction
+        $transactionVolume = FinancialTransaction::where('transaction_type', 'payment')
+            ->where('status', 'completed')
+            ->sum('amount');
+
+        $stats = [
+            'total_campaigns' => Campaign::count(),
+            'active_campaigns' => Campaign::where('status', 'active')->count(),
+            'successful_campaigns' => Campaign::where('status', 'successful')->count(),
+            'total_raised' => Campaign::sum('raised_amount') / 100,
+            'total_users' => User::count(),
+            'total_backers' => CampaignContribution::distinct('user_id')->count(),
+            'total_payments' => $transactionPayments + $contributionPaymentsCount,
+            'total_volume' => ($transactionVolume + $contributionVolume) / 100,
+            'platform_fees' => FinancialTransaction::where('transaction_type', 'fee')
+                ->where('status', 'completed')
+                ->sum('amount') / 100,
+            'monthly_stats' => [
+                'new_users' => User::whereMonth('created_at', now()->month)->count(),
+                'new_campaigns' => Campaign::whereMonth('created_at', now()->month)->count(),
+                'payments' => FinancialTransaction::where('transaction_type', 'payment')
+                    ->where('status', 'completed')
+                    ->whereMonth('created_at', now()->month)
+                    ->count() + collect(CampaignContribution::where('status', 'succeeded')
+                    ->whereMonth('created_at', now()->month)
+                    ->get())->filter(function($contribution) {
+                        return !FinancialTransaction::where('external_transaction_id', $contribution->transaction_id)
+                            ->where('transaction_type', 'payment')
+                            ->exists();
+                    })->count(),
+                'volume' => (FinancialTransaction::where('transaction_type', 'payment')
+                    ->where('status', 'completed')
+                    ->whereMonth('created_at', now()->month)
+                    ->sum('amount') + collect(CampaignContribution::where('status', 'succeeded')
+                    ->whereMonth('created_at', now()->month)
+                    ->get())->filter(function($contribution) {
+                        return !FinancialTransaction::where('external_transaction_id', $contribution->transaction_id)
+                            ->where('transaction_type', 'payment')
+                            ->exists();
+                    })->sum('amount')) / 100,
+            ],
+        ];
+
+        return response()->json([
+            'success' => true,
+            'data' => $stats,
+            'message' => 'Admin dashboard statistics retrieved successfully'
+        ]);
+    }
+
+    /**
+     * Get payment history for admin (all users' payments)
+     */
+    public function paymentHistory(Request $request): JsonResponse
+    {
+        $perPage = $request->get('per_page', 50);
+        $page = $request->get('page', 1);
+
+        // Get payments from FinancialTransaction table
+        $financialTransactions = FinancialTransaction::with(['campaign', 'user'])
+            ->where('transaction_type', 'payment');
+
+        // Get contributions
+        $contributions = CampaignContribution::with(['campaign', 'user'])
+            ->where('status', 'succeeded');
+
+        // Apply filters
+        if ($request->has('user_id')) {
+            $financialTransactions->where('user_id', $request->user_id);
+            $contributions->where('user_id', $request->user_id);
+        }
+
+        if ($request->has('campaign_id')) {
+            $financialTransactions->where('campaign_id', $request->campaign_id);
+            $contributions->where('campaign_id', $request->campaign_id);
+        }
+
+        if ($request->has('from_date')) {
+            $financialTransactions->whereDate('created_at', '>=', $request->from_date);
+            $contributions->whereDate('created_at', '>=', $request->from_date);
+        }
+
+        if ($request->has('to_date')) {
+            $financialTransactions->whereDate('created_at', '<=', $request->to_date);
+            $contributions->whereDate('created_at', '<=', $request->to_date);
+        }
+
+        if ($request->has('payment_provider')) {
+            $financialTransactions->where('payment_provider', $request->payment_provider);
+            $contributions->where('payment_processor', $request->payment_provider);
+        }
+
+        // Get all records
+        $allFinancialTransactions = $financialTransactions->get();
+        $allContributions = $contributions->get();
+
+        // Merge and transform
+        $mergedPayments = collect();
+
+        // Add FinancialTransactions
+        foreach ($allFinancialTransactions as $transaction) {
+            $mergedPayments->push([
+                'id' => 'ft_' . $transaction->id,
+                'source' => 'financial_transaction',
+                'reference' => $transaction->reference,
+                'user' => $transaction->user ? [
+                    'id' => $transaction->user->id,
+                    'name' => $transaction->user->name,
+                    'email' => $transaction->user->email,
+                ] : null,
+                'campaign' => $transaction->campaign ? [
+                    'id' => $transaction->campaign->id,
+                    'title' => $transaction->campaign->title,
+                ] : null,
+                'amount' => $transaction->amount,
+                'currency' => $transaction->currency,
+                'payment_method' => $transaction->payment_method,
+                'payment_provider' => $transaction->payment_provider,
+                'status' => $transaction->status,
+                'created_at' => $transaction->created_at->toIso8601String(),
+            ]);
+        }
+
+        // Add Contributions
+        foreach ($allContributions as $contribution) {
+            // Only check for duplicate if transaction_id exists
+            $hasFinancialTransaction = false;
+            if ($contribution->transaction_id) {
+                $hasFinancialTransaction = FinancialTransaction::where('external_transaction_id', $contribution->transaction_id)
+                    ->where('transaction_type', 'payment')
+                    ->exists();
+            }
+
+            if (!$hasFinancialTransaction) {
+                $mergedPayments->push([
+                    'id' => 'cc_' . $contribution->id,
+                    'source' => 'campaign_contribution',
+                    'reference' => 'CONT-' . $contribution->id,
+                    'user' => $contribution->user ? [
+                        'id' => $contribution->user->id,
+                        'name' => $contribution->user->name,
+                        'email' => $contribution->user->email,
+                    ] : null,
+                    'campaign' => $contribution->campaign ? [
+                        'id' => $contribution->campaign->id,
+                        'title' => $contribution->campaign->title,
+                    ] : null,
+                    'amount' => $contribution->amount,
+                    'currency' => $contribution->currency,
+                    'payment_method' => $this->getPaymentMethodFromProcessor($contribution->payment_processor),
+                    'payment_provider' => $contribution->payment_processor,
+                    'status' => 'completed',
+                    'created_at' => $contribution->created_at->toIso8601String(),
+                ]);
+            }
+        }
+
+        // Sort by created_at descending (handle ISO8601 string dates)
+        $mergedPayments = $mergedPayments->sortByDesc(function($payment) {
+            return is_string($payment['created_at'])
+                ? strtotime($payment['created_at'])
+                : $payment['created_at']->timestamp ?? 0;
+        })->values();
+
+        // Manual pagination
+        $total = $mergedPayments->count();
+        $offset = ($page - 1) * $perPage;
+        $paginated = $mergedPayments->slice($offset, $perPage)->values();
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'data' => $paginated->toArray(),
+                'current_page' => $page,
+                'per_page' => $perPage,
+                'total' => $total,
+                'last_page' => ceil($total / $perPage),
+            ],
+            'message' => 'Payment history retrieved successfully'
+        ]);
+    }
+
+    /**
+     * Get total number of campaigns
+     */
+    public function campaignCount(): JsonResponse
+    {
+        $count = Campaign::count();
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'total_campaigns' => $count
+            ],
+            'message' => 'Campaign count retrieved successfully'
+        ]);
+    }
+
+    /**
+     * Get available reports list
+     */
+    public function reportsAvailable(): JsonResponse
+    {
+        $reports = [
+            'campaign_reports' => [
+                'name' => 'Campaign Reports',
+                'description' => 'View campaign performance metrics',
+                'endpoint' => '/api/v1/reports/campaigns',
+            ],
+            'financial_reports' => [
+                'name' => 'Financial Reports',
+                'description' => 'Analyze financial trends',
+                'endpoint' => '/api/v1/reports/financial',
+            ],
+            'user_reports' => [
+                'name' => 'User Reports',
+                'description' => 'User activity and engagement',
+                'endpoint' => '/api/v1/reports/users',
+            ],
+            'analytics' => [
+                'name' => 'Analytics',
+                'description' => 'Platform performance metrics',
+                'endpoint' => '/api/v1/reports/analytics',
+            ],
+        ];
+
+        return response()->json([
+            'success' => true,
+            'data' => $reports,
+            'message' => 'Available reports retrieved successfully'
+        ]);
+    }
+
+    /**
+     * Helper method to get payment method from processor
+     */
+    private function getPaymentMethodFromProcessor($processor): string
+    {
+        $mapping = [
+            'paypal' => 'paypal',
+            'stripe' => 'card',
+            'mpesa' => 'mobile_money',
+            'flutterwave' => 'card',
+        ];
+
+        return $mapping[strtolower($processor ?? '')] ?? 'unknown';
     }
 }

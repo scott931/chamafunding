@@ -15,6 +15,8 @@ document.addEventListener('alpine:init', () => {
         pledges: [],
         updates: [],
         transactions: [],
+        paymentHistory: [],
+        campaignCount: null,
         currentTab: 'pledges',
         selectedPledge: null,
         showPledgeModal: false,
@@ -29,6 +31,16 @@ document.addEventListener('alpine:init', () => {
             this.loadDashboardSummary();
             this.loadPledges();
             this.loadUpdates();
+            this.loadCampaignCountData();
+        },
+
+        async loadCampaignCountData() {
+            try {
+                const data = await this.request('/campaigns-count');
+                this.campaignCount = data.data.total_campaigns;
+            } catch (error) {
+                console.error('Failed to load campaign count:', error);
+            }
         },
 
         async request(url, options = {}) {
@@ -100,6 +112,39 @@ document.addEventListener('alpine:init', () => {
                 console.error('Failed to load transactions:', error);
             } finally {
                 this.loading = false;
+            }
+        },
+
+        async loadPaymentHistory(page = 1) {
+            this.loading = true;
+            try {
+                const data = await this.request(`/payment-history?per_page=15&page=${page}`);
+                return data.data;
+            } catch (error) {
+                console.error('Failed to load payment history:', error);
+                throw error;
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        async loadCampaignCount() {
+            try {
+                const data = await this.request('/campaigns-count');
+                return data.data.total_campaigns;
+            } catch (error) {
+                console.error('Failed to load campaign count:', error);
+                throw error;
+            }
+        },
+
+        async loadCampaignTotalPayment(campaignId) {
+            try {
+                const data = await this.request(`/campaigns/${campaignId}/total-payment`);
+                return data.data;
+            } catch (error) {
+                console.error('Failed to load campaign total payment:', error);
+                throw error;
             }
         },
 
@@ -242,6 +287,55 @@ document.addEventListener('alpine:init', () => {
 
             if (tab === 'transactions' && this.transactions.length === 0) {
                 this.loadTransactions();
+            }
+
+            if (tab === 'payment-history' && this.paymentHistory.length === 0) {
+                this.loadPaymentHistoryForTab();
+            }
+        },
+
+        async loadPaymentHistoryForTab(page = 1) {
+            this.loading = true;
+            try {
+                const response = await this.request(`/payment-history?per_page=15&page=${page}`);
+                console.log('Payment history API response:', JSON.stringify(response, null, 2)); // Debug log
+
+                // Laravel paginator structure: { success: true, data: { data: [...items...], current_page: 1, ... } }
+                if (response && response.success && response.data) {
+                    // Check if it's a paginator object (has data property with array)
+                    if (response.data.data && Array.isArray(response.data.data)) {
+                        this.paymentHistory = response.data.data;
+                        console.log('Loaded payment history items:', this.paymentHistory.length);
+                    }
+                    // Check if data is directly an array
+                    else if (Array.isArray(response.data)) {
+                        this.paymentHistory = response.data;
+                        console.log('Loaded payment history items (direct array):', this.paymentHistory.length);
+                    }
+                    // Otherwise it might be an object with items
+                    else if (response.data.items && Array.isArray(response.data.items)) {
+                        this.paymentHistory = response.data.items;
+                        console.log('Loaded payment history items (items property):', this.paymentHistory.length);
+                    }
+                    else {
+                        console.warn('Unexpected response structure:', response.data);
+                        this.paymentHistory = [];
+                    }
+                } else {
+                    console.warn('Invalid response structure:', response);
+                    this.paymentHistory = [];
+                }
+            } catch (error) {
+                console.error('Failed to load payment history:', error);
+                if (error.message) {
+                    console.error('Error message:', error.message);
+                }
+                if (error.stack) {
+                    console.error('Error stack:', error.stack);
+                }
+                this.paymentHistory = [];
+            } finally {
+                this.loading = false;
             }
         },
 

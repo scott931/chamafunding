@@ -29,11 +29,12 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerate();
 
         // Redirect admin users to admin dashboard
-        if (auth()->user()->hasAnyRole(['Treasurer', 'Secretary', 'Auditor'])) {
+        if (auth()->user()->isAdmin()) {
             return redirect()->intended(route('admin.index', absolute: false));
         }
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        // Redirect regular users (backers/contributors) to backer dashboard
+        return redirect()->intended(route('backer.dashboard', absolute: false));
     }
 
     /**

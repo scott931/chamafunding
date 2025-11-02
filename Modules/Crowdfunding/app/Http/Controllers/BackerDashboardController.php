@@ -16,7 +16,9 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 class BackerDashboardController extends Controller
 {
@@ -553,6 +555,281 @@ class BackerDashboardController extends Controller
     }
 
     /**
+     * Get comprehensive dashboard data including summary, action items, and active backing
+     */
+    public function dashboard(): JsonResponse
+    {
+        $user = Auth::user();
+
+        // Get all basic stats
+        $totalPledged = CampaignContribution::where('user_id', $user->id)
+            ->where('status', 'succeeded')
+            ->sum('amount');
+
+        $totalCampaignsBacked = CampaignContribution::where('user_id', $user->id)
+            ->where('status', 'succeeded')
+            ->distinct('campaign_id')
+            ->count('campaign_id');
+
+        // Get active backing projects with full details
+        $contributions = CampaignContribution::with([
+                'campaign' => function ($q) {
+                    $q->with(['creator']);
+                },
+                'rewardTier',
+                'detail',
+            ])
+            ->where('user_id', $user->id)
+            ->where('status', 'succeeded')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $activeBacking = $contributions->map(function ($contribution) {
+            $campaign = $contribution->campaign;
+            $detail = $contribution->detail;
+
+            // Calculate days remaining
+            $daysRemaining = null;
+            if ($campaign->deadline && $campaign->status === 'active') {
+                $now = now();
+                $deadline = \Carbon\Carbon::parse($campaign->deadline);
+                $daysRemaining = max(0, $now->diffInDays($deadline, false));
+            }
+
+            // Determine funding status
+            $fundingStatus = $campaign->status;
+            if ($campaign->status === 'active') {
+                $fundingStatus = $campaign->raised_amount >= $campaign->goal_amount ? 'successful' : 'live';
+            }
+
+            // Determine project status (post-funding)
+            $projectStatus = null;
+            if ($campaign->status === 'successful' || ($campaign->status === 'active' && $campaign->raised_amount >= $campaign->goal_amount)) {
+                if ($detail && $detail->delivery_status === 'shipped') {
+                    $projectStatus = 'shipping';
+                } elseif ($detail && $detail->delivery_status === 'delivered') {
+                    $projectStatus = 'delivered';
+                } elseif ($detail && $detail->delivery_status === 'processing') {
+                    $projectStatus = 'in_production';
+                } else {
+                    $projectStatus = 'in_production'; // Default for successful campaigns
+                }
+            } elseif ($campaign->status === 'failed') {
+                $projectStatus = 'unsuccessful';
+            } else {
+                // For live campaigns that haven't reached goal yet
+                $projectStatus = 'pending';
+            }
+
+            // Generate full URL for featured image
+            $featuredImageUrl = null;
+            if ($campaign->featured_image) {
+                if (filter_var($campaign->featured_image, FILTER_VALIDATE_URL)) {
+                    // Already a full URL
+                    $featuredImageUrl = $campaign->featured_image;
+                } elseif (Storage::disk('public')->exists($campaign->featured_image)) {
+                    // Storage path - convert to URL
+                    $featuredImageUrl = Storage::disk('public')->url($campaign->featured_image);
+                } else {
+                    // Try as asset path
+                    $featuredImageUrl = asset($campaign->featured_image);
+                }
+            }
+
+            return [
+                'id' => $contribution->id,
+                'campaign' => [
+                    'id' => $campaign->id,
+                    'title' => $campaign->title,
+                    'slug' => $campaign->slug,
+                    'featured_image' => $featuredImageUrl,
+                    'status' => $campaign->status,
+                    'funding_status' => $fundingStatus, // live, successful, unsuccessful
+                    'project_status' => $projectStatus, // in_production, shipping, delivered, unsuccessful
+                    'progress_percentage' => round($campaign->progress_percentage, 1),
+                    'goal_amount' => $campaign->goal_amount, // Return raw amount in cents
+                    'raised_amount' => $campaign->raised_amount, // Return raw amount in cents
+                    'currency' => $campaign->currency ?? 'USD',
+                    'deadline' => $campaign->deadline?->format('Y-m-d'),
+                    'days_remaining' => $daysRemaining,
+                ],
+                'creator' => $campaign->creator ? [
+                    'id' => $campaign->creator->id,
+                    'name' => $campaign->creator->name,
+                ] : null,
+                'pledge' => [
+                    'amount' => $contribution->amount, // Return raw amount in cents for frontend formatting
+                    'currency' => $contribution->currency ?? 'USD',
+                    'date' => $contribution->created_at->format('Y-m-d H:i:s'),
+                ],
+                'reward_tier' => $contribution->rewardTier ? [
+                    'id' => $contribution->rewardTier->id,
+                    'name' => $contribution->rewardTier->name,
+                    'description' => $contribution->rewardTier->description,
+                    'estimated_delivery' => $contribution->rewardTier->estimated_delivery_date,
+                ] : null,
+                'fulfillment' => [
+                    'delivery_status' => $detail?->delivery_status ?? 'pending',
+                    'survey_completed' => $detail?->survey_completed ?? false,
+                    'has_shipping_address' => $detail?->hasShippingAddress() ?? false,
+                    'tracking_number' => $detail?->tracking_number,
+                    'tracking_carrier' => $detail?->tracking_carrier,
+                    'shipped_at' => $detail?->shipped_at?->format('Y-m-d H:i:s'),
+                    'delivered_at' => $detail?->delivered_at?->format('Y-m-d H:i:s'),
+                ],
+            ];
+        });
+
+        // Get action items
+        $actionItems = collect();
+
+        // Pending surveys
+        $pendingSurveyContributions = CampaignContribution::with(['campaign', 'detail'])
+            ->where('user_id', $user->id)
+            ->where('status', 'succeeded')
+            ->whereHas('detail', function ($q) {
+                $q->where('survey_completed', false);
+            })
+            ->get();
+
+        foreach ($pendingSurveyContributions as $contribution) {
+            $actionItems->push([
+                'type' => 'survey',
+                'priority' => 'high',
+                'title' => 'Complete your survey',
+                'message' => 'Please complete your survey for ' . $contribution->campaign->title,
+                'action_url' => '/backer/pledges/' . $contribution->id,
+                'campaign_id' => $contribution->campaign_id,
+                'campaign_title' => $contribution->campaign->title,
+                'contribution_id' => $contribution->id,
+            ]);
+        }
+
+        // Missing shipping addresses for rewards that require shipping
+        $missingShipping = CampaignContribution::with(['campaign', 'rewardTier', 'detail'])
+            ->where('user_id', $user->id)
+            ->where('status', 'succeeded')
+            ->whereHas('rewardTier', function ($q) {
+                $q->where('requires_shipping', true);
+            })
+            ->where(function ($q) {
+                $q->whereDoesntHave('detail', function ($detailQ) {
+                    // No additional conditions
+                })
+                  ->orWhereHas('detail', function ($subQ) {
+                      $subQ->whereNull('shipping_address');
+                  });
+            })
+            ->get();
+
+        foreach ($missingShipping as $contribution) {
+            $actionItems->push([
+                'type' => 'shipping_address',
+                'priority' => 'medium',
+                'title' => 'Add shipping address',
+                'message' => 'Please provide your shipping address for ' . $contribution->campaign->title,
+                'action_url' => '/backer/pledges/' . $contribution->id,
+                'campaign_id' => $contribution->campaign_id,
+                'campaign_title' => $contribution->campaign->title,
+                'contribution_id' => $contribution->id,
+            ]);
+        }
+
+        // Failed payments
+        $failedContributions = CampaignContribution::with('campaign')
+            ->where('user_id', $user->id)
+            ->where('status', 'failed')
+            ->get();
+
+        foreach ($failedContributions as $contribution) {
+            $actionItems->push([
+                'type' => 'failed_payment',
+                'priority' => 'high',
+                'title' => 'Payment failed',
+                'message' => 'We couldn\'t process your payment for ' . $contribution->campaign->title . '. Please update your payment method.',
+                'action_url' => '/backer/pledges/' . $contribution->id,
+                'campaign_id' => $contribution->campaign_id,
+                'campaign_title' => $contribution->campaign->title,
+                'contribution_id' => $contribution->id,
+            ]);
+        }
+
+        // Get latest updates
+        $campaignIds = $contributions->pluck('campaign_id')->unique();
+        $latestUpdates = CampaignUpdate::with(['campaign', 'author'])
+            ->whereIn('campaign_id', $campaignIds)
+            ->published()
+            ->orderBy('published_at', 'desc')
+            ->limit(10)
+            ->get()
+            ->map(function ($update) {
+                return [
+                    'id' => $update->id,
+                    'campaign' => [
+                        'id' => $update->campaign->id,
+                        'title' => $update->campaign->title,
+                        'slug' => $update->campaign->slug,
+                        'featured_image' => $update->campaign->featured_image,
+                    ],
+                    'title' => $update->title,
+                    'content' => Str::limit($update->content, 200),
+                    'full_content' => $update->content,
+                    'type' => $update->type,
+                    'author' => [
+                        'id' => $update->author->id,
+                        'name' => $update->author->name,
+                    ],
+                    'published_at' => $update->published_at->format('Y-m-d H:i:s'),
+                    'published_at_human' => $update->published_at->diffForHumans(),
+                ];
+            });
+
+        // Get payment methods
+        $paymentMethods = PaymentMethod::where('user_id', $user->id)
+            ->where('is_verified', true)
+            ->orderBy('is_default', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($method) {
+                return [
+                    'id' => $method->id,
+                    'type' => $method->type,
+                    'display_name' => $method->display_name,
+                    'last_four' => $method->last_four,
+                    'brand' => $method->brand,
+                    'is_default' => $method->is_default,
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                ],
+                'summary' => [
+                    'total_projects_backed' => $totalCampaignsBacked,
+                    'total_amount_pledged' => $totalPledged, // Return raw amount in cents for frontend formatting
+                    'currency' => 'USD',
+                ],
+                'active_backing' => $activeBacking,
+                'action_items' => $actionItems->sortByDesc('priority')->values(),
+                'latest_updates' => $latestUpdates,
+                'payment_methods' => $paymentMethods,
+                'stats' => [
+                    'total_pledged' => number_format($totalPledged / 100, 2),
+                    'total_campaigns_backed' => $totalCampaignsBacked,
+                    'active_campaigns' => $contributions->where('campaign.status', 'active')->count(),
+                    'pending_actions' => $actionItems->count(),
+                ],
+            ],
+            'message' => 'Dashboard data retrieved successfully',
+        ]);
+    }
+
+    /**
      * Get dashboard summary/stats
      */
     public function dashboardSummary(): JsonResponse
@@ -593,6 +870,25 @@ class BackerDashboardController extends Controller
             ->published()
             ->count();
 
+        // Get financial statistics
+        $totalIncome = FinancialTransaction::where('user_id', $user->id)
+            ->where('transaction_type', 'payment')
+            ->where('status', 'completed')
+            ->sum('net_amount');
+
+        $totalExpenses = FinancialTransaction::where('user_id', $user->id)
+            ->whereIn('transaction_type', ['withdrawal', 'fee'])
+            ->where('status', 'completed')
+            ->sum('amount');
+
+        $netBalance = $totalIncome - $totalExpenses;
+
+        // Get total payments count
+        $totalPayments = FinancialTransaction::where('user_id', $user->id)
+            ->where('transaction_type', 'payment')
+            ->where('status', 'completed')
+            ->count();
+
         return response()->json([
             'success' => true,
             'data' => [
@@ -601,8 +897,202 @@ class BackerDashboardController extends Controller
                 'active_campaigns' => $activeCampaigns,
                 'pending_surveys' => $pendingSurveys,
                 'unread_updates' => $unreadUpdates,
+                'total_income' => number_format($totalIncome / 100, 2),
+                'total_expenses' => number_format($totalExpenses / 100, 2),
+                'net_balance' => number_format($netBalance / 100, 2),
+                'total_payments' => $totalPayments,
+                'contributions' => $totalCampaignsBacked,
             ],
             'message' => 'Dashboard summary retrieved successfully',
+        ]);
+    }
+
+    /**
+     * Get payment history - returns payments made by the authenticated user
+     * Includes both FinancialTransaction and CampaignContribution (PayPal/Venmo)
+     */
+    public function paymentHistory(Request $request): JsonResponse
+    {
+        $userId = Auth::id();
+        $perPage = $request->get('per_page', 15);
+        $page = $request->get('page', 1);
+
+        // Get payments from FinancialTransaction table
+        $financialTransactions = FinancialTransaction::with(['campaign', 'savingsAccount'])
+            ->where('user_id', $userId)
+            ->where('transaction_type', 'payment');
+
+        // Get contributions that may not have FinancialTransaction records
+        $contributions = CampaignContribution::with(['campaign'])
+            ->where('user_id', $userId)
+            ->where('status', 'succeeded');
+
+        // Apply date filters if provided
+        if ($request->has('from_date')) {
+            $financialTransactions->whereDate('created_at', '>=', $request->from_date);
+            $contributions->whereDate('created_at', '>=', $request->from_date);
+        }
+
+        if ($request->has('to_date')) {
+            $financialTransactions->whereDate('created_at', '<=', $request->to_date);
+            $contributions->whereDate('created_at', '<=', $request->to_date);
+        }
+
+        // Apply status filter
+        if ($request->has('status')) {
+            $financialTransactions->where('status', $request->status);
+        }
+
+        // Get all records
+        $allFinancialTransactions = $financialTransactions->get();
+        $allContributions = $contributions->get();
+
+        // Merge and transform contributions to match FinancialTransaction structure
+        $mergedPayments = collect();
+
+        // Add FinancialTransactions
+        foreach ($allFinancialTransactions as $transaction) {
+            $mergedPayments->push([
+                'id' => 'ft_' . $transaction->id,
+                'source' => 'financial_transaction',
+                'reference' => $transaction->reference,
+                'campaign' => $transaction->campaign ? [
+                    'id' => $transaction->campaign->id,
+                    'title' => $transaction->campaign->title,
+                ] : null,
+                'amount' => $transaction->amount,
+                'currency' => $transaction->currency,
+                'payment_method' => $transaction->payment_method,
+                'payment_provider' => $transaction->payment_provider,
+                'status' => $transaction->status,
+                'created_at' => $transaction->created_at->toIso8601String(),
+            ]);
+        }
+
+        // Add Contributions that don't have corresponding FinancialTransaction
+        // (for backward compatibility with existing contributions)
+        foreach ($allContributions as $contribution) {
+            // Check if this contribution already has a FinancialTransaction
+            $hasFinancialTransaction = FinancialTransaction::where('external_transaction_id', $contribution->transaction_id)
+                ->where('user_id', $userId)
+                ->exists();
+
+            if (!$hasFinancialTransaction) {
+                $mergedPayments->push([
+                    'id' => 'cc_' . $contribution->id,
+                    'source' => 'campaign_contribution',
+                    'reference' => 'CONT-' . $contribution->id,
+                    'campaign' => $contribution->campaign ? [
+                        'id' => $contribution->campaign->id,
+                        'title' => $contribution->campaign->title,
+                    ] : null,
+                    'amount' => $contribution->amount,
+                    'currency' => $contribution->currency,
+                    'payment_method' => $this->getPaymentMethodFromProcessor($contribution->payment_processor),
+                    'payment_provider' => $contribution->payment_processor,
+                    'status' => 'completed',
+                    'created_at' => $contribution->created_at->toIso8601String(),
+                ]);
+            }
+        }
+
+        // Sort by created_at descending (handle ISO8601 string dates)
+        $mergedPayments = $mergedPayments->sortByDesc(function($payment) {
+            return is_string($payment['created_at'])
+                ? strtotime($payment['created_at'])
+                : $payment['created_at']->timestamp ?? 0;
+        })->values();
+
+        // Manual pagination
+        $total = $mergedPayments->count();
+        $offset = ($page - 1) * $perPage;
+        $paginated = $mergedPayments->slice($offset, $perPage)->values();
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'data' => $paginated->toArray(),
+                'current_page' => $page,
+                'per_page' => $perPage,
+                'total' => $total,
+                'last_page' => ceil($total / $perPage),
+            ],
+            'message' => 'Payment history retrieved successfully'
+        ]);
+    }
+
+    /**
+     * Helper method to get payment method from processor
+     */
+    private function getPaymentMethodFromProcessor($processor): string
+    {
+        $mapping = [
+            'paypal' => 'paypal',
+            'stripe' => 'card',
+            'mpesa' => 'mobile_money',
+            'flutterwave' => 'card',
+        ];
+
+        return $mapping[strtolower($processor ?? '')] ?? 'unknown';
+    }
+
+    /**
+     * Get total number of campaigns
+     */
+    public function campaignCount(): JsonResponse
+    {
+        $count = Campaign::count();
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'total_campaigns' => $count
+            ],
+            'message' => 'Campaign count retrieved successfully'
+        ]);
+    }
+
+    /**
+     * Get total payment made to a specific campaign by the authenticated user
+     */
+    public function campaignTotalPayment($campaignId): JsonResponse
+    {
+        // Verify campaign exists
+        $campaign = Campaign::find($campaignId);
+
+        if (!$campaign) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Campaign not found'
+            ], 404);
+        }
+
+        // Calculate total payments made by the user to this campaign
+        // Only count completed payments (excluding refunds)
+        $totalPayment = FinancialTransaction::where('user_id', Auth::id())
+            ->where('campaign_id', $campaignId)
+            ->where('transaction_type', 'payment')
+            ->where('status', 'completed')
+            ->sum('amount');
+
+        // Also get count of payments
+        $paymentCount = FinancialTransaction::where('user_id', Auth::id())
+            ->where('campaign_id', $campaignId)
+            ->where('transaction_type', 'payment')
+            ->where('status', 'completed')
+            ->count();
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'campaign_id' => $campaignId,
+                'campaign_title' => $campaign->title,
+                'total_amount' => $totalPayment / 100, // Convert from cents to dollars
+                'total_amount_raw' => $totalPayment, // Amount in cents
+                'currency' => $campaign->currency ?? 'USD',
+                'payment_count' => $paymentCount,
+            ],
+            'message' => 'Total payment to campaign retrieved successfully'
         ]);
     }
 

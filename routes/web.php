@@ -8,20 +8,22 @@ use App\Mail\TestMail;
 Route::get('/', function () {
     if (auth()->check()) {
         // Redirect admin users to admin dashboard
-        if (auth()->user()->hasAnyRole(['Treasurer', 'Secretary', 'Auditor'])) {
+        if (auth()->user()->isAdmin()) {
             return redirect()->route('admin.index');
         }
-        return redirect()->route('dashboard');
+        // Redirect regular users to backer dashboard
+        return redirect()->route('backer.dashboard');
     }
     return redirect()->route('login');
 });
 
 Route::get('/dashboard', function () {
     // Redirect admin users to admin dashboard
-    if (auth()->user()->hasAnyRole(['Treasurer', 'Secretary', 'Auditor'])) {
+    if (auth()->user()->isAdmin()) {
         return redirect()->route('admin.index');
     }
-    return view('dashboard');
+    // Redirect regular users to backer dashboard
+    return redirect()->route('backer.dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::get('/backer/dashboard', function () {
@@ -32,10 +34,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    // Protected test mail route (restricted to Treasurer/Secretary/Auditor)
+    // Protected test mail route (restricted to admin roles)
     Route::get('/admin/test-mail', function () {
         $user = auth()->user();
-        if (!$user || ! $user->hasAnyRole(['Treasurer', 'Secretary', 'Auditor'])) {
+        if (!$user || ! $user->isAdmin()) {
             abort(403);
         }
 

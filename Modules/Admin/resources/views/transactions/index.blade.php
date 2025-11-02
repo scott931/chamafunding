@@ -72,8 +72,12 @@
                                         <span class="font-mono text-xs text-gray-900">{{ $transaction->reference }}</span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm text-gray-900">{{ $transaction->user->name ?? 'N/A' }}</div>
-                                        <div class="text-xs text-gray-500">{{ $transaction->user->email ?? '' }}</div>
+                                        @if($transaction->user)
+                                            <div class="text-sm text-gray-900">{{ $transaction->user->name ?? 'N/A' }}</div>
+                                            <div class="text-xs text-gray-500">{{ $transaction->user->email ?? '' }}</div>
+                                        @else
+                                            <div class="text-sm text-gray-900">N/A</div>
+                                        @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         @if($transaction->campaign)

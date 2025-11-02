@@ -10,6 +10,8 @@ class ReportsCache extends Model
 {
     use HasFactory;
 
+    protected $table = 'reports_cache';
+
     protected $fillable = [
         'report_type',
         'cache_key',

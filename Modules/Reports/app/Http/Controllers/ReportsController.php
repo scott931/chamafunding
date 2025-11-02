@@ -627,4 +627,219 @@ class ReportsController extends Controller
         // This would require more complex tracking
         return 0;
     }
+
+    /**
+     * Get payment history - returns payments made by the authenticated user
+     * Includes both FinancialTransaction and CampaignContribution (PayPal/Venmo)
+     */
+    public function paymentHistory(Request $request): JsonResponse
+    {
+        $user = Auth::user();
+        $isAdmin = $user->hasAnyRole([
+            'Super Admin', 'Financial Admin', 'Moderator', 'Support Agent',
+            'Treasurer', 'Secretary', 'Auditor'
+        ]);
+
+        $userId = $isAdmin ? null : $user->id;
+        $perPage = $request->get('per_page', 15);
+        $page = $request->get('page', 1);
+
+        // Get payments from FinancialTransaction table
+        $financialTransactions = FinancialTransaction::with(['campaign', 'savingsAccount', 'user'])
+            ->where('transaction_type', 'payment');
+
+        if ($userId) {
+            $financialTransactions->where('user_id', $userId);
+        }
+
+        // Get contributions that may not have FinancialTransaction records
+        $contributions = \App\Models\CampaignContribution::with(['campaign', 'user'])
+            ->where('status', 'succeeded');
+
+        if ($userId) {
+            $contributions->where('user_id', $userId);
+        }
+
+        // Apply date filters if provided
+        if ($request->has('from_date')) {
+            $financialTransactions->whereDate('created_at', '>=', $request->from_date);
+            $contributions->whereDate('created_at', '>=', $request->from_date);
+        }
+
+        if ($request->has('to_date')) {
+            $financialTransactions->whereDate('created_at', '<=', $request->to_date);
+            $contributions->whereDate('created_at', '<=', $request->to_date);
+        }
+
+        // Apply status filter
+        if ($request->has('status')) {
+            $financialTransactions->where('status', $request->status);
+        }
+
+        // Get all records
+        $allFinancialTransactions = $financialTransactions->get();
+        $allContributions = $contributions->get();
+
+        // Merge and transform
+        $mergedPayments = collect();
+
+        // Add FinancialTransactions
+        foreach ($allFinancialTransactions as $transaction) {
+            $mergedPayments->push([
+                'id' => 'ft_' . $transaction->id,
+                'source' => 'financial_transaction',
+                'reference' => $transaction->reference,
+                'user' => $transaction->user ? [
+                    'id' => $transaction->user->id,
+                    'name' => $transaction->user->name,
+                    'email' => $transaction->user->email,
+                ] : null,
+                'campaign' => $transaction->campaign ? [
+                    'id' => $transaction->campaign->id,
+                    'title' => $transaction->campaign->title,
+                ] : null,
+                'amount' => $transaction->amount,
+                'currency' => $transaction->currency,
+                'payment_method' => $transaction->payment_method,
+                'payment_provider' => $transaction->payment_provider,
+                'status' => $transaction->status,
+                'created_at' => $transaction->created_at->toIso8601String(),
+            ]);
+        }
+
+        // Add Contributions that don't have corresponding FinancialTransaction
+        foreach ($allContributions as $contribution) {
+            $hasFinancialTransaction = false;
+            if ($contribution->transaction_id) {
+                $query = FinancialTransaction::where('external_transaction_id', $contribution->transaction_id)
+                    ->where('transaction_type', 'payment');
+                if ($userId) {
+                    $query->where('user_id', $userId);
+                }
+                $hasFinancialTransaction = $query->exists();
+            }
+
+            if (!$hasFinancialTransaction) {
+                $mergedPayments->push([
+                    'id' => 'cc_' . $contribution->id,
+                    'source' => 'campaign_contribution',
+                    'reference' => 'CONT-' . $contribution->id,
+                    'user' => $contribution->user ? [
+                        'id' => $contribution->user->id,
+                        'name' => $contribution->user->name,
+                        'email' => $contribution->user->email,
+                    ] : null,
+                    'campaign' => $contribution->campaign ? [
+                        'id' => $contribution->campaign->id,
+                        'title' => $contribution->campaign->title,
+                    ] : null,
+                    'amount' => $contribution->amount,
+                    'currency' => $contribution->currency,
+                    'payment_method' => $this->getPaymentMethodFromProcessor($contribution->payment_processor),
+                    'payment_provider' => $contribution->payment_processor,
+                    'status' => 'completed',
+                    'created_at' => $contribution->created_at->toIso8601String(),
+                ]);
+            }
+        }
+
+        // Sort by created_at descending (handle ISO8601 string dates)
+        $mergedPayments = $mergedPayments->sortByDesc(function($payment) {
+            return is_string($payment['created_at'])
+                ? strtotime($payment['created_at'])
+                : $payment['created_at']->timestamp ?? 0;
+        })->values();
+
+        // Manual pagination
+        $total = $mergedPayments->count();
+        $offset = ($page - 1) * $perPage;
+        $paginated = $mergedPayments->slice($offset, $perPage)->values();
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'data' => $paginated->toArray(),
+                'current_page' => $page,
+                'per_page' => $perPage,
+                'total' => $total,
+                'last_page' => ceil($total / $perPage),
+            ],
+            'message' => 'Payment history retrieved successfully'
+        ]);
+    }
+
+    /**
+     * Helper method to get payment method from processor
+     */
+    private function getPaymentMethodFromProcessor($processor): string
+    {
+        $mapping = [
+            'paypal' => 'paypal',
+            'stripe' => 'card',
+            'mpesa' => 'mobile_money',
+            'flutterwave' => 'card',
+        ];
+
+        return $mapping[strtolower($processor ?? '')] ?? 'unknown';
+    }
+
+    /**
+     * Get total number of campaigns
+     */
+    public function campaignCount(): JsonResponse
+    {
+        $count = Campaign::count();
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'total_campaigns' => $count
+            ],
+            'message' => 'Campaign count retrieved successfully'
+        ]);
+    }
+
+    /**
+     * Get total payment made to a specific campaign by the authenticated user
+     */
+    public function campaignTotalPayment($campaignId): JsonResponse
+    {
+        // Verify campaign exists
+        $campaign = Campaign::find($campaignId);
+
+        if (!$campaign) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Campaign not found'
+            ], 404);
+        }
+
+        // Calculate total payments made by the user to this campaign
+        // Only count completed payments (excluding refunds)
+        $totalPayment = FinancialTransaction::where('user_id', Auth::id())
+            ->where('campaign_id', $campaignId)
+            ->where('transaction_type', 'payment')
+            ->where('status', 'completed')
+            ->sum('amount');
+
+        // Also get count of payments
+        $paymentCount = FinancialTransaction::where('user_id', Auth::id())
+            ->where('campaign_id', $campaignId)
+            ->where('transaction_type', 'payment')
+            ->where('status', 'completed')
+            ->count();
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'campaign_id' => $campaignId,
+                'campaign_title' => $campaign->title,
+                'total_amount' => $totalPayment / 100, // Convert from cents to dollars
+                'total_amount_raw' => $totalPayment, // Amount in cents
+                'currency' => $campaign->currency ?? 'USD',
+                'payment_count' => $paymentCount,
+            ],
+            'message' => 'Total payment to campaign retrieved successfully'
+        ]);
+    }
 }

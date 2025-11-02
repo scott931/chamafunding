@@ -134,6 +134,7 @@ class RegisterWizardController extends Controller
 		// default Member role applied in RegisteredUserController, apply here too
 		try { $user->assignRole('Member'); } catch (\Throwable $e) {}
 
-		return redirect()->route('dashboard');
+		// Redirect regular users to backer dashboard
+		return redirect()->route('backer.dashboard');
 	}
 }

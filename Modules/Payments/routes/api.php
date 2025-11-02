@@ -14,13 +14,16 @@ Route::middleware(['web', 'auth'])->prefix('v1/paypal')->group(function () {
     Route::post('/capture', [PayPalController::class, 'captureOrder'])->name('paypal.order.capture');
 });
 
-Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
+Route::middleware(['web', 'auth:sanctum'])->prefix('v1')->group(function () {
     Route::apiResource('payments', PaymentsController::class)->names('payments');
 
     // Additional payment endpoints
     Route::get('payments/{id}/status', [PaymentsController::class, 'status'])->name('payments.status');
     Route::post('payments/{id}/refund', [PaymentsController::class, 'refund'])->name('payments.refund');
     Route::get('payments-history', [PaymentsController::class, 'history'])->name('payments.history');
+    Route::get('payments-summary', [PaymentsController::class, 'summary'])->name('payments.summary');
+    Route::get('campaigns-count', [PaymentsController::class, 'campaignCount'])->name('payments.campaigns-count');
+    Route::get('campaigns/{campaignId}/total-payment', [PaymentsController::class, 'campaignTotalPayment'])->name('payments.campaign-total-payment');
 
     // Payment methods
     Route::get('payment-methods', [PaymentsController::class, 'paymentMethods'])->name('payment-methods.index');

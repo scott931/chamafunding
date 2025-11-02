@@ -91,16 +91,61 @@ class FinanceController extends Controller
 
     /**
      * Calculate balance
+     * Includes both FinancialTransaction and CampaignContribution data
      */
     public function balance(): JsonResponse
     {
         $userId = Auth::id();
 
+        // Get income from FinancialTransaction (completed payments)
+        $transactionIncome = FinancialTransaction::where('user_id', $userId)
+            ->where('transaction_type', 'payment')
+            ->where('status', 'completed')
+            ->sum('net_amount');
+
+        // Get contributions that may not have FinancialTransaction records
+        // Only count contributions that don't have corresponding FinancialTransaction
+        $allContributions = \App\Models\CampaignContribution::where('user_id', $userId)
+            ->where('status', 'succeeded')
+            ->get();
+
+        $contributionIncome = 0;
+        foreach ($allContributions as $contribution) {
+            // Check if this contribution already has a FinancialTransaction
+            $hasFinancialTransaction = FinancialTransaction::where('external_transaction_id', $contribution->transaction_id)
+                ->where('user_id', $userId)
+                ->exists();
+
+            if (!$hasFinancialTransaction) {
+                $contributionIncome += $contribution->amount;
+            }
+        }
+
+        // Calculate net contribution amount (subtract typical 2.9% fee)
+        $feeRate = 0.029;
+        $contributionIncomeNet = (int) round($contributionIncome * (1 - $feeRate));
+
+        // Total income from both sources
+        $totalIncome = $transactionIncome + $contributionIncomeNet;
+
+        // Campaign contributions (total amount contributed, not net)
+        $transactionContributions = FinancialTransaction::where('user_id', $userId)
+            ->where('transaction_type', 'payment')
+            ->whereNotNull('campaign_id')
+            ->where('status', 'completed')
+            ->sum('amount');
+
+        $contributionContributions = \App\Models\CampaignContribution::where('user_id', $userId)
+            ->where('status', 'succeeded')
+            ->sum('amount');
+
+        // Total contributions (use transaction contributions if they exist, otherwise use direct contributions)
+        $campaignContributions = $transactionContributions > 0
+            ? $transactionContributions
+            : $contributionContributions;
+
         $balance = [
-            'total_income' => FinancialTransaction::where('user_id', $userId)
-                ->where('transaction_type', 'payment')
-                ->where('status', 'completed')
-                ->sum('net_amount'),
+            'total_income' => $totalIncome,
             'total_expenses' => FinancialTransaction::where('user_id', $userId)
                 ->whereIn('transaction_type', ['withdrawal', 'fee'])
                 ->where('status', 'completed')
@@ -112,11 +157,15 @@ class FinanceController extends Controller
             'savings_balance' => SavingsAccount::where('user_id', $userId)
                 ->where('status', 'active')
                 ->sum('balance'),
-            'campaign_contributions' => FinancialTransaction::where('user_id', $userId)
+            'campaign_contributions' => $campaignContributions,
+            'total_payments_count' => FinancialTransaction::where('user_id', $userId)
                 ->where('transaction_type', 'payment')
-                ->whereNotNull('campaign_id')
                 ->where('status', 'completed')
-                ->sum('amount'),
+                ->count() + collect($allContributions)->filter(function($contribution) use ($userId) {
+                    return !FinancialTransaction::where('external_transaction_id', $contribution->transaction_id)
+                        ->where('user_id', $userId)
+                        ->exists();
+                })->count(),
         ];
 
         $balance['net_balance'] = $balance['total_income'] - $balance['total_expenses'];
@@ -308,6 +357,193 @@ class FinanceController extends Controller
                 ->map->sum('amount'),
             'average_fee' => $fees->avg('amount'),
         ];
+    }
+
+    /**
+     * Get payment history - returns payments made by the authenticated user
+     * Includes both FinancialTransaction and CampaignContribution (PayPal/Venmo)
+     */
+    public function paymentHistory(Request $request): JsonResponse
+    {
+        $userId = Auth::id();
+        $perPage = $request->get('per_page', 15);
+        $page = $request->get('page', 1);
+
+        // Get payments from FinancialTransaction table
+        $financialTransactions = FinancialTransaction::with(['campaign', 'savingsAccount'])
+            ->where('user_id', $userId)
+            ->where('transaction_type', 'payment');
+
+        // Get contributions that may not have FinancialTransaction records
+        $contributions = \App\Models\CampaignContribution::with(['campaign'])
+            ->where('user_id', $userId)
+            ->where('status', 'succeeded');
+
+        // Apply date filters if provided
+        if ($request->has('from_date')) {
+            $financialTransactions->whereDate('created_at', '>=', $request->from_date);
+            $contributions->whereDate('created_at', '>=', $request->from_date);
+        }
+
+        if ($request->has('to_date')) {
+            $financialTransactions->whereDate('created_at', '<=', $request->to_date);
+            $contributions->whereDate('created_at', '<=', $request->to_date);
+        }
+
+        // Apply status filter
+        if ($request->has('status')) {
+            $financialTransactions->where('status', $request->status);
+        }
+
+        // Get all records
+        $allFinancialTransactions = $financialTransactions->get();
+        $allContributions = $contributions->get();
+
+        // Merge and transform
+        $mergedPayments = collect();
+
+        // Add FinancialTransactions
+        foreach ($allFinancialTransactions as $transaction) {
+            $mergedPayments->push([
+                'id' => 'ft_' . $transaction->id,
+                'source' => 'financial_transaction',
+                'reference' => $transaction->reference,
+                'campaign' => $transaction->campaign ? [
+                    'id' => $transaction->campaign->id,
+                    'title' => $transaction->campaign->title,
+                ] : null,
+                'amount' => $transaction->amount,
+                'currency' => $transaction->currency,
+                'payment_method' => $transaction->payment_method,
+                'payment_provider' => $transaction->payment_provider,
+                'status' => $transaction->status,
+                'created_at' => $transaction->created_at->toIso8601String(),
+            ]);
+        }
+
+        // Add Contributions that don't have corresponding FinancialTransaction
+        foreach ($allContributions as $contribution) {
+            $hasFinancialTransaction = FinancialTransaction::where('external_transaction_id', $contribution->transaction_id)
+                ->where('user_id', $userId)
+                ->exists();
+
+            if (!$hasFinancialTransaction) {
+                $mergedPayments->push([
+                    'id' => 'cc_' . $contribution->id,
+                    'source' => 'campaign_contribution',
+                    'reference' => 'CONT-' . $contribution->id,
+                    'campaign' => $contribution->campaign ? [
+                        'id' => $contribution->campaign->id,
+                        'title' => $contribution->campaign->title,
+                    ] : null,
+                    'amount' => $contribution->amount,
+                    'currency' => $contribution->currency,
+                    'payment_method' => $this->getPaymentMethodFromProcessor($contribution->payment_processor),
+                    'payment_provider' => $contribution->payment_processor,
+                    'status' => 'completed',
+                    'created_at' => $contribution->created_at->toIso8601String(),
+                ]);
+            }
+        }
+
+        // Sort by created_at descending (handle ISO8601 string dates)
+        $mergedPayments = $mergedPayments->sortByDesc(function($payment) {
+            return is_string($payment['created_at'])
+                ? strtotime($payment['created_at'])
+                : $payment['created_at']->timestamp ?? 0;
+        })->values();
+
+        // Manual pagination
+        $total = $mergedPayments->count();
+        $offset = ($page - 1) * $perPage;
+        $paginated = $mergedPayments->slice($offset, $perPage)->values();
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'data' => $paginated->toArray(),
+                'current_page' => $page,
+                'per_page' => $perPage,
+                'total' => $total,
+                'last_page' => ceil($total / $perPage),
+            ],
+            'message' => 'Payment history retrieved successfully'
+        ]);
+    }
+
+    /**
+     * Helper method to get payment method from processor
+     */
+    private function getPaymentMethodFromProcessor($processor): string
+    {
+        $mapping = [
+            'paypal' => 'paypal',
+            'stripe' => 'card',
+            'mpesa' => 'mobile_money',
+            'flutterwave' => 'card',
+        ];
+
+        return $mapping[strtolower($processor ?? '')] ?? 'unknown';
+    }
+
+    /**
+     * Get total number of campaigns
+     */
+    public function campaignCount(): JsonResponse
+    {
+        $count = Campaign::count();
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'total_campaigns' => $count
+            ],
+            'message' => 'Campaign count retrieved successfully'
+        ]);
+    }
+
+    /**
+     * Get total payment made to a specific campaign by the authenticated user
+     */
+    public function campaignTotalPayment($campaignId): JsonResponse
+    {
+        // Verify campaign exists
+        $campaign = Campaign::find($campaignId);
+
+        if (!$campaign) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Campaign not found'
+            ], 404);
+        }
+
+        // Calculate total payments made by the user to this campaign
+        // Only count completed payments (excluding refunds)
+        $totalPayment = FinancialTransaction::where('user_id', Auth::id())
+            ->where('campaign_id', $campaignId)
+            ->where('transaction_type', 'payment')
+            ->where('status', 'completed')
+            ->sum('amount');
+
+        // Also get count of payments
+        $paymentCount = FinancialTransaction::where('user_id', Auth::id())
+            ->where('campaign_id', $campaignId)
+            ->where('transaction_type', 'payment')
+            ->where('status', 'completed')
+            ->count();
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'campaign_id' => $campaignId,
+                'campaign_title' => $campaign->title,
+                'total_amount' => $totalPayment / 100, // Convert from cents to dollars
+                'total_amount_raw' => $totalPayment, // Amount in cents
+                'currency' => $campaign->currency ?? 'USD',
+                'payment_count' => $paymentCount,
+            ],
+            'message' => 'Total payment to campaign retrieved successfully'
+        ]);
     }
 
     /**

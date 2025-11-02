@@ -7,19 +7,10 @@ use Modules\Crowdfunding\Http\Controllers\BackerDashboardController;
 // Contribution endpoint - supports web session authentication for same-origin requests
 Route::middleware(['web', 'auth'])->prefix('v1')->group(function () {
     Route::post('campaigns/{id}/contribute', [CrowdfundingController::class, 'contribute'])->name('campaigns.contribute');
-});
 
-Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
-    Route::apiResource('campaigns', CrowdfundingController::class)->names('campaigns');
-
-    // Additional campaign endpoints (for API tokens)
-    Route::post('campaigns/{id}/activate', [CrowdfundingController::class, 'activate'])->name('campaigns.activate');
-    Route::get('campaigns/{id}/contributions', [CrowdfundingController::class, 'contributions'])->name('campaigns.contributions');
-    Route::get('campaigns/{id}/analytics', [CrowdfundingController::class, 'analytics'])->name('campaigns.analytics');
-    Route::get('campaigns-search', [CrowdfundingController::class, 'search'])->name('campaigns.search');
-
-    // Backer Dashboard endpoints
+    // Backer Dashboard endpoints - support web session auth
     Route::prefix('backer')->name('backer.')->group(function () {
+        Route::get('dashboard', [BackerDashboardController::class, 'dashboard'])->name('dashboard');
         Route::get('dashboard/summary', [BackerDashboardController::class, 'dashboardSummary'])->name('dashboard.summary');
 
         // Project Discovery
@@ -56,6 +47,11 @@ Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
 
         // Payment Methods
         Route::get('payment-methods', [BackerDashboardController::class, 'getPaymentMethods'])->name('payment-methods.index');
+
+        // Payment Information
+        Route::get('payment-history', [BackerDashboardController::class, 'paymentHistory'])->name('payment-history');
+        Route::get('campaigns-count', [BackerDashboardController::class, 'campaignCount'])->name('campaigns-count');
+        Route::get('campaigns/{campaignId}/total-payment', [BackerDashboardController::class, 'campaignTotalPayment'])->name('campaign-total-payment');
     });
 });
 

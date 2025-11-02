@@ -1,7 +1,7 @@
 <div x-data="{ sidebarOpen: false }" class="min-h-screen flex">
     <!-- Sidebar -->
     <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
-           class="fixed lg:static inset-y-0 left-0 z-50 w-64 bg-gradient-to-b from-blue-900 via-indigo-900 to-purple-900 shadow-2xl transform transition-transform duration-300 ease-in-out lg:transition-none">
+           class="fixed inset-y-0 left-0 z-50 w-64 bg-gradient-to-b from-blue-900 via-indigo-900 to-purple-900 shadow-2xl transform transition-transform duration-300 ease-in-out lg:transition-none">
 
         <!-- Logo Section -->
         <div class="flex items-center justify-between h-16 px-6 border-b border-white/10">
@@ -57,7 +57,31 @@
                 {{ __('Reports') }}
             </x-sidebar-link>
 
-            @if(auth()->user()->hasAnyRole(['Super Admin', 'Financial Admin', 'Moderator', 'Support Agent', 'Treasurer', 'Secretary', 'Auditor']))
+            @php
+                $isAdmin = auth()->check() && auth()->user()->isAdmin();
+            @endphp
+            @if($isAdmin)
+            <x-sidebar-link :href="route('admin.campaigns.index')" :active="request()->routeIs('admin.campaigns.*')">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+                {{ __('Campaign Management') }}
+            </x-sidebar-link>
+
+            <x-sidebar-link :href="route('admin.transactions.index')" :active="request()->routeIs('admin.transactions.*')">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                </svg>
+                {{ __('Transaction Log') }}
+            </x-sidebar-link>
+
+            <x-sidebar-link :href="route('admin.reports.index')" :active="request()->routeIs('admin.reports.*')">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                {{ __('Admin Reports') }}
+            </x-sidebar-link>
+
             <x-sidebar-link :href="route('admin.settings.index')" :active="request()->routeIs('admin.settings.*')">
                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
@@ -74,11 +98,11 @@
                 <x-slot name="trigger">
                     <button class="flex items-center w-full px-4 py-3 text-sm font-medium text-white hover:bg-white/10 rounded-lg transition-all duration-200">
                         <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white font-semibold text-sm mr-3 shadow-lg">
-                            {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                            {{ strtoupper(substr(Auth::user()?->name ?? 'U', 0, 1)) }}
                         </div>
                         <div class="flex-1 text-left">
-                            <p class="font-medium text-white">{{ Auth::user()->name }}</p>
-                            <p class="text-xs text-gray-300">{{ Auth::user()->email }}</p>
+                            <p class="font-medium text-white">{{ Auth::user()?->name ?? 'User' }}</p>
+                            <p class="text-xs text-gray-300">{{ Auth::user()?->email ?? 'No email' }}</p>
                         </div>
                         <svg class="w-4 h-4 text-gray-300 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
@@ -123,7 +147,7 @@
          style="display: none;"></div>
 
     <!-- Main Content -->
-    <div class="flex-1 flex flex-col lg:ml-0">
+    <div class="flex-1 flex flex-col lg:ml-64">
         <!-- Top Bar with Menu Button (Mobile Only) -->
         <div class="bg-white/95 backdrop-blur-md border-b border-gray-200/50 shadow-sm sticky top-0 z-40 lg:hidden">
             <div class="flex items-center justify-between h-16 px-4">
@@ -139,7 +163,7 @@
                     <span class="text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">CrowdFunding</span>
                 </a>
                 <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-semibold text-xs">
-                    {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                    {{ strtoupper(substr(Auth::user()?->name ?? 'U', 0, 1)) }}
                 </div>
             </div>
         </div>

@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
@@ -358,9 +359,31 @@ class CrowdfundingController extends Controller
 
         // Check if campaign is active
         if (!$campaign->isActive()) {
+            // Log detailed information for debugging
+            Log::warning('Campaign contribution attempt failed - campaign not active', [
+                'campaign_id' => $campaign->id,
+                'campaign_status' => $campaign->status,
+                'starts_at' => $campaign->starts_at,
+                'ends_at' => $campaign->ends_at,
+                'now' => now(),
+                'isActive_result' => $campaign->isActive(),
+                'status_check' => $campaign->status === 'active',
+                'starts_at_check' => $campaign->starts_at === null || $campaign->starts_at <= now(),
+                'ends_at_check' => $campaign->ends_at === null || $campaign->ends_at >= now(),
+            ]);
+
+            $reason = 'Campaign is not active';
+            if ($campaign->status !== 'active') {
+                $reason .= " (status: {$campaign->status})";
+            } elseif ($campaign->starts_at && $campaign->starts_at > now()) {
+                $reason .= " (starts at: {$campaign->starts_at})";
+            } elseif ($campaign->ends_at && $campaign->ends_at < now()) {
+                $reason .= " (ended at: {$campaign->ends_at})";
+            }
+
             return response()->json([
                 'success' => false,
-                'message' => 'Campaign is not active'
+                'message' => $reason
             ], 400);
         }
 
@@ -431,6 +454,32 @@ class CrowdfundingController extends Controller
                     \App\Models\RewardTier::where('id', $request->reward_tier_id)
                         ->increment('quantity_claimed');
                 }
+
+                // Create FinancialTransaction record for payment history tracking
+                // This ensures PayPal/Venmo payments appear in payment history
+                $paymentMethod = $request->payment_method ?? 'paypal';
+                $paymentProvider = $request->payment_processor ?? 'paypal';
+
+                // Calculate fees (2.9% for PayPal/Venmo typically)
+                $feeRate = 0.029;
+                $feeAmount = (int) round($contribution->amount * $feeRate);
+                $netAmount = $contribution->amount - $feeAmount;
+
+                \App\Models\FinancialTransaction::create([
+                    'transaction_type' => 'payment',
+                    'reference' => 'CONT_' . $contribution->id . '_' . time(),
+                    'user_id' => Auth::id(),
+                    'campaign_id' => $campaign->id,
+                    'amount' => $contribution->amount,
+                    'fee_amount' => $feeAmount,
+                    'net_amount' => $netAmount,
+                    'currency' => $contribution->currency,
+                    'payment_method' => $paymentMethod, // 'venmo' or 'paypal'
+                    'payment_provider' => $paymentProvider, // 'paypal'
+                    'external_transaction_id' => $request->transaction_id,
+                    'status' => 'completed',
+                    'description' => 'Campaign contribution via ' . ucfirst($paymentMethod),
+                ]);
             }
 
             DB::commit();

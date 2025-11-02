@@ -99,4 +99,33 @@ class User extends Authenticatable
     {
         return $this->hasMany(SavedCampaign::class);
     }
+
+    /**
+     * Get all admin roles that should redirect to admin dashboard.
+     *
+     * @return array<string>
+     */
+    public static function getAdminRoles(): array
+    {
+        return [
+            'Super Admin',
+            'Financial Admin',
+            'Moderator',
+            'Support Agent',
+            // Legacy roles (backward compatibility)
+            'Treasurer',
+            'Secretary',
+            'Auditor',
+        ];
+    }
+
+    /**
+     * Check if user has any admin role.
+     *
+     * @return bool
+     */
+    public function isAdmin(): bool
+    {
+        return $this->hasAnyRole(self::getAdminRoles());
+    }
 }

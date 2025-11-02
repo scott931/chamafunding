@@ -52,6 +52,7 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        return redirect(route('dashboard', absolute: false));
+        // Redirect regular users to backer dashboard
+        return redirect(route('backer.dashboard', absolute: false));
     }
 }

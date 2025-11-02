@@ -63,8 +63,15 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <!-- Campaign Details -->
                 <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-                    <h3 class="text-lg font-bold text-gray-900 mb-4">Campaign Details</h3>
-                    <div class="space-y-4">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-gray-900">Campaign Details</h3>
+                        <button onclick="toggleEditForm()" class="px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors">
+                            Edit Campaign
+                        </button>
+                    </div>
+
+                    <!-- Display Mode -->
+                    <div id="displayMode" class="space-y-4">
                         <div>
                             <p class="text-sm text-gray-500 mb-1">Category</p>
                             <p class="font-medium text-gray-900 capitalize">{{ str_replace('_', ' ', $campaign->category) }}</p>
@@ -85,6 +92,18 @@
                             <p class="text-sm text-gray-500 mb-1">Currency</p>
                             <p class="font-medium text-gray-900">{{ $campaign->currency }}</p>
                         </div>
+                        @if($campaign->starts_at)
+                            <div>
+                                <p class="text-sm text-gray-500 mb-1">Start Date</p>
+                                <p class="font-medium text-gray-900">{{ $campaign->starts_at->format('F j, Y H:i') }}</p>
+                            </div>
+                        @endif
+                        @if($campaign->ends_at)
+                            <div>
+                                <p class="text-sm text-gray-500 mb-1">End Date</p>
+                                <p class="font-medium text-gray-900">{{ $campaign->ends_at->format('F j, Y H:i') }}</p>
+                            </div>
+                        @endif
                         @if($campaign->deadline)
                             <div>
                                 <p class="text-sm text-gray-500 mb-1">Deadline</p>
@@ -95,6 +114,106 @@
                             <p class="text-sm text-gray-500 mb-1">Description</p>
                             <p class="text-gray-900 leading-relaxed">{{ $campaign->description }}</p>
                         </div>
+                    </div>
+
+                    <!-- Edit Form -->
+                    <div id="editMode" class="hidden">
+                        @if(session('success'))
+                            <div class="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                                <p class="text-green-800 text-sm">{{ session('success') }}</p>
+                            </div>
+                        @endif
+                        @if($errors->any())
+                            <div class="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                                <ul class="list-disc list-inside text-red-800 text-sm">
+                                    @foreach($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+                        <form method="POST" action="{{ route('admin.campaigns.update', $campaign->id) }}" class="space-y-4">
+                            @csrf
+                            @method('PUT')
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                                <input type="text" name="title" value="{{ old('title', $campaign->title) }}"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                                <select name="category" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    <option value="emergency" {{ old('category', $campaign->category) === 'emergency' ? 'selected' : '' }}>Emergency</option>
+                                    <option value="project" {{ old('category', $campaign->category) === 'project' ? 'selected' : '' }}>Project</option>
+                                    <option value="community" {{ old('category', $campaign->category) === 'community' ? 'selected' : '' }}>Community</option>
+                                    <option value="education" {{ old('category', $campaign->category) === 'education' ? 'selected' : '' }}>Education</option>
+                                    <option value="health" {{ old('category', $campaign->category) === 'health' ? 'selected' : '' }}>Health</option>
+                                    <option value="environment" {{ old('category', $campaign->category) === 'environment' ? 'selected' : '' }}>Environment</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Goal Amount ($)</label>
+                                <input type="number" step="0.01" name="goal_amount" value="{{ old('goal_amount', $campaign->goal_amount / 100) }}"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Currency</label>
+                                <input type="text" name="currency" value="{{ old('currency', $campaign->currency) }}" maxlength="3"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Start Date & Time</label>
+                                <input type="datetime-local" name="starts_at"
+                                       value="{{ old('starts_at', $campaign->starts_at ? $campaign->starts_at->format('Y-m-d\TH:i') : '') }}"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">End Date & Time</label>
+                                <input type="datetime-local" name="ends_at"
+                                       value="{{ old('ends_at', $campaign->ends_at ? $campaign->ends_at->format('Y-m-d\TH:i') : '') }}"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Deadline</label>
+                                <input type="date" name="deadline"
+                                       value="{{ old('deadline', $campaign->deadline ? $campaign->deadline->format('Y-m-d') : '') }}"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                                <select name="status" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    <option value="draft" {{ old('status', $campaign->status) === 'draft' ? 'selected' : '' }}>Draft</option>
+                                    <option value="active" {{ old('status', $campaign->status) === 'active' ? 'selected' : '' }}>Active</option>
+                                    <option value="successful" {{ old('status', $campaign->status) === 'successful' ? 'selected' : '' }}>Successful</option>
+                                    <option value="failed" {{ old('status', $campaign->status) === 'failed' ? 'selected' : '' }}>Failed</option>
+                                    <option value="closed" {{ old('status', $campaign->status) === 'closed' ? 'selected' : '' }}>Closed</option>
+                                    <option value="suspended" {{ old('status', $campaign->status) === 'suspended' ? 'selected' : '' }}>Suspended</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                                <textarea name="description" rows="4"
+                                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">{{ old('description', $campaign->description) }}</textarea>
+                            </div>
+
+                            <div class="flex items-center space-x-3 pt-4">
+                                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors">
+                                    Save Changes
+                                </button>
+                                <button type="button" onclick="toggleEditForm()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition-colors">
+                                    Cancel
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
 
@@ -193,5 +312,20 @@
             </div>
         </div>
     </div>
+
+    <script>
+        function toggleEditForm() {
+            const displayMode = document.getElementById('displayMode');
+            const editMode = document.getElementById('editMode');
+
+            if (displayMode.classList.contains('hidden')) {
+                displayMode.classList.remove('hidden');
+                editMode.classList.add('hidden');
+            } else {
+                displayMode.classList.add('hidden');
+                editMode.classList.remove('hidden');
+            }
+        }
+    </script>
 </x-app-layout>
 

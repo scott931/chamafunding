@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Modules\Admin\App\Http\Controllers\AdminController;
 use Modules\Admin\App\Http\Controllers\UserRoleController;
 use Modules\Admin\App\Http\Controllers\SettingsController;
+use Modules\Admin\App\Http\Controllers\ReportsController;
 
 // Only Treasurer, Secretary, Auditor can access Admin module
 Route::middleware(['auth', 'verified', 'admin.role'])->group(function () {
@@ -14,6 +15,7 @@ Route::middleware(['auth', 'verified', 'admin.role'])->group(function () {
     Route::get('admin/campaigns', [AdminController::class, 'campaigns'])->name('admin.campaigns.index');
     Route::get('admin/campaigns/{id}', [AdminController::class, 'showCampaign'])->name('admin.campaigns.show');
     Route::patch('admin/campaigns/{id}/status', [AdminController::class, 'updateCampaignStatus'])->name('admin.campaigns.update-status');
+    Route::put('admin/campaigns/{id}', [AdminController::class, 'updateCampaign'])->name('admin.campaigns.update');
 
     // User Management
     Route::get('admin/users', [UserRoleController::class, 'index'])->name('admin.users.index');
@@ -26,7 +28,15 @@ Route::middleware(['auth', 'verified', 'admin.role'])->group(function () {
 
     // Support & Moderation (Placeholder routes)
     Route::get('admin/support', [AdminController::class, 'support'])->name('admin.support.index');
-    Route::get('admin/reports', [AdminController::class, 'reports'])->name('admin.reports.index');
+
+    // Reports System
+    Route::get('admin/reports', [ReportsController::class, 'index'])->name('admin.reports.index');
+    Route::get('admin/reports/platform-overview', [ReportsController::class, 'platformOverview'])->name('admin.reports.platform-overview');
+    Route::get('admin/reports/all-projects', [ReportsController::class, 'allProjects'])->name('admin.reports.all-projects');
+    Route::get('admin/reports/financial-summary', [ReportsController::class, 'financialSummary'])->name('admin.reports.financial-summary');
+    Route::get('admin/reports/backer-report', [ReportsController::class, 'backerReport'])->name('admin.reports.backer-report');
+    Route::get('admin/reports/user-management', [ReportsController::class, 'userManagement'])->name('admin.reports.user-management');
+    Route::get('admin/reports/support-moderation', [ReportsController::class, 'supportModeration'])->name('admin.reports.support-moderation');
 
     // Settings (Comprehensive RBAC-based)
     Route::get('admin/settings', [SettingsController::class, 'index'])->name('admin.settings.index');

@@ -84,7 +84,7 @@ class Campaign extends Model
     public function isActive(): bool
     {
         return $this->status === 'active' &&
-               $this->starts_at <= now() &&
+               ($this->starts_at === null || $this->starts_at <= now()) &&
                ($this->ends_at === null || $this->ends_at >= now());
     }
 
