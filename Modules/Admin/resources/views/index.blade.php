@@ -260,14 +260,14 @@
                     async loadPaymentHistory() {
                         this.loading = true;
                         try {
-                            const response = await this.request('/payment-history?per_page=50');
+                            const response = await this.request('/payment-history?per_page=3');
                             console.log('Admin payment history response:', response);
 
                             if (response.success && response.data) {
                                 if (response.data.data && Array.isArray(response.data.data)) {
-                                    this.paymentHistory = response.data.data;
+                                    this.paymentHistory = response.data.data.slice(0, 3);
                                 } else if (Array.isArray(response.data)) {
-                                    this.paymentHistory = response.data;
+                                    this.paymentHistory = response.data.slice(0, 3);
                                 } else {
                                     this.paymentHistory = [];
                                 }
@@ -857,7 +857,7 @@
                 <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                     <div class="mb-6">
                         <h3 class="text-2xl font-bold text-gray-900 mb-2">Contributions</h3>
-                        <p class="text-4xl font-bold text-gray-900">${{ number_format($stats['platform_fees_month'] / 1000, 0) }}K</p>
+                        <p class="text-4xl font-bold text-gray-900">${{ number_format($stats['contributions_this_month'] / 1000, 0) }}K</p>
                     </div>
 
                     <!-- Funding Over Time Chart -->
@@ -937,8 +937,11 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <h3 class="text-base sm:text-lg font-bold text-gray-900">Payment History</h3>
-                                <p class="text-xs sm:text-sm text-gray-600 mt-1">All payments made by all users</p>
+                                <p class="text-xs sm:text-sm text-gray-600 mt-1">Recent payments preview</p>
                             </div>
+                            <a href="{{ route('admin.transactions.index') }}" class="text-xs sm:text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors">
+                                View All →
+                            </a>
                         </div>
                     </div>
 
@@ -956,82 +959,51 @@
                     </div>
 
                     <!-- Mobile Card View -->
-                    <div class="lg:hidden space-y-3 px-4 pb-4" x-show="!loading && paymentHistory && paymentHistory.length > 0" x-transition>
-                        <template x-for="(payment, index) in paymentHistory.slice(0, 5)" :key="payment.id || index">
-                            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
-                                <div class="flex items-start justify-between mb-3">
-                                    <div class="flex-1 min-w-0">
-                                        <h4 class="text-sm font-semibold text-gray-900 truncate" x-text="payment.campaign ? payment.campaign.title : 'N/A'"></h4>
-                                        <p class="text-xs text-gray-500 mt-1" x-text="formatDate(payment.created_at)"></p>
+                    <div class="lg:hidden space-y-2 px-4 py-3" x-show="!loading && paymentHistory && paymentHistory.length > 0" x-transition>
+                        <template x-for="(payment, index) in paymentHistory" :key="payment.id || index">
+                            <div class="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
+                                <div class="flex-1 min-w-0 pr-3">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-sm font-medium text-gray-900 truncate" x-text="payment.user ? (payment.user.name || 'N/A') : 'N/A'"></span>
+                                        <span class="px-2 py-0.5 inline-flex rounded-full text-xs font-medium flex-shrink-0"
+                                              :class="getStatusBadgeClass(payment.status || 'pending')"
+                                              x-text="(payment.status || 'pending').charAt(0).toUpperCase() + (payment.status || 'pending').slice(1)"></span>
                                     </div>
-                                    <span class="px-2.5 py-1 inline-flex rounded-full text-xs font-medium ml-2 flex-shrink-0"
-                                          :class="getStatusBadgeClass(payment.status || 'pending')"
-                                          x-text="(payment.status || 'pending').charAt(0).toUpperCase() + (payment.status || 'pending').slice(1)"></span>
+                                    <p class="text-xs text-gray-500 mt-0.5" x-text="formatDate(payment.created_at)"></p>
                                 </div>
-                                <div class="space-y-2">
-                                    <div class="flex items-center justify-between">
-                                        <span class="text-xs text-gray-600">Amount</span>
-                                        <span class="text-base font-bold text-gray-900" x-text="formatCurrency((payment.amount || 0) / 100, payment.currency || 'USD')"></span>
-                                    </div>
-                                    <div x-show="payment.user" class="flex items-center justify-between">
-                                        <span class="text-xs text-gray-600">User</span>
-                                        <span class="text-xs font-medium text-gray-900" x-text="payment.user.name || 'N/A'"></span>
-                                    </div>
-                                    <div class="flex items-center justify-between">
-                                        <span class="text-xs text-gray-600">Method</span>
-                                        <span class="text-xs text-gray-700" x-text="payment.payment_method || 'N/A'"></span>
-                                    </div>
-                                    <div class="flex items-center justify-between">
-                                        <span class="text-xs text-gray-600">Reference</span>
-                                        <span class="text-xs font-mono text-gray-600 truncate max-w-[120px]" x-text="payment.reference || 'N/A'"></span>
-                                    </div>
+                                <div class="text-right flex-shrink-0">
+                                    <span class="text-sm font-bold text-gray-900" x-text="formatCurrency((payment.amount || 0) / 100, payment.currency || 'USD')"></span>
                                 </div>
                             </div>
                         </template>
                     </div>
 
                     <!-- Desktop Table View -->
-                    <div class="hidden lg:block overflow-x-auto -mx-4 sm:mx-0" x-show="!loading && paymentHistory && paymentHistory.length > 0" x-transition>
-                        <div class="inline-block min-w-full align-middle">
-                            <div class="overflow-hidden shadow-sm sm:rounded-lg">
-                                <table class="min-w-full divide-y divide-gray-100">
-                                    <thead class="bg-gray-50">
-                                        <tr>
-                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
-                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reference</th>
-                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Campaign</th>
-                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Method</th>
-                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="bg-white divide-y divide-gray-100">
-                                        <template x-for="(payment, index) in paymentHistory.slice(0, 5)" :key="payment.id || index">
-                                            <tr class="hover:bg-gray-50 transition-colors">
-                                                <td class="px-4 py-3 text-sm text-gray-900" x-text="formatDate(payment.created_at)"></td>
-                                                <td class="px-4 py-3 text-sm text-gray-900">
-                                                    <div x-show="payment.user">
-                                                        <div class="font-medium" x-text="payment.user.name || 'N/A'"></div>
-                                                        <div class="text-gray-500 text-xs" x-text="payment.user.email"></div>
-                                                    </div>
-                                                    <span x-show="!payment.user" class="text-gray-400">N/A</span>
-                                                </td>
-                                                <td class="px-4 py-3 text-sm font-mono text-gray-600" x-text="payment.reference || 'N/A'"></td>
-                                                <td class="px-4 py-3 text-sm text-gray-900" x-text="payment.campaign ? payment.campaign.title.substring(0, 30) + '...' : 'N/A'"></td>
-                                                <td class="px-4 py-3 text-sm font-medium text-gray-900"
-                                                    x-text="formatCurrency((payment.amount || 0) / 100, payment.currency || 'USD')"></td>
-                                                <td class="px-4 py-3 text-sm text-gray-600" x-text="payment.payment_method || 'N/A'"></td>
-                                                <td class="px-4 py-3">
-                                                    <span class="px-2 py-1 inline-flex rounded-full text-xs font-medium"
-                                                          :class="getStatusBadgeClass(payment.status || 'pending')"
-                                                          x-text="(payment.status || 'pending').charAt(0).toUpperCase() + (payment.status || 'pending').slice(1)"></span>
-                                                </td>
-                                            </tr>
-                                        </template>
-                                    </tbody>
-                                </table>
-                            </div>
+                    <div class="hidden lg:block" x-show="!loading && paymentHistory && paymentHistory.length > 0" x-transition>
+                        <div class="px-4 sm:px-6 py-3 space-y-2">
+                            <template x-for="(payment, index) in paymentHistory" :key="payment.id || index">
+                                <div class="flex items-center justify-between py-2.5 border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors rounded px-2">
+                                    <div class="flex items-center gap-4 flex-1 min-w-0">
+                                        <div class="flex-shrink-0 w-24">
+                                            <p class="text-xs text-gray-500" x-text="formatDate(payment.created_at)"></p>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-center gap-2">
+                                                <p class="text-sm font-medium text-gray-900 truncate" x-text="payment.user ? (payment.user.name || 'N/A') : 'N/A'"></p>
+                                            </div>
+                                            <p x-show="payment.campaign" class="text-xs text-gray-500 truncate mt-0.5" x-text="payment.campaign ? (payment.campaign.title.length > 40 ? payment.campaign.title.substring(0, 40) + '...' : payment.campaign.title) : ''"></p>
+                                        </div>
+                                        <div class="flex-shrink-0 text-right">
+                                            <p class="text-sm font-bold text-gray-900" x-text="formatCurrency((payment.amount || 0) / 100, payment.currency || 'USD')"></p>
+                                        </div>
+                                        <div class="flex-shrink-0 w-24 text-right">
+                                            <span class="px-2 py-1 inline-flex rounded-full text-xs font-medium"
+                                                  :class="getStatusBadgeClass(payment.status || 'pending')"
+                                                  x-text="(payment.status || 'pending').charAt(0).toUpperCase() + (payment.status || 'pending').slice(1)"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
                         </div>
                     </div>
                 </div>
@@ -1042,18 +1014,30 @@
                     <div class="space-y-4 max-h-96 overflow-y-auto">
                         @if($recentActivity->count() > 0)
                             @foreach($recentActivity->take(6) as $activity)
+                                @php
+                                    $colorMap = [
+                                        'contribution' => 'bg-green-500',
+                                        'payment' => 'bg-green-500',
+                                        'campaign_created' => 'bg-blue-500',
+                                        'campaign_assigned' => 'bg-purple-500',
+                                        'settings_change' => 'bg-yellow-500',
+                                        'refund' => 'bg-orange-500',
+                                        'transfer' => 'bg-indigo-500',
+                                        'interest' => 'bg-emerald-500',
+                                        'fee' => 'bg-gray-500',
+                                    ];
+                                    $color = $colorMap[$activity['type']] ?? 'bg-gray-500';
+                                @endphp
                                 <div class="flex items-start space-x-3 pb-4 border-b border-gray-100 last:border-0">
-                                    @if($activity['type'] === 'large_pledge')
-                                        <div class="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
-                                    @elseif($activity['type'] === 'high_value_campaign')
-                                        <div class="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
-                                    @elseif($activity['type'] === 'flagged')
-                                        <div class="w-2 h-2 bg-red-500 rounded-full mt-2"></div>
-                                    @else
-                                        <div class="w-2 h-2 bg-yellow-500 rounded-full mt-2"></div>
-                                    @endif
+                                    <div class="w-2 h-2 {{ $color }} rounded-full mt-2"></div>
                                     <div class="flex-1">
-                                        <p class="text-sm text-gray-900">{{ $activity['message'] }}</p>
+                                        @if(isset($activity['url']) && $activity['url'])
+                                            <a href="{{ $activity['url'] }}" class="text-sm text-gray-900 hover:text-blue-600 transition-colors">
+                                                {{ $activity['message'] }}
+                                            </a>
+                                        @else
+                                            <p class="text-sm text-gray-900">{{ $activity['message'] }}</p>
+                                        @endif
                                         <p class="text-xs text-gray-500 mt-1">{{ $activity['time']->diffForHumans() }}</p>
                                     </div>
                                 </div>

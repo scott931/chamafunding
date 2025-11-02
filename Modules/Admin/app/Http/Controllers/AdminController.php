@@ -23,6 +23,37 @@ class AdminController extends Controller
      */
     public function index()
     {
+        // Calculate total contributions this month
+        // Get FinancialTransaction payments for this month
+        $ftPaymentsThisMonth = FinancialTransaction::where('transaction_type', 'payment')
+            ->whereMonth('created_at', now()->month)
+            ->where('status', 'completed')
+            ->sum('amount');
+
+        // Get CampaignContribution records for this month
+        $contributionsThisMonth = CampaignContribution::where('status', 'succeeded')
+            ->whereMonth('created_at', now()->month)
+            ->get();
+
+        $contributionAmount = 0;
+        foreach ($contributionsThisMonth as $contribution) {
+            // Check if this contribution already has a FinancialTransaction
+            $hasFinancialTransaction = false;
+            if ($contribution->transaction_id) {
+                $hasFinancialTransaction = FinancialTransaction::where('external_transaction_id', $contribution->transaction_id)
+                    ->where('transaction_type', 'payment')
+                    ->whereMonth('created_at', now()->month)
+                    ->exists();
+            }
+
+            if (!$hasFinancialTransaction) {
+                $contributionAmount += $contribution->amount;
+            }
+        }
+
+        // Total contributions this month (in cents)
+        $totalContributionsThisMonth = $ftPaymentsThisMonth + $contributionAmount;
+
         // Platform KPIs
         $stats = [
             'total_raised' => Campaign::sum('raised_amount') / 100,
@@ -34,6 +65,7 @@ class AdminController extends Controller
                 ->whereMonth('created_at', now()->month)
                 ->where('status', 'completed')
                 ->sum('amount') / 100,
+            'contributions_this_month' => $totalContributionsThisMonth / 100,
             'pending_payouts' => Campaign::where('status', 'successful')
                 ->sum('raised_amount') / 100,
             'open_support_tickets' => 0, // Placeholder - implement support system
@@ -146,56 +178,101 @@ class AdminController extends Controller
      */
     private function getRecentActivity()
     {
+        $userId = Auth::id();
         $activities = [];
 
-        // Large pledges
-        $largePledges = FinancialTransaction::where('transaction_type', 'payment')
+        // User's contributions
+        $contributions = CampaignContribution::where('user_id', $userId)
+            ->where('status', 'succeeded')
+            ->with(['campaign'])
+            ->orderByDesc('created_at')
+            ->limit(5)
+            ->get()
+            ->map(function ($contribution) {
+                return [
+                    'type' => 'contribution',
+                    'message' => "Contributed $" . number_format($contribution->amount / 100, 2) . " to campaign: " . ($contribution->campaign->title ?? 'N/A'),
+                    'time' => $contribution->created_at,
+                    'url' => $contribution->campaign ? route('admin.campaigns.show', $contribution->campaign_id) : null,
+                ];
+            });
+
+        // User's financial transactions
+        $transactions = FinancialTransaction::where('user_id', $userId)
             ->where('status', 'completed')
-            ->where('amount', '>=', 100000) // $1000 or more
-            ->with(['campaign', 'user'])
+            ->with(['campaign'])
             ->orderByDesc('created_at')
             ->limit(5)
             ->get()
             ->map(function ($tx) {
+                $typeLabel = match($tx->transaction_type) {
+                    'payment' => 'Payment',
+                    'refund' => 'Refund',
+                    'transfer' => 'Transfer',
+                    'interest' => 'Interest',
+                    default => ucfirst($tx->transaction_type),
+                };
+
                 return [
-                    'type' => 'large_pledge',
-                    'message' => "Large pledge of $" . number_format($tx->amount / 100, 2) . " processed on campaign: " . ($tx->campaign->title ?? 'N/A'),
+                    'type' => $tx->transaction_type,
+                    'message' => "{$typeLabel} of $" . number_format($tx->amount / 100, 2) .
+                        ($tx->campaign ? " for campaign: {$tx->campaign->title}" : ""),
                     'time' => $tx->created_at,
                     'url' => $tx->campaign ? route('admin.campaigns.show', $tx->campaign_id) : null,
                 ];
             });
 
-        // New high-value campaigns
-        $highValueCampaigns = Campaign::where('goal_amount', '>=', 10000000) // $100k or more
-            ->where('created_at', '>=', now()->subDays(7))
-            ->with('creator')
+        // User's campaigns created
+        $campaignsCreated = Campaign::where('created_by', $userId)
             ->orderByDesc('created_at')
             ->limit(5)
             ->get()
             ->map(function ($campaign) {
                 return [
-                    'type' => 'high_value_campaign',
-                    'message' => "New campaign '{$campaign->title}' launched with a $" . number_format($campaign->goal_amount / 100, 0) . "+ goal",
+                    'type' => 'campaign_created',
+                    'message' => "Created campaign '{$campaign->title}'",
                     'time' => $campaign->created_at,
                     'url' => route('admin.campaigns.show', $campaign->id),
                 ];
             });
 
-        // Campaigns under review or flagged
-        $flaggedCampaigns = Campaign::whereIn('status', ['draft', 'pending'])
+        // Settings changes made by user
+        $settingsChanges = \App\Models\SettingsAuditLog::where('changed_by', $userId)
             ->orderByDesc('created_at')
+            ->limit(5)
+            ->get()
+            ->map(function ($log) {
+                return [
+                    'type' => 'settings_change',
+                    'message' => "Updated setting: " . str_replace('_', ' ', $log->setting_key),
+                    'time' => $log->created_at,
+                    'url' => null,
+                ];
+            });
+
+        // Campaigns assigned to user
+        $assignedCampaigns = Campaign::whereHas('assignedUsers', function ($query) use ($userId) {
+            $query->where('user_id', $userId);
+        })
+            ->orderByDesc('updated_at')
             ->limit(5)
             ->get()
             ->map(function ($campaign) {
                 return [
-                    'type' => 'flagged',
-                    'message' => "Campaign '{$campaign->title}' is {$campaign->status} and requires review",
-                    'time' => $campaign->created_at,
+                    'type' => 'campaign_assigned',
+                    'message' => "Assigned to campaign '{$campaign->title}'",
+                    'time' => $campaign->updated_at,
                     'url' => route('admin.campaigns.show', $campaign->id),
                 ];
             });
 
-        $activities = collect([...$largePledges, ...$highValueCampaigns, ...$flaggedCampaigns])
+        $activities = collect([
+            ...$contributions,
+            ...$transactions,
+            ...$campaignsCreated,
+            ...$settingsChanges,
+            ...$assignedCampaigns
+        ])
             ->sortByDesc('time')
             ->take(10)
             ->values();
