@@ -166,10 +166,13 @@
         </div>
 
         <!-- Page Content -->
-        <div class="flex-1">
+        <div class="flex-1 pb-16 lg:pb-0">
             {{ $slot }}
         </div>
     </div>
+
+    <!-- Mobile Bottom Navigation -->
+    <x-mobile-bottom-nav />
 </div>
 
 

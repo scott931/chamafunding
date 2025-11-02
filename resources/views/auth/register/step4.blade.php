@@ -1,6 +1,6 @@
 <x-guest-layout>
-<div class="min-h-screen bg-gray-50">
-	<div class="max-w-3xl mx-auto px-4 py-10">
+<div class="min-h-screen bg-gradient-to-br from-gray-50 via-indigo-50 to-purple-50">
+	<div class="max-w-lg mx-auto px-4 sm:px-6 py-6 sm:py-8">
 		<div class="mb-6">
 			<div class="w-full bg-gray-200 rounded-full h-2">
 				<div class="bg-indigo-600 h-2 rounded-full" style="width: 100%;"></div>
@@ -8,9 +8,9 @@
 			<p class="text-sm text-gray-600 mt-2">Step 3 of 3 — Payment Methods (Optional)</p>
 		</div>
 
-	<div class="bg-white rounded shadow p-6">
+	<div class="bg-white rounded-2xl shadow-xl p-5 sm:p-6">
 		<div class="mb-4">
-			<h2 class="text-lg font-semibold text-gray-900 mb-2">Add Payment Methods</h2>
+			<h2 class="text-lg sm:text-xl font-semibold text-gray-900 mb-2">Add Payment Methods</h2>
 			<p class="text-sm text-gray-600">Connect your PayPal account to enable both PayPal and Venmo payments. You can skip this step and add payment methods later.</p>
 		</div>
 
@@ -21,32 +21,32 @@
 			<input type="hidden" name="skip_payment_methods" id="skip_payment_methods" value="0" />
 
 			<!-- PayPal Connection Section -->
-			<div id="paypal-section" class="border rounded-lg p-4 mb-4">
-				<div class="flex items-start justify-between mb-3">
+			<div id="paypal-section" class="border rounded-lg p-3 sm:p-4 mb-4">
+				<div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-3 gap-2">
 					<div class="flex-1">
-						<h3 class="font-medium text-gray-900 mb-1">PayPal & Venmo</h3>
+						<h3 class="font-medium text-gray-900 mb-1 text-sm sm:text-base">PayPal & Venmo</h3>
 						<p class="text-xs text-gray-500">Connect your PayPal account to enable both PayPal and Venmo payments</p>
 					</div>
-					<div id="paypal-status" class="text-sm text-gray-500">Not connected</div>
+					<div id="paypal-status" class="text-xs sm:text-sm text-gray-500">Not connected</div>
 				</div>
 				<div id="paypal-button-container" class="mb-3"></div>
 				<div id="venmo-button-container" class="mb-2 hidden"></div>
-				<div id="paypal-success" class="hidden bg-green-50 border border-green-200 rounded p-3 text-sm text-green-800">
+				<div id="paypal-success" class="hidden bg-green-50 border border-green-200 rounded p-3 text-xs sm:text-sm text-green-800">
 					<span class="font-medium">✓ Connected!</span> Your PayPal account has been linked.
 				</div>
 			</div>
 
-			<div class="mt-6 flex items-center justify-between">
-				<a href="{{ route('register.step3') }}" class="text-gray-600">Back</a>
-				<div class="flex items-center gap-3">
-					<button type="button" id="skip-btn" class="text-gray-600 px-4 py-2 rounded border border-gray-300 hover:bg-gray-50">Skip for Now</button>
-					<button type="submit" id="submit-btn" class="bg-green-600 text-white px-5 py-2 rounded hover:bg-green-700">Complete Registration</button>
+			<div class="mt-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+				<a href="{{ route('register.step3') }}" class="text-gray-600 text-center sm:text-left text-sm sm:text-base py-2">Back</a>
+				<div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+					<button type="button" id="skip-btn" class="text-gray-600 px-4 py-2.5 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors text-sm sm:text-base w-full sm:w-auto font-medium">Skip for Now</button>
+					<button type="submit" id="submit-btn" class="bg-green-600 text-white px-6 py-2.5 rounded-lg hover:bg-green-700 transition-colors text-sm sm:text-base w-full sm:w-auto font-medium">Complete Registration</button>
 				</div>
 			</div>
 		</form>
 	</div>
 
-	<div class="text-center text-xs text-gray-500 mt-6">
+	<div class="text-center text-xs text-gray-500 mt-6 px-4">
 		SSL secured • Your payment information is encrypted
 	</div>
 	</div>

@@ -136,17 +136,17 @@
 
             <!-- Stats Card -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-                    <div class="text-sm font-medium text-gray-500">Campaigns Created</div>
-                    <div class="mt-2 text-3xl font-semibold text-gray-900">{{ $user->campaigns_count ?? 0 }}</div>
+                <div class="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl p-6 text-white shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 transition-all duration-200 transform hover:scale-105">
+                    <div class="text-sm font-medium text-white/90">Campaigns Created</div>
+                    <div class="mt-2 text-3xl font-semibold text-white">{{ $user->campaigns_count ?? 0 }}</div>
                 </div>
-                <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-                    <div class="text-sm font-medium text-gray-500">Total Contributions</div>
-                    <div class="mt-2 text-3xl font-semibold text-gray-900">${{ number_format(($user->contributions()->sum('amount') ?? 0) / 100, 2) }}</div>
+                <div class="bg-gradient-to-br from-teal-500 to-cyan-600 rounded-xl p-6 text-white shadow-lg shadow-teal-500/30 hover:shadow-xl hover:shadow-teal-500/40 transition-all duration-200 transform hover:scale-105">
+                    <div class="text-sm font-medium text-white/90">Total Contributions</div>
+                    <div class="mt-2 text-3xl font-semibold text-white">${{ number_format(($user->contributions()->sum('amount') ?? 0) / 100, 2) }}</div>
                 </div>
-                <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-                    <div class="text-sm font-medium text-gray-500">Assigned Campaigns</div>
-                    <div class="mt-2 text-3xl font-semibold text-gray-900">{{ $user->assignedCampaigns->count() }}</div>
+                <div class="bg-gradient-to-br from-rose-500 to-pink-600 rounded-xl p-6 text-white shadow-lg shadow-rose-500/30 hover:shadow-xl hover:shadow-rose-500/40 transition-all duration-200 transform hover:scale-105">
+                    <div class="text-sm font-medium text-white/90">Assigned Campaigns</div>
+                    <div class="mt-2 text-3xl font-semibold text-white">{{ $user->assignedCampaigns->count() }}</div>
                 </div>
             </div>
         </div>

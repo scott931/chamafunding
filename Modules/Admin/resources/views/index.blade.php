@@ -3,19 +3,21 @@
         <div class="bg-white border-b border-gray-100">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                 <!-- Top Row: Welcome & Actions -->
-                <div class="flex items-center justify-between mb-4">
-                    <div>
-                        <h2 class="text-2xl font-bold text-gray-900">Welcome Back, {{ Auth::user()->name }}</h2>
-                        <div class="text-sm text-gray-500 mt-1">
-                            {{ now()->subDays(30)->format('M j, Y') }} - {{ now()->format('M j, Y') }} | Last 30 days
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-4">
+                    <div class="flex-1 min-w-0">
+                        <h2 class="text-xl sm:text-2xl font-bold text-gray-900">Welcome Back, {{ Auth::user()->name }}</h2>
+                        <div class="text-xs sm:text-sm text-gray-500 mt-1">
+                            <span class="block sm:inline">{{ now()->subDays(30)->format('M j, Y') }} - {{ now()->format('M j, Y') }}</span>
+                            <span class="hidden sm:inline"> | </span>
+                            <span class="block sm:inline">Last 30 days</span>
                         </div>
                     </div>
 
                     <!-- Right side: Search, Notifications, Profile -->
-                    <div class="flex items-center space-x-3">
+                    <div class="flex items-center space-x-2 sm:space-x-3 w-full sm:w-auto">
                         <!-- Search Bar -->
-                        <div class="relative hidden md:block">
-                            <input type="text" placeholder="Search anything..." class="w-64 pl-10 pr-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white text-sm transition-all duration-200">
+                        <div class="relative flex-1 sm:flex-none sm:block hidden md:block">
+                            <input type="text" placeholder="Search anything..." class="w-full sm:w-64 pl-10 pr-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white text-sm transition-all duration-200">
                             <svg class="absolute left-3 top-3 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                             </svg>
@@ -43,7 +45,7 @@
                                 x-transition:leave="transition ease-in duration-150"
                                 x-transition:leave-start="transform opacity-100 scale-100"
                                 x-transition:leave-end="transform opacity-0 scale-95"
-                                class="absolute right-0 mt-2 w-96 bg-white rounded-xl shadow-lg border border-gray-100 z-50 max-h-[600px] overflow-hidden flex flex-col"
+                                class="absolute right-0 mt-2 w-[calc(100vw-2rem)] sm:w-96 max-w-md bg-white rounded-xl shadow-lg border border-gray-100 z-50 max-h-[600px] overflow-hidden flex flex-col"
                                 style="display: none;"
                             >
                                 <!-- Header -->
@@ -756,101 +758,101 @@
         })();
     </script>
 
-    <div class="bg-gray-50 min-h-screen" x-data="adminDashboard" x-init="init()">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+    <div class="bg-gray-50 min-h-screen pb-20 lg:pb-0" x-data="adminDashboard" x-init="init()">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-4 sm:space-y-6">
             <!-- Top Row: 4 Key KPI Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-5">
                 <!-- Total Platform Raised -->
-                <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200">
+                <div class="bg-gradient-to-br from-emerald-500 to-green-600 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/40 transition-all duration-200 transform hover:scale-105">
                     <div class="flex items-center justify-between mb-2">
-                        <p class="text-sm font-medium text-gray-600">Total Platform Raised</p>
-                        <button class="text-gray-400 hover:text-gray-600 transition-colors">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <p class="text-xs sm:text-sm font-medium text-white/90">Total Platform Raised</p>
+                        <button class="text-white/70 hover:text-white transition-colors">
+                            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
                             </svg>
                         </button>
                     </div>
-                    <p class="text-3xl font-bold text-gray-900 mb-1">${{ number_format($stats['total_raised'] / 1000, 1) }}K</p>
+                    <p class="text-2xl sm:text-3xl font-bold text-white mb-1">${{ number_format($stats['total_raised'] / 1000, 1) }}K</p>
                     <div class="flex items-center text-sm">
-                        <span class="text-green-600 font-medium flex items-center">
+                        <span class="text-white/90 font-medium flex items-center">
                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
                             </svg>
                             +2.45%
                         </span>
-                        <span class="text-gray-500 ml-2">vs last month</span>
+                        <span class="text-white/70 ml-2">vs last month</span>
                     </div>
                 </div>
 
                 <!-- Active Campaigns -->
-                <a href="{{ route('admin.campaigns.index', ['status' => 'active']) }}" class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200 group">
+                <a href="{{ route('admin.campaigns.index', ['status' => 'active']) }}" class="bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 transition-all duration-200 transform hover:scale-105 group">
                     <div class="flex items-center justify-between mb-2">
-                        <p class="text-sm font-medium text-gray-600">Active Campaigns</p>
-                        <button class="text-gray-400 hover:text-gray-600 transition-colors">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <p class="text-xs sm:text-sm font-medium text-white/90">Active Campaigns</p>
+                        <button class="text-white/70 hover:text-white transition-colors">
+                            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
                             </svg>
                         </button>
                     </div>
-                    <p class="text-3xl font-bold text-gray-900 mb-1">{{ $stats['active_campaigns'] }}</p>
+                    <p class="text-2xl sm:text-3xl font-bold text-white mb-1">{{ $stats['active_campaigns'] }}</p>
                     <div class="flex items-center text-sm">
-                        <span class="text-green-600 font-medium flex items-center">
+                        <span class="text-white/90 font-medium flex items-center">
                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
                             </svg>
                             +1.20%
                         </span>
-                        <span class="text-gray-500 ml-2">Live right now</span>
+                        <span class="text-white/70 ml-2">Live right now</span>
                     </div>
                 </a>
 
                 <!-- Total Backers -->
-                <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200">
+                <div class="bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg shadow-purple-500/30 hover:shadow-xl hover:shadow-purple-500/40 transition-all duration-200 transform hover:scale-105">
                     <div class="flex items-center justify-between mb-2">
-                        <p class="text-sm font-medium text-gray-600">Total Backers</p>
-                        <button class="text-gray-400 hover:text-gray-600 transition-colors">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <p class="text-xs sm:text-sm font-medium text-white/90">Total Backers</p>
+                        <button class="text-white/70 hover:text-white transition-colors">
+                            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
                             </svg>
                         </button>
                     </div>
-                    <p class="text-3xl font-bold text-gray-900 mb-1">{{ number_format($stats['total_backers_alltime']) }}</p>
+                    <p class="text-2xl sm:text-3xl font-bold text-white mb-1">{{ number_format($stats['total_backers_alltime']) }}</p>
                     <div class="flex items-center text-sm">
-                        <span class="text-red-600 font-medium flex items-center">
+                        <span class="text-white/90 font-medium flex items-center">
                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
                             </svg>
                             -0.50%
                         </span>
-                        <span class="text-gray-500 ml-2">{{ $stats['total_backers_month'] }} this month</span>
+                        <span class="text-white/70 ml-2">{{ $stats['total_backers_month'] }} this month</span>
                     </div>
                 </div>
 
                 <!-- Platform Fees -->
-                <a href="{{ route('admin.financial.index') }}" class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200 group">
+                <a href="{{ route('admin.financial.index') }}" class="bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg shadow-amber-500/30 hover:shadow-xl hover:shadow-amber-500/40 transition-all duration-200 transform hover:scale-105 group">
                     <div class="flex items-center justify-between mb-2">
-                        <p class="text-sm font-medium text-gray-600">Platform Fees</p>
-                        <button class="text-gray-400 hover:text-gray-600 transition-colors">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <p class="text-xs sm:text-sm font-medium text-white/90">Platform Fees</p>
+                        <button class="text-white/70 hover:text-white transition-colors">
+                            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
                             </svg>
                         </button>
                     </div>
-                    <p class="text-3xl font-bold text-gray-900 mb-1">${{ number_format($stats['platform_fees_month'], 0) }}</p>
+                    <p class="text-2xl sm:text-3xl font-bold text-white mb-1">${{ number_format($stats['platform_fees_month'], 0) }}</p>
                     <div class="flex items-center text-sm">
-                        <span class="text-green-600 font-medium flex items-center">
+                        <span class="text-white/90 font-medium flex items-center">
                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
                             </svg>
                             +0.84%
                         </span>
-                        <span class="text-gray-500 ml-2">This month</span>
+                        <span class="text-white/70 ml-2">This month</span>
                     </div>
                 </a>
             </div>
 
             <!-- Middle Row: Left (Contributions with Chart) & Right (Two Cards) -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
                 <!-- Left: Contributions Card with Funding Over Time Chart -->
                 <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                     <div class="mb-6">
@@ -928,14 +930,14 @@
             </div>
 
             <!-- Bottom Row: Payment History Table & Recent Activity -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
                 <!-- Left: Payment History Table -->
-                <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div class="px-6 py-4 border-b border-gray-100">
+                <div class="lg:col-span-2 bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="px-4 sm:px-6 py-4 border-b border-gray-100">
                         <div class="flex items-center justify-between">
                             <div>
-                                <h3 class="text-lg font-bold text-gray-900">Payment History</h3>
-                                <p class="text-sm text-gray-600 mt-1">All payments made by all users</p>
+                                <h3 class="text-base sm:text-lg font-bold text-gray-900">Payment History</h3>
+                                <p class="text-xs sm:text-sm text-gray-600 mt-1">All payments made by all users</p>
                             </div>
                         </div>
                     </div>
@@ -953,50 +955,90 @@
                         <p class="mt-2 text-sm text-gray-400">Payment transactions will appear here once users make contributions</p>
                     </div>
 
-                    <div class="overflow-x-auto" x-show="!loading && paymentHistory && paymentHistory.length > 0" x-transition>
-                        <table class="min-w-full divide-y divide-gray-100">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reference</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Campaign</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Method</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-100">
-                                <template x-for="(payment, index) in paymentHistory.slice(0, 5)" :key="payment.id || index">
-                                    <tr class="hover:bg-gray-50 transition-colors">
-                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900" x-text="formatDate(payment.created_at)"></td>
-                                        <td class="px-4 py-3 text-sm text-gray-900">
-                                            <div x-show="payment.user">
-                                                <div class="font-medium" x-text="payment.user.name || 'N/A'"></div>
-                                                <div class="text-gray-500 text-xs" x-text="payment.user.email"></div>
-                                            </div>
-                                            <span x-show="!payment.user" class="text-gray-400">N/A</span>
-                                        </td>
-                                        <td class="px-4 py-3 whitespace-nowrap text-sm font-mono text-gray-600" x-text="payment.reference || 'N/A'"></td>
-                                        <td class="px-4 py-3 text-sm text-gray-900" x-text="payment.campaign ? payment.campaign.title.substring(0, 20) + '...' : 'N/A'"></td>
-                                        <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900"
-                                            x-text="formatCurrency((payment.amount || 0) / 100, payment.currency || 'USD')"></td>
-                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600" x-text="payment.payment_method || 'N/A'"></td>
-                                        <td class="px-4 py-3 whitespace-nowrap">
-                                            <span class="px-2 py-1 inline-flex rounded-full text-xs font-medium"
-                                                  :class="getStatusBadgeClass(payment.status || 'pending')"
-                                                  x-text="(payment.status || 'pending').charAt(0).toUpperCase() + (payment.status || 'pending').slice(1)"></span>
-                                        </td>
-                                    </tr>
-                                </template>
-                            </tbody>
-                        </table>
+                    <!-- Mobile Card View -->
+                    <div class="lg:hidden space-y-3 px-4 pb-4" x-show="!loading && paymentHistory && paymentHistory.length > 0" x-transition>
+                        <template x-for="(payment, index) in paymentHistory.slice(0, 5)" :key="payment.id || index">
+                            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+                                <div class="flex items-start justify-between mb-3">
+                                    <div class="flex-1 min-w-0">
+                                        <h4 class="text-sm font-semibold text-gray-900 truncate" x-text="payment.campaign ? payment.campaign.title : 'N/A'"></h4>
+                                        <p class="text-xs text-gray-500 mt-1" x-text="formatDate(payment.created_at)"></p>
+                                    </div>
+                                    <span class="px-2.5 py-1 inline-flex rounded-full text-xs font-medium ml-2 flex-shrink-0"
+                                          :class="getStatusBadgeClass(payment.status || 'pending')"
+                                          x-text="(payment.status || 'pending').charAt(0).toUpperCase() + (payment.status || 'pending').slice(1)"></span>
+                                </div>
+                                <div class="space-y-2">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-xs text-gray-600">Amount</span>
+                                        <span class="text-base font-bold text-gray-900" x-text="formatCurrency((payment.amount || 0) / 100, payment.currency || 'USD')"></span>
+                                    </div>
+                                    <div x-show="payment.user" class="flex items-center justify-between">
+                                        <span class="text-xs text-gray-600">User</span>
+                                        <span class="text-xs font-medium text-gray-900" x-text="payment.user.name || 'N/A'"></span>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-xs text-gray-600">Method</span>
+                                        <span class="text-xs text-gray-700" x-text="payment.payment_method || 'N/A'"></span>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-xs text-gray-600">Reference</span>
+                                        <span class="text-xs font-mono text-gray-600 truncate max-w-[120px]" x-text="payment.reference || 'N/A'"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+
+                    <!-- Desktop Table View -->
+                    <div class="hidden lg:block overflow-x-auto -mx-4 sm:mx-0" x-show="!loading && paymentHistory && paymentHistory.length > 0" x-transition>
+                        <div class="inline-block min-w-full align-middle">
+                            <div class="overflow-hidden shadow-sm sm:rounded-lg">
+                                <table class="min-w-full divide-y divide-gray-100">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reference</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Campaign</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Method</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-100">
+                                        <template x-for="(payment, index) in paymentHistory.slice(0, 5)" :key="payment.id || index">
+                                            <tr class="hover:bg-gray-50 transition-colors">
+                                                <td class="px-4 py-3 text-sm text-gray-900" x-text="formatDate(payment.created_at)"></td>
+                                                <td class="px-4 py-3 text-sm text-gray-900">
+                                                    <div x-show="payment.user">
+                                                        <div class="font-medium" x-text="payment.user.name || 'N/A'"></div>
+                                                        <div class="text-gray-500 text-xs" x-text="payment.user.email"></div>
+                                                    </div>
+                                                    <span x-show="!payment.user" class="text-gray-400">N/A</span>
+                                                </td>
+                                                <td class="px-4 py-3 text-sm font-mono text-gray-600" x-text="payment.reference || 'N/A'"></td>
+                                                <td class="px-4 py-3 text-sm text-gray-900" x-text="payment.campaign ? payment.campaign.title.substring(0, 30) + '...' : 'N/A'"></td>
+                                                <td class="px-4 py-3 text-sm font-medium text-gray-900"
+                                                    x-text="formatCurrency((payment.amount || 0) / 100, payment.currency || 'USD')"></td>
+                                                <td class="px-4 py-3 text-sm text-gray-600" x-text="payment.payment_method || 'N/A'"></td>
+                                                <td class="px-4 py-3">
+                                                    <span class="px-2 py-1 inline-flex rounded-full text-xs font-medium"
+                                                          :class="getStatusBadgeClass(payment.status || 'pending')"
+                                                          x-text="(payment.status || 'pending').charAt(0).toUpperCase() + (payment.status || 'pending').slice(1)"></span>
+                                                </td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Right: Recent Activity / AI Assistant -->
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                    <h3 class="text-lg font-bold text-gray-900 mb-4">Recent Activity</h3>
+                    <!-- Right: Recent Activity / AI Assistant -->
+                <div class="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6">
+                    <h3 class="text-base sm:text-lg font-bold text-gray-900 mb-4">Recent Activity</h3>
                     <div class="space-y-4 max-h-96 overflow-y-auto">
                         @if($recentActivity->count() > 0)
                             @foreach($recentActivity->take(6) as $activity)

@@ -5,3 +5,44 @@
 [x-cloak] {
     display: none !important;
 }
+
+/* Mobile-friendly touch targets and interactions */
+@layer utilities {
+    /* Ensure minimum touch target size for mobile (44x44px) */
+    .touch-target {
+        min-height: 44px;
+        min-width: 44px;
+    }
+
+    /* Prevent text size adjustment on iOS */
+    @supports (-webkit-touch-callout: none) {
+        input,
+        textarea,
+        select {
+            font-size: 16px !important;
+        }
+    }
+
+    /* Smooth scrolling for better mobile experience */
+    * {
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Improve table scrolling on mobile */
+    .table-responsive {
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+    }
+
+    /* Mobile app-like card styles */
+    .mobile-card {
+        @apply bg-white rounded-xl shadow-sm border border-gray-100 p-4;
+    }
+
+    /* Safe area padding for mobile bottom nav */
+    @supports (padding-bottom: env(safe-area-inset-bottom)) {
+        .mobile-bottom-nav {
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+    }
+}
