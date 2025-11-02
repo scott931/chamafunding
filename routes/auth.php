@@ -23,10 +23,10 @@ Route::middleware('guest')->group(function () {
     // Wizard routes
     Route::get('register/step-1', [RegisterWizardController::class, 'showStep1'])->name('register.step1');
     Route::post('register/step-1', [RegisterWizardController::class, 'postStep1'])->name('register.step1.post');
-    Route::get('register/step-2', [RegisterWizardController::class, 'showStep2'])->name('register.step2');
-    Route::post('register/step-2', [RegisterWizardController::class, 'postStep2'])->name('register.step2.post');
     Route::get('register/step-3', [RegisterWizardController::class, 'showStep3'])->name('register.step3');
     Route::post('register/step-3', [RegisterWizardController::class, 'postStep3'])->name('register.step3.post');
+    Route::get('register/step-4', [RegisterWizardController::class, 'showStep4'])->name('register.step4');
+    Route::post('register/step-4', [RegisterWizardController::class, 'postStep4'])->name('register.step4.post');
     Route::post('register/otp/resend', function () {
         $wizard = session('register_wizard');
         if (!$wizard || !isset($wizard['step1']['email'])) {

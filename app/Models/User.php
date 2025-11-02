@@ -32,6 +32,11 @@ class User extends Authenticatable
         'postal_code',
         'is_verified',
         'verification_token',
+        'approval_status',
+        'is_approved',
+        'approved_at',
+        'approved_by',
+        'approval_notes',
     ];
 
     /**
@@ -56,6 +61,8 @@ class User extends Authenticatable
             'password' => 'hashed',
             'date_of_birth' => 'date',
             'is_verified' => 'boolean',
+            'is_approved' => 'boolean',
+            'approved_at' => 'datetime',
         ];
     }
 
@@ -98,6 +105,43 @@ class User extends Authenticatable
     public function savedCampaigns()
     {
         return $this->hasMany(SavedCampaign::class);
+    }
+
+    // Campaign assignment relationships
+    public function assignedCampaigns()
+    {
+        return $this->belongsToMany(Campaign::class, 'campaign_users', 'user_id', 'campaign_id')
+            ->withPivot('assigned_by', 'assigned_at', 'notes')
+            ->withTimestamps();
+    }
+
+    public function approver()
+    {
+        return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    /**
+     * Check if user is approved
+     */
+    public function isApproved(): bool
+    {
+        return $this->is_approved && $this->approval_status === 'approved';
+    }
+
+    /**
+     * Check if user is pending approval
+     */
+    public function isPendingApproval(): bool
+    {
+        return $this->approval_status === 'pending';
+    }
+
+    /**
+     * Check if user is declined
+     */
+    public function isDeclined(): bool
+    {
+        return $this->approval_status === 'declined';
     }
 
     /**

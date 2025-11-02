@@ -1,62 +1,151 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="bg-white border-b border-gray-200">
+        <div class="bg-white border-b border-gray-100">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                 <!-- Top Row: Welcome & Actions -->
                 <div class="flex items-center justify-between mb-4">
                     <div>
                         <h2 class="text-2xl font-bold text-gray-900">Welcome Back, {{ Auth::user()->name }}</h2>
+                        <div class="text-sm text-gray-500 mt-1">
+                            {{ now()->subDays(30)->format('M j, Y') }} - {{ now()->format('M j, Y') }} | Last 30 days
+                        </div>
                     </div>
 
                     <!-- Right side: Search, Notifications, Profile -->
-                    <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-3">
                         <!-- Search Bar -->
                         <div class="relative hidden md:block">
-                            <input type="text" placeholder="Search anything..." class="w-64 pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
-                            <svg class="absolute left-3 top-2.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <input type="text" placeholder="Search anything..." class="w-64 pl-10 pr-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white text-sm transition-all duration-200">
+                            <svg class="absolute left-3 top-3 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                             </svg>
                         </div>
 
-                        <!-- Notifications -->
-                        <button class="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                            </svg>
-                            <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-                        </button>
+                        <!-- Notifications Dropdown -->
+                        <div class="relative" x-data="notificationDropdown()" @click.away="dropdownOpen = false">
+                            <button
+                                @click="toggleDropdown()"
+                                class="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-all duration-200"
+                            >
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                </svg>
+                                <span x-show="unreadCount > 0" class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                                <span x-show="unreadCount > 0" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center" x-text="unreadCount > 99 ? '99+' : unreadCount"></span>
+                            </button>
 
-                        <!-- Messages -->
-                        <button class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                            </svg>
-                        </button>
+                            <!-- Dropdown Panel -->
+                            <div
+                                x-show="dropdownOpen"
+                                x-transition:enter="transition ease-out duration-200"
+                                x-transition:enter-start="transform opacity-0 scale-95"
+                                x-transition:enter-end="transform opacity-100 scale-100"
+                                x-transition:leave="transition ease-in duration-150"
+                                x-transition:leave-start="transform opacity-100 scale-100"
+                                x-transition:leave-end="transform opacity-0 scale-95"
+                                class="absolute right-0 mt-2 w-96 bg-white rounded-xl shadow-lg border border-gray-100 z-50 max-h-[600px] overflow-hidden flex flex-col"
+                                style="display: none;"
+                            >
+                                <!-- Header -->
+                                <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+                                    <h3 class="text-lg font-semibold text-gray-900">Transaction Notifications</h3>
+                                    <button
+                                        @click="markAllAsRead()"
+                                        class="text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors"
+                                        x-show="unreadCount > 0"
+                                    >
+                                        Mark all read
+                                    </button>
+                                </div>
 
-                        <!-- Settings -->
-                        <button class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                        </button>
+                                <!-- Loading State -->
+                                <div x-show="loading" class="p-8 text-center">
+                                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                                    <p class="mt-2 text-sm text-gray-500">Loading notifications...</p>
+                                </div>
 
-                        <!-- User Profile -->
-                        <div class="flex items-center space-x-2">
-                            <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
-                                {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                                <!-- Empty State -->
+                                <div x-show="!loading && notifications.length === 0" class="p-8 text-center">
+                                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                    </svg>
+                                    <p class="mt-2 text-sm text-gray-500">No transaction notifications</p>
+                                </div>
+
+                                <!-- Notifications List -->
+                                <div x-show="!loading && notifications.length > 0" class="overflow-y-auto flex-1">
+                                    <template x-for="(campaign, index) in notifications" :key="campaign.campaign_id">
+                                        <div class="border-b border-gray-50 last:border-b-0 hover:bg-gray-50 transition-colors">
+                                            <!-- Campaign Header -->
+                                            <div class="px-4 py-3 bg-gray-50 border-b border-gray-100 flex items-center justify-between">
+                                                <div class="flex-1 min-w-0">
+                                                    <h4 class="text-sm font-semibold text-gray-900 truncate" x-text="campaign.campaign_name"></h4>
+                                                    <p class="text-xs text-gray-500 mt-1">
+                                                        <span x-text="campaign.total_transactions"></span> transaction<span x-show="campaign.total_transactions > 1">s</span> •
+                                                        <span x-text="campaign.formatted_total_amount"></span> <span x-text="campaign.currency"></span>
+                                                    </p>
+                                                </div>
+                                                <button
+                                                    @click="markCampaignAsRead(campaign.campaign_id)"
+                                                    class="ml-2 text-xs text-blue-600 hover:text-blue-800 font-medium transition-colors"
+                                                    title="Mark as read"
+                                                >
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                                    </svg>
+                                                </button>
+                                            </div>
+
+                                            <!-- Transactions in Campaign -->
+                                            <div class="px-4 py-2">
+                                                <template x-for="(transaction, tIndex) in campaign.transactions" :key="transaction.id">
+                                                    <div class="py-2 border-b border-gray-50 last:border-b-0">
+                                                        <div class="flex items-start justify-between">
+                                                            <div class="flex-1 min-w-0">
+                                                                <div class="flex items-center space-x-2">
+                                                                    <span class="text-sm font-medium text-gray-900" x-text="transaction.user_name"></span>
+                                                                    <span class="text-xs text-gray-500" x-text="transaction.formatted_date"></span>
+                                                                </div>
+                                                                <p class="text-xs text-gray-500 mt-1" x-text="transaction.reference"></p>
+                                                            </div>
+                                                            <div class="ml-4 text-right">
+                                                                <p class="text-sm font-semibold text-gray-900" x-text="transaction.formatted_amount"></p>
+                                                                <p class="text-xs text-gray-500" x-text="transaction.currency"></p>
+                                                            </div>
+                                                        </div>
+                                                        <div class="mt-1">
+                                                            <span
+                                                                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
+                                                                :class="{
+                                                                    'bg-green-100 text-green-800': transaction.status === 'completed' || transaction.status === 'succeeded',
+                                                                    'bg-yellow-100 text-yellow-800': transaction.status === 'pending' || transaction.status === 'processing',
+                                                                    'bg-red-100 text-red-800': transaction.status === 'failed'
+                                                                }"
+                                                                x-text="transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1)"
+                                                            ></span>
+                                                        </div>
+                                                    </div>
+                                                </template>
+
+                                                <div x-show="campaign.total_transactions > campaign.transactions.length" class="pt-2 text-center">
+                                                    <p class="text-xs text-gray-500">
+                                                        +<span x-text="campaign.total_transactions - campaign.transactions.length"></span> more transaction<span x-show="(campaign.total_transactions - campaign.transactions.length) > 1">s</span>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+
+                                <!-- Footer -->
+                                <div class="px-4 py-3 border-t border-gray-100 bg-gray-50">
+                                    <a href="{{ route('admin.transactions.index') }}" class="block text-center text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors">
+                                        View all transactions
+                                    </a>
+                                </div>
                             </div>
-                            <span class="text-sm font-medium text-gray-700 hidden md:block">{{ Auth::user()->name }}</span>
-                            <svg class="w-4 h-4 text-gray-400 hidden md:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                            </svg>
                         </div>
                     </div>
-                </div>
-
-                <!-- Date Range -->
-                <div class="text-sm text-gray-600">
-                    {{ now()->subDays(30)->format('M j, Y') }} - {{ now()->format('M j, Y') }} | Last 30 days
                 </div>
             </div>
         </div>
@@ -519,6 +608,99 @@
         })();
     </script>
 
+    <!-- Notification Dropdown Component -->
+    <script>
+        function notificationDropdown() {
+            return {
+                dropdownOpen: false,
+                notifications: [],
+                unreadCount: 0,
+                loading: false,
+                readCampaigns: new Set(), // Track read campaigns
+
+                async loadNotifications() {
+                    this.loading = true;
+                    try {
+                        const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                        const response = await fetch('/api/v1/admin/transaction-notifications', {
+                            method: 'GET',
+                            headers: {
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': token,
+                                'X-Requested-With': 'XMLHttpRequest'
+                            },
+                            credentials: 'same-origin'
+                        });
+
+                        if (!response.ok) {
+                            throw new Error('Failed to load notifications');
+                        }
+
+                        const data = await response.json();
+                        if (data.success && data.data) {
+                            // Filter out read campaigns
+                            this.notifications = data.data.notifications.filter(
+                                campaign => !this.readCampaigns.has(campaign.campaign_id.toString())
+                            );
+                            // Recalculate unread count
+                            this.unreadCount = this.notifications.reduce((sum, campaign) => sum + campaign.total_transactions, 0);
+                        }
+                    } catch (error) {
+                        console.error('Error loading notifications:', error);
+                        this.notifications = [];
+                        this.unreadCount = 0;
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                toggleDropdown() {
+                    this.dropdownOpen = !this.dropdownOpen;
+                    if (this.dropdownOpen) {
+                        this.loadNotifications();
+                    }
+                },
+
+                async markCampaignAsRead(campaignId) {
+                    try {
+                        const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                        const response = await fetch(`/api/v1/admin/notifications/${campaignId}/mark-read`, {
+                            method: 'POST',
+                            headers: {
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': token,
+                                'X-Requested-With': 'XMLHttpRequest'
+                            },
+                            credentials: 'same-origin'
+                        });
+
+                        if (response.ok) {
+                            // Mark campaign as read locally
+                            this.readCampaigns.add(campaignId.toString());
+                            // Remove from notifications list
+                            this.notifications = this.notifications.filter(
+                                campaign => campaign.campaign_id.toString() !== campaignId.toString()
+                            );
+                            // Update unread count
+                            this.unreadCount = this.notifications.reduce((sum, campaign) => sum + campaign.total_transactions, 0);
+                        }
+                    } catch (error) {
+                        console.error('Error marking notification as read:', error);
+                    }
+                },
+
+                async markAllAsRead() {
+                    const campaignIds = this.notifications.map(campaign => campaign.campaign_id);
+                    for (const campaignId of campaignIds) {
+                        await this.markCampaignAsRead(campaignId);
+                    }
+                }
+            }
+        }
+    </script>
+
     <!-- Chart.js CDN - Load with multiple fallbacks -->
     <script>
         (function() {
@@ -577,12 +759,12 @@
     <div class="bg-gray-50 min-h-screen" x-data="adminDashboard" x-init="init()">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
             <!-- Top Row: 4 Key KPI Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
                 <!-- Total Platform Raised -->
-                <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200">
                     <div class="flex items-center justify-between mb-2">
                         <p class="text-sm font-medium text-gray-600">Total Platform Raised</p>
-                        <button class="text-gray-400 hover:text-gray-600">
+                        <button class="text-gray-400 hover:text-gray-600 transition-colors">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
                             </svg>
@@ -601,10 +783,10 @@
                 </div>
 
                 <!-- Active Campaigns -->
-                <a href="{{ route('admin.campaigns.index', ['status' => 'active']) }}" class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                <a href="{{ route('admin.campaigns.index', ['status' => 'active']) }}" class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200 group">
                     <div class="flex items-center justify-between mb-2">
                         <p class="text-sm font-medium text-gray-600">Active Campaigns</p>
-                        <button class="text-gray-400 hover:text-gray-600">
+                        <button class="text-gray-400 hover:text-gray-600 transition-colors">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
                             </svg>
@@ -623,10 +805,10 @@
                 </a>
 
                 <!-- Total Backers -->
-                <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200">
                     <div class="flex items-center justify-between mb-2">
                         <p class="text-sm font-medium text-gray-600">Total Backers</p>
-                        <button class="text-gray-400 hover:text-gray-600">
+                        <button class="text-gray-400 hover:text-gray-600 transition-colors">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
                             </svg>
@@ -645,10 +827,10 @@
                 </div>
 
                 <!-- Platform Fees -->
-                <a href="{{ route('admin.financial.index') }}" class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                <a href="{{ route('admin.financial.index') }}" class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200 group">
                     <div class="flex items-center justify-between mb-2">
                         <p class="text-sm font-medium text-gray-600">Platform Fees</p>
-                        <button class="text-gray-400 hover:text-gray-600">
+                        <button class="text-gray-400 hover:text-gray-600 transition-colors">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
                             </svg>
@@ -665,22 +847,21 @@
                         <span class="text-gray-500 ml-2">This month</span>
                     </div>
                 </a>
-
             </div>
 
-            <!-- Middle Row: Left (Total Profit with Chart) & Right (Two Cards) -->
+            <!-- Middle Row: Left (Contributions with Chart) & Right (Two Cards) -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- Left: Total Profit Card with Funding Over Time Chart -->
-                <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <!-- Left: Contributions Card with Funding Over Time Chart -->
+                <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                     <div class="mb-6">
-                        <h3 class="text-2xl font-bold text-gray-900 mb-2">Total Profit</h3>
+                        <h3 class="text-2xl font-bold text-gray-900 mb-2">Contributions</h3>
                         <p class="text-4xl font-bold text-gray-900">${{ number_format($stats['platform_fees_month'] / 1000, 0) }}K</p>
                     </div>
 
                     <!-- Funding Over Time Chart -->
                     <div class="mb-6">
                         <div class="flex items-center justify-between mb-4">
-                            <h4 class="text-sm font-semibold text-gray-700">Funding Over Time</h4>
+                            <h4 class="text-sm font-semibold text-gray-700">Contributions Over Time</h4>
                             <span class="text-xs text-gray-500">Jan 2024 - Mar 2024</span>
                         </div>
                         <div class="h-48">
@@ -692,11 +873,11 @@
                     <div class="space-y-4">
                         <div>
                             <div class="flex items-center justify-between mb-2">
-                                <span class="text-sm font-medium text-gray-700">Total Profit</span>
+                                <span class="text-sm font-medium text-gray-700">Contributions</span>
                                 <span class="text-sm font-bold text-gray-900">${{ number_format($stats['total_raised'] / 1000, 1) }}M</span>
                             </div>
-                            <div class="w-full bg-gray-200 rounded-full h-2.5">
-                                <div class="bg-blue-600 h-2.5 rounded-full" style="width: 75%"></div>
+                            <div class="w-full bg-gray-100 rounded-full h-2.5">
+                                <div class="bg-blue-600 h-2.5 rounded-full transition-all duration-500" style="width: 75%"></div>
                             </div>
                         </div>
                         <div>
@@ -704,8 +885,8 @@
                                 <span class="text-sm font-medium text-gray-700">Total Expenses</span>
                                 <span class="text-sm font-bold text-gray-900">${{ number_format($stats['pending_payouts'] / 1000, 1) }}K</span>
                             </div>
-                            <div class="w-full bg-gray-200 rounded-full h-2.5">
-                                <div class="bg-green-500 h-2.5 rounded-full" style="width: 45%"></div>
+                            <div class="w-full bg-gray-100 rounded-full h-2.5">
+                                <div class="bg-green-500 h-2.5 rounded-full transition-all duration-500" style="width: 45%"></div>
                             </div>
                         </div>
                         <div>
@@ -713,8 +894,8 @@
                                 <span class="text-sm font-medium text-gray-700">Net Profit</span>
                                 <span class="text-sm font-bold text-gray-900">${{ number_format(($stats['platform_fees_month']) / 1000, 0) }}K</span>
                             </div>
-                            <div class="w-full bg-gray-200 rounded-full h-2.5">
-                                <div class="bg-orange-500 h-2.5 rounded-full" style="width: 60%"></div>
+                            <div class="w-full bg-gray-100 rounded-full h-2.5">
+                                <div class="bg-orange-500 h-2.5 rounded-full transition-all duration-500" style="width: 60%"></div>
                             </div>
                         </div>
                     </div>
@@ -723,7 +904,7 @@
                 <!-- Right: Two Cards -->
                 <div class="space-y-6">
                     <!-- Most Day Active -->
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                         <h3 class="text-lg font-bold text-gray-900 mb-4">Most Day Active</h3>
                         <div class="h-48">
                             <canvas id="campaignsByStatusChart"></canvas>
@@ -731,7 +912,7 @@
                     </div>
 
                     <!-- Campaign Status Rate -->
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                         <h3 class="text-lg font-bold text-gray-900 mb-4">Campaign Status Rate</h3>
                         <div class="h-48 flex items-center justify-center">
                             <canvas id="topCategoriesChart"></canvas>
@@ -749,8 +930,8 @@
             <!-- Bottom Row: Payment History Table & Recent Activity -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <!-- Left: Payment History Table -->
-                <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div class="px-6 py-4 border-b border-gray-200">
+                <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-100">
                         <div class="flex items-center justify-between">
                             <div>
                                 <h3 class="text-lg font-bold text-gray-900">Payment History</h3>
@@ -773,21 +954,21 @@
                     </div>
 
                     <div class="overflow-x-auto" x-show="!loading && paymentHistory && paymentHistory.length > 0" x-transition>
-                        <table class="min-w-full divide-y divide-gray-200">
+                        <table class="min-w-full divide-y divide-gray-100">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">User</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Reference</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Campaign</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Method</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reference</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Campaign</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Method</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                                 </tr>
                             </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
+                            <tbody class="bg-white divide-y divide-gray-100">
                                 <template x-for="(payment, index) in paymentHistory.slice(0, 5)" :key="payment.id || index">
-                                    <tr class="hover:bg-gray-50">
+                                    <tr class="hover:bg-gray-50 transition-colors">
                                         <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900" x-text="formatDate(payment.created_at)"></td>
                                         <td class="px-4 py-3 text-sm text-gray-900">
                                             <div x-show="payment.user">
@@ -814,7 +995,7 @@
                 </div>
 
                 <!-- Right: Recent Activity / AI Assistant -->
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                     <h3 class="text-lg font-bold text-gray-900 mb-4">Recent Activity</h3>
                     <div class="space-y-4 max-h-96 overflow-y-auto">
                         @if($recentActivity->count() > 0)

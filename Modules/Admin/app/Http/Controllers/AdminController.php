@@ -8,9 +8,11 @@ use App\Models\User;
 use App\Models\FinancialTransaction;
 use App\Models\CampaignContribution;
 use App\Models\SavingsAccount;
+use App\Models\TransactionNotificationRead;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 
@@ -738,6 +740,177 @@ class AdminController extends Controller
             'success' => true,
             'data' => $reports,
             'message' => 'Available reports retrieved successfully'
+        ]);
+    }
+
+    /**
+     * Get transaction notifications grouped by campaign
+     */
+    public function transactionNotifications(Request $request): JsonResponse
+    {
+        $limit = $request->get('limit', 50);
+
+        // Get transactions from FinancialTransaction
+        $financialTransactions = FinancialTransaction::with(['user', 'campaign'])
+            ->where('transaction_type', 'payment')
+            ->whereIn('status', ['completed', 'pending', 'processing'])
+            ->whereNotNull('campaign_id')
+            ->orderBy('created_at', 'desc')
+            ->limit($limit)
+            ->get();
+
+        // Get transactions from CampaignContribution
+        $contributions = CampaignContribution::with(['user', 'campaign'])
+            ->where('status', 'succeeded')
+            ->whereNotNull('campaign_id')
+            ->orderBy('created_at', 'desc')
+            ->limit($limit)
+            ->get();
+
+        // Merge and group by campaign
+        $notifications = collect();
+
+        // Process FinancialTransactions
+        foreach ($financialTransactions as $transaction) {
+            $notifications->push([
+                'id' => 'ft_' . $transaction->id,
+                'type' => 'financial_transaction',
+                'campaign_id' => $transaction->campaign_id,
+                'campaign_name' => $transaction->campaign?->title ?? 'Unknown Campaign',
+                'user_name' => $transaction->user?->name ?? 'Unknown User',
+                'user_email' => $transaction->user?->email ?? '',
+                'amount' => $transaction->amount,
+                'currency' => $transaction->currency ?? 'USD',
+                'status' => $transaction->status,
+                'reference' => $transaction->reference,
+                'created_at' => $transaction->created_at,
+                'formatted_amount' => number_format($transaction->amount / 100, 2),
+                'formatted_date' => $transaction->created_at->diffForHumans(),
+            ]);
+        }
+
+        // Process Contributions
+        foreach ($contributions as $contribution) {
+            $notifications->push([
+                'id' => 'cc_' . $contribution->id,
+                'type' => 'campaign_contribution',
+                'campaign_id' => $contribution->campaign_id,
+                'campaign_name' => $contribution->campaign?->title ?? 'Unknown Campaign',
+                'user_name' => $contribution->user?->name ?? 'Unknown User',
+                'user_email' => $contribution->user?->email ?? '',
+                'amount' => $contribution->amount,
+                'currency' => $contribution->currency ?? 'USD',
+                'status' => 'succeeded',
+                'reference' => $contribution->transaction_id ?? $contribution->id,
+                'created_at' => $contribution->created_at,
+                'formatted_amount' => number_format($contribution->amount / 100, 2),
+                'formatted_date' => $contribution->created_at->diffForHumans(),
+            ]);
+        }
+
+        // Get read campaign IDs for the current user
+        $readCampaignIds = TransactionNotificationRead::getReadCampaignIds(Auth::id());
+
+        // Group by campaign and filter out read campaigns
+        $grouped = $notifications->groupBy('campaign_id')
+            ->filter(function ($items, $campaignId) use ($readCampaignIds) {
+                // Only include campaigns that haven't been marked as read
+                return !in_array($campaignId, $readCampaignIds);
+            })
+            ->map(function ($items, $campaignId) {
+                $firstItem = $items->first();
+                return [
+                    'campaign_id' => $campaignId,
+                    'campaign_name' => $firstItem['campaign_name'],
+                    'total_transactions' => $items->count(),
+                    'total_amount' => $items->sum('amount'),
+                    'formatted_total_amount' => number_format($items->sum('amount') / 100, 2),
+                    'currency' => $firstItem['currency'],
+                    'transactions' => $items->take(10)->values()->all(), // Show latest 10 per campaign
+                    'latest_transaction_date' => $items->max('created_at'),
+                ];
+            })
+            ->values()
+            ->take(20); // Show latest 20 campaigns
+
+        // Calculate unread count (only unread campaigns)
+        $unreadCount = $grouped->sum('total_transactions');
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'notifications' => $grouped,
+                'unread_count' => $unreadCount,
+                'total_campaigns' => $grouped->count(),
+            ],
+            'message' => 'Transaction notifications retrieved successfully'
+        ]);
+    }
+
+    /**
+     * Mark transaction notification as read (by campaign)
+     */
+    public function markNotificationRead(Request $request, $campaignId): JsonResponse
+    {
+        $userId = Auth::id();
+
+        // Validate campaign exists
+        if (!Campaign::find($campaignId)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Campaign not found'
+            ], 404);
+        }
+
+        // Mark as read
+        TransactionNotificationRead::markAsRead($userId, $campaignId);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Notifications marked as read'
+        ]);
+    }
+
+    /**
+     * Mark all transaction notifications as read
+     */
+    public function markAllNotificationsRead(Request $request): JsonResponse
+    {
+        $userId = Auth::id();
+
+        // Get all campaigns with unread notifications
+        $readCampaignIds = TransactionNotificationRead::getReadCampaignIds($userId);
+
+        // Get all campaign IDs that have transactions
+        $limit = $request->get('limit', 100);
+
+        $financialTransactionCampaignIds = FinancialTransaction::where('transaction_type', 'payment')
+            ->whereIn('status', ['completed', 'pending', 'processing'])
+            ->whereNotNull('campaign_id')
+            ->limit($limit)
+            ->pluck('campaign_id')
+            ->unique()
+            ->toArray();
+
+        $contributionCampaignIds = CampaignContribution::where('status', 'succeeded')
+            ->whereNotNull('campaign_id')
+            ->limit($limit)
+            ->pluck('campaign_id')
+            ->unique()
+            ->toArray();
+
+        $allCampaignIds = array_unique(array_merge($financialTransactionCampaignIds, $contributionCampaignIds));
+
+        // Mark all as read
+        foreach ($allCampaignIds as $campaignId) {
+            if (!in_array($campaignId, $readCampaignIds)) {
+                TransactionNotificationRead::markAsRead($userId, $campaignId);
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'All notifications marked as read'
         ]);
     }
 

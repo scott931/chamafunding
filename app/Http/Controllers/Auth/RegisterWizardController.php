@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use App\Mail\OtpCodeMail;
+use App\Models\PaymentMethod;
 
 class RegisterWizardController extends Controller
 {
@@ -28,6 +29,8 @@ class RegisterWizardController extends Controller
 			'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
 			'phone' => ['required', 'string', 'max:30'],
 			'password' => ['required', 'confirmed', \Illuminate\Validation\Rules\Password::defaults()],
+			'accept_terms' => ['accepted'],
+			'accept_privacy' => ['accepted'],
 		]);
 
 		$wizard = $request->session()->get('register_wizard', []);
@@ -36,43 +39,24 @@ class RegisterWizardController extends Controller
 			'email' => $data['email'],
 			'phone' => $data['phone'],
 			'password' => Hash::make($data['password']),
+			'accept_terms' => $data['accept_terms'] ?? false,
+			'accept_privacy' => $data['accept_privacy'] ?? false,
 		];
 		$request->session()->put('register_wizard', $wizard);
 
-        // Generate and email OTP
-        $otp = (string) random_int(100000, 999999);
-        $ttlMinutes = 10;
-        $request->session()->put('register_otp', [
-            'code' => $otp,
-            'expires_at' => now()->addMinutes($ttlMinutes),
-            'email' => $data['email'],
-        ]);
-        try {
-            Mail::to($data['email'])->send(new OtpCodeMail($otp, $ttlMinutes));
-        } catch (\Throwable $e) {
-            // swallow mail errors for now; user can resend later
-        }
-
-		return redirect()->route('register.step2');
-	}
-
-	public function showStep2(): View
-	{
-		return view('auth.register.step2');
-	}
-
-	public function postStep2(Request $request): RedirectResponse
-	{
-		$data = $request->validate([
-			'membership_type' => ['nullable', 'string', 'max:100'],
-			'preferred_contribution_amount' => ['nullable', 'numeric', 'min:0'],
-			'payment_frequency' => ['nullable', Rule::in(['monthly','weekly','quarterly'])],
-			'referral_code' => ['nullable', 'string', 'max:50'],
-		]);
-
-		$wizard = $request->session()->get('register_wizard', []);
-		$wizard['step2'] = $data;
-		$request->session()->put('register_wizard', $wizard);
+        // Generate and email OTP - COMMENTED OUT FOR NOW
+        // $otp = (string) random_int(100000, 999999);
+        // $ttlMinutes = 10;
+        // $request->session()->put('register_otp', [
+        //     'code' => $otp,
+        //     'expires_at' => now()->addMinutes($ttlMinutes),
+        //     'email' => $data['email'],
+        // ]);
+        // try {
+        //     Mail::to($data['email'])->send(new OtpCodeMail($otp, $ttlMinutes));
+        // } catch (\Throwable $e) {
+        //     // swallow mail errors for now; user can resend later
+        // }
 
 		return redirect()->route('register.step3');
 	}
@@ -84,10 +68,31 @@ class RegisterWizardController extends Controller
 
 	public function postStep3(Request $request): RedirectResponse
 	{
+		$wizard = $request->session()->get('register_wizard');
+		if (!$wizard || !isset($wizard['step1'])) {
+			return redirect()->route('register.step1');
+		}
+
+		// Step 3 is now just a pass-through (terms/privacy moved to step1)
+		// Store step 3 data and move to step 4
+		$wizard['step3'] = [];
+		$request->session()->put('register_wizard', $wizard);
+
+		return redirect()->route('register.step4');
+	}
+
+	public function showStep4(): View
+	{
+		return view('auth.register.step4');
+	}
+
+	public function postStep4(Request $request): RedirectResponse
+	{
+		// Payment methods are optional during registration
 		$data = $request->validate([
-			'accept_terms' => ['accepted'],
-			'accept_privacy' => ['accepted'],
-			'otp' => ['nullable', 'string', 'max:10'],
+			'paypal_account_id' => ['nullable', 'string', 'max:255'],
+			'paypal_email' => ['nullable', 'email', 'max:255'],
+			'skip_payment_methods' => ['nullable', 'boolean'],
 		]);
 
 		$wizard = $request->session()->get('register_wizard');
@@ -95,35 +100,41 @@ class RegisterWizardController extends Controller
 			return redirect()->route('register.step1');
 		}
 
-        // Validate OTP
-        $sessionOtp = $request->session()->get('register_otp');
-        if (!$sessionOtp || $sessionOtp['email'] !== ($wizard['step1']['email'] ?? null)) {
-            return back()->withErrors(['otp' => 'Verification code not found. Please resend.'])->withInput();
-        }
-        if (now()->greaterThan($sessionOtp['expires_at'])) {
-            return back()->withErrors(['otp' => 'Verification code expired. Please resend.'])->withInput();
-        }
-        if (($data['otp'] ?? '') !== ($sessionOtp['code'] ?? '')) {
-            return back()->withErrors(['otp' => 'Invalid verification code.'])->withInput();
-        }
+		// Store payment method data (even if empty, user can skip)
+		$wizard['step4'] = $data;
+		$request->session()->put('register_wizard', $wizard);
 
+		// Now create the user
 		$step1 = $wizard['step1'];
-		$step2 = $wizard['step2'] ?? [];
+		// $sessionOtp = $request->session()->get('register_otp'); // COMMENTED OUT FOR NOW
 
 		$user = User::create([
 			'name' => $step1['name'],
 			'email' => $step1['email'],
 			'phone' => $step1['phone'] ?? null,
 			'password' => $step1['password'],
-			'membership_type' => $step2['membership_type'] ?? null,
-			'preferred_contribution_amount' => isset($step2['preferred_contribution_amount']) ? (int) round(((float) $step2['preferred_contribution_amount']) * 100) : null,
-			'payment_frequency' => $step2['payment_frequency'] ?? null,
-			'referral_code' => $step2['referral_code'] ?? null,
-			'terms_accepted_at' => now(),
-			'privacy_accepted_at' => now(),
-            'otp_code' => $sessionOtp['code'] ?? null,
-            'otp_expires_at' => $sessionOtp['expires_at'] ?? null,
+			'terms_accepted_at' => ($step1['accept_terms'] ?? false) ? now() : null,
+			'privacy_accepted_at' => ($step1['accept_privacy'] ?? false) ? now() : null,
+            // 'otp_code' => $sessionOtp['code'] ?? null, // COMMENTED OUT FOR NOW
+            // 'otp_expires_at' => $sessionOtp['expires_at'] ?? null, // COMMENTED OUT FOR NOW
 		]);
+
+		// Create payment methods if provided
+		if (!($data['skip_payment_methods'] ?? false) && !empty($data['paypal_account_id'])) {
+			PaymentMethod::create([
+				'user_id' => $user->id,
+				'type' => 'digital_wallet',
+				'provider' => 'paypal',
+				'external_id' => $data['paypal_account_id'],
+				'brand' => 'PayPal',
+				'is_default' => true,
+				'is_verified' => true,
+				'metadata' => [
+					'email' => $data['paypal_email'] ?? null,
+					'venmo_enabled' => true, // Venmo is enabled via PayPal
+				],
+			]);
+		}
 
 		event(new Registered($user));
 		Auth::login($user);

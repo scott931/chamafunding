@@ -28,7 +28,11 @@
 
                 <!-- Page Content -->
                 <main class="min-h-screen">
-                    {{ $slot }}
+                    @isset($slot)
+                        {{ $slot }}
+                    @else
+                        @yield('content')
+                    @endisset
                 </main>
             </x-sidebar>
         </div>

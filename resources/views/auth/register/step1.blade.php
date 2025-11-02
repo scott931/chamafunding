@@ -1,14 +1,12 @@
-@extends('layouts.app')
-
-@section('content')
+<x-guest-layout>
 <div class="min-h-screen bg-gray-50">
 	<div class="max-w-3xl mx-auto px-4 py-10">
 		<div class="text-center mb-8">
 			<h1 class="text-3xl font-bold text-gray-900">Join our Community Savings Platform</h1>
-			<p class="text-gray-600 mt-2">Recurring contributions, transparent campaigns, and SACCO-grade governance.</p>
+			<p class="text-gray-600 mt-2">Recurring contributions, transparent campaigns, and quality governance.</p>
 			<div class="flex items-center justify-center gap-6 text-sm text-gray-500 mt-3">
 				<span>🔒 Bank-level encryption</span>
-				<span>✅ Registered SACCO</span>
+				<span>✅ Registered</span>
 				<span>👥 Join 5,000+ members</span>
 			</div>
 		</div>
@@ -53,6 +51,18 @@
 					<input type="password" name="password_confirmation" class="mt-1 w-full border rounded px-3 py-2" required />
 				</div>
 			</div>
+			<div class="mt-6 space-y-4">
+				<div class="flex items-center gap-2">
+					<input id="accept_terms" type="checkbox" name="accept_terms" class="border rounded" required>
+					<label for="accept_terms" class="text-sm text-gray-700">I agree to the <a href="#" class="text-indigo-600">Terms of Service</a>.</label>
+				</div>
+				@error('accept_terms')<p class="text-sm text-red-600">{{ $message }}</p>@enderror
+				<div class="flex items-center gap-2">
+					<input id="accept_privacy" type="checkbox" name="accept_privacy" class="border rounded" required>
+					<label for="accept_privacy" class="text-sm text-gray-700">I agree to the <a href="#" class="text-indigo-600">Privacy Policy</a>.</label>
+				</div>
+				@error('accept_privacy')<p class="text-sm text-red-600">{{ $message }}</p>@enderror
+			</div>
 			<div class="mt-6 flex items-center justify-between">
 				<a href="{{ url('/') }}" class="text-gray-600 text-sm">Explore first</a>
 				<button class="bg-indigo-600 text-white px-5 py-2 rounded">Continue</button>
@@ -88,12 +98,7 @@
 	}
 	</script>
 
-	<div class="mt-8">
-		<img src="https://dummyimage.com/1200x300/ebf2ff/1e3a8a&text=Save+together.+Grow+faster." alt="Hero" class="w-full rounded" />
-	</div>
-
 	</div>
 </div>
-@endsection
-
+</x-guest-layout>
 
