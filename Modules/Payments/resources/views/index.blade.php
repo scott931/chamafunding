@@ -32,12 +32,16 @@
                     paymentHistory: [],
                     campaignCount: null,
                     isAdmin: {{ auth()->user() && auth()->user()->hasAnyRole(['Super Admin', 'Financial Admin', 'Moderator', 'Support Agent', 'Treasurer', 'Secretary', 'Auditor']) ? 'true' : 'false' }},
+                    fromDate: new Date(new Date().setDate(new Date().getDate() - 30)).toISOString().slice(0,10),
+                    toDate: new Date().toISOString().slice(0,10),
 
                     init() {
                         this.loadSummary();
                         this.loadPaymentHistory();
                         this.loadCampaignCount();
                     },
+
+
 
                     async request(url, options = {}) {
                         const headers = {
@@ -70,7 +74,10 @@
 
                     async loadSummary() {
                         try {
-                            const response = await this.request('/payments-summary');
+                            const params = new URLSearchParams();
+                            if (this.fromDate) params.set('from_date', this.fromDate);
+                            if (this.toDate) params.set('to_date', this.toDate);
+                            const response = await this.request(`/payments-summary?${params.toString()}`);
                             console.log('Summary response:', response);
                             if (response.success && response.data) {
                                 this.summary = response.data;
@@ -88,7 +95,10 @@
                     async loadPaymentHistory() {
                         this.loading = true;
                         try {
-                            const response = await this.request('/payments-history?per_page=15');
+                            const params = new URLSearchParams({ per_page: '15' });
+                            if (this.fromDate) params.set('from_date', this.fromDate);
+                            if (this.toDate) params.set('to_date', this.toDate);
+                            const response = await this.request(`/payments-history?${params.toString()}`);
 
                             if (response.success && response.data) {
                                 if (response.data.data && Array.isArray(response.data.data)) {
@@ -98,6 +108,7 @@
                                 } else {
                                     this.paymentHistory = [];
                                 }
+
                             } else {
                                 this.paymentHistory = [];
                             }
@@ -107,6 +118,10 @@
                         } finally {
                             this.loading = false;
                         }
+                    },
+                    applyFilters() {
+                        this.loadSummary();
+                        this.loadPaymentHistory();
                     },
 
                     async loadCampaignCount() {
@@ -254,6 +269,24 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                             </svg>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="bg-white rounded-2xl shadow-lg p-6">
+                <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">From</label>
+                        <input type="date" x-model="fromDate" class="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">To</label>
+                        <input type="date" x-model="toDate" class="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
+                    </div>
+                    <div class="flex-1"></div>
+                    <div>
+                        <button @click="applyFilters()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">Apply</button>
                     </div>
                 </div>
             </div>

@@ -596,6 +596,8 @@ class PaymentsController extends Controller
         ]);
 
         $userId = $isAdmin ? null : $user->id;
+        $fromDate = $request->get('from_date');
+        $toDate = $request->get('to_date');
 
         // Get FinancialTransaction payments
         $transactionPaymentsQuery = FinancialTransaction::where('transaction_type', 'payment')
@@ -603,6 +605,13 @@ class PaymentsController extends Controller
 
         if ($userId) {
             $transactionPaymentsQuery->where('user_id', $userId);
+        }
+
+        if ($fromDate) {
+            $transactionPaymentsQuery->whereDate('created_at', '>=', $fromDate);
+        }
+        if ($toDate) {
+            $transactionPaymentsQuery->whereDate('created_at', '<=', $toDate);
         }
 
         $transactionPayments = $transactionPaymentsQuery->get();
@@ -614,6 +623,13 @@ class PaymentsController extends Controller
 
         if ($userId) {
             $contributionsQuery->where('user_id', $userId);
+        }
+
+        if ($fromDate) {
+            $contributionsQuery->whereDate('created_at', '>=', $fromDate);
+        }
+        if ($toDate) {
+            $contributionsQuery->whereDate('created_at', '<=', $toDate);
         }
 
         $allContributions = $contributionsQuery->get();
@@ -643,6 +659,13 @@ class PaymentsController extends Controller
 
         if ($userId) {
             $expensesQuery->where('user_id', $userId);
+        }
+
+        if ($fromDate) {
+            $expensesQuery->whereDate('created_at', '>=', $fromDate);
+        }
+        if ($toDate) {
+            $expensesQuery->whereDate('created_at', '<=', $toDate);
         }
 
         $totalExpenses = $expensesQuery->sum('amount');

@@ -827,29 +827,30 @@
                         <span class="text-white/70 ml-2">{{ $stats['total_backers_month'] }} this month</span>
                     </div>
                 </div>
-
-                <!-- Platform Fees -->
-                <a href="{{ route('admin.financial.index') }}" class="bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg shadow-amber-500/30 hover:shadow-xl hover:shadow-amber-500/40 transition-all duration-200 transform hover:scale-105 group">
+                <!-- This Month Contributions -->
+                <div class="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/40 transition-all duration-200 transform hover:scale-105">
                     <div class="flex items-center justify-between mb-2">
-                        <p class="text-xs sm:text-sm font-medium text-white/90">Platform Fees</p>
+                        <p class="text-xs sm:text-sm font-medium text-white/90">This Month Contributions</p>
                         <button class="text-white/70 hover:text-white transition-colors">
                             <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
                             </svg>
                         </button>
                     </div>
-                    <p class="text-2xl sm:text-3xl font-bold text-white mb-1">${{ number_format($stats['platform_fees_month'], 0) }}</p>
+                    <p class="text-2xl sm:text-3xl font-bold text-white mb-1">${{ number_format($stats['contributions_this_month'], 0) }}</p>
                     <div class="flex items-center text-sm">
                         <span class="text-white/90 font-medium flex items-center">
                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
                             </svg>
-                            +0.84%
+                            This month
                         </span>
-                        <span class="text-white/70 ml-2">This month</span>
                     </div>
-                </a>
+                </div>
+
             </div>
+
+
 
             <!-- Middle Row: Left (Contributions with Chart) & Right (Two Cards) -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
@@ -864,7 +865,12 @@
                     <div class="mb-6">
                         <div class="flex items-center justify-between mb-4">
                             <h4 class="text-sm font-semibold text-gray-700">Contributions Over Time</h4>
-                            <span class="text-xs text-gray-500">Jan 2024 - Mar 2024</span>
+                            <form method="GET" class="flex items-center gap-2">
+                                <input type="date" name="from_date" value="{{ request('from_date') }}" class="border rounded px-2 py-1 text-xs focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
+                                <span class="text-xs text-gray-400">to</span>
+                                <input type="date" name="to_date" value="{{ request('to_date') }}" class="border rounded px-2 py-1 text-xs focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
+                                <button class="text-xs bg-indigo-600 text-white px-3 py-1 rounded hover:bg-indigo-700">Apply</button>
+                            </form>
                         </div>
                         <div class="h-48">
                             <canvas id="fundingChart"></canvas>

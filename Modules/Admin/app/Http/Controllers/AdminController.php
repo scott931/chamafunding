@@ -21,8 +21,14 @@ class AdminController extends Controller
     /**
      * Display admin dashboard with platform overview.
      */
-    public function index()
+    public function index(Request $request)
     {
+        $fromDate = $request->get('from_date');
+        $toDate = $request->get('to_date');
+        if ($fromDate && !$toDate) { $toDate = now()->format('Y-m-d'); }
+        if ($toDate && !$fromDate) { $fromDate = now()->subDays(30)->format('Y-m-d'); }
+        $hasCustomRange = $fromDate && $toDate;
+
         // Calculate total contributions this month
         // Get FinancialTransaction payments for this month
         $ftPaymentsThisMonth = FinancialTransaction::where('transaction_type', 'payment')
@@ -74,25 +80,40 @@ class AdminController extends Controller
             'new_campaigns_this_month' => Campaign::whereMonth('created_at', now()->month)->count(),
         ];
 
-        // Funding over time (last 30 days) - Include both FinancialTransaction and CampaignContribution
-        $ftFunding = FinancialTransaction::where('transaction_type', 'payment')
-            ->where('status', 'completed')
-            ->where('created_at', '>=', now()->subDays(30))
+        // Funding over time (range) - Include both FinancialTransaction and CampaignContribution
+        $ftFundingQuery = FinancialTransaction::where('transaction_type', 'payment')
+            ->where('status', 'completed');
+        if ($hasCustomRange) {
+            $ftFundingQuery->whereDate('created_at', '>=', $fromDate)
+                           ->whereDate('created_at', '<=', $toDate);
+        } else {
+            $ftFundingQuery->where('created_at', '>=', now()->subDays(30));
+        }
+        $ftFunding = $ftFundingQuery
             ->selectRaw('DATE(created_at) as date, SUM(amount) as total')
             ->groupBy('date')
             ->get()
             ->keyBy('date');
 
         // Get contributions and merge with FinancialTransactions
-        $contributions = CampaignContribution::where('status', 'succeeded')
-            ->where('created_at', '>=', now()->subDays(30))
+        $contributionsQuery = CampaignContribution::where('status', 'succeeded');
+        if ($hasCustomRange) {
+            $contributionsQuery->whereDate('created_at', '>=', $fromDate)
+                               ->whereDate('created_at', '<=', $toDate);
+        } else {
+            $contributionsQuery->where('created_at', '>=', now()->subDays(30));
+        }
+        $contributions = $contributionsQuery
             ->get();
 
         $fundingOverTime = collect();
 
-        // Create date range for last 30 days
-        for ($i = 29; $i >= 0; $i--) {
-            $date = now()->subDays($i)->format('Y-m-d');
+        // Build date range loop
+        $rangeStart = $hasCustomRange ? \Carbon\Carbon::parse($fromDate) : now()->subDays(30);
+        $rangeEnd = $hasCustomRange ? \Carbon\Carbon::parse($toDate) : now();
+        $period = new \DatePeriod($rangeStart->startOfDay(), new \DateInterval('P1D'), $rangeEnd->copy()->addDay()->startOfDay());
+        foreach ($period as $day) {
+            $date = $day->format('Y-m-d');
             $total = 0;
 
             // Add FinancialTransaction amount
