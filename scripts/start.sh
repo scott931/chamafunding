@@ -3,41 +3,27 @@
 # Startup script for Render deployment
 # This script runs migrations and then starts the application
 
-set -e
-
 echo "Starting ChamaFunding application..."
 
-# Wait for database to be ready (optional, but helpful)
-echo "Waiting for database connection..."
-max_attempts=30
-attempt=0
-until php artisan migrate:status &> /dev/null || [ $attempt -ge $max_attempts ]; do
-    attempt=$((attempt + 1))
-    echo "Database is unavailable - sleeping (attempt $attempt/$max_attempts)"
-    sleep 2
-done
+# Wait a moment for database to be ready
+echo "Waiting for services to be ready..."
+sleep 5
 
-if [ $attempt -ge $max_attempts ]; then
-    echo "Warning: Could not verify database connection, proceeding anyway..."
-else
-    echo "Database is ready!"
-fi
-
-# Run database migrations
+# Run database migrations (don't fail if this errors)
 echo "Running database migrations..."
-php artisan migrate --force
+php artisan migrate --force || echo "Migration failed, continuing anyway..."
 
 # Create storage link if it doesn't exist
 echo "Creating storage link..."
 php artisan storage:link || true
 
-# Cache configuration for better performance
+# Cache configuration for better performance (don't fail if this errors)
 echo "Caching configuration..."
-php artisan config:cache || true
-php artisan route:cache || true
-php artisan view:cache || true
+php artisan config:cache || echo "Config cache failed, continuing..."
+php artisan route:cache || echo "Route cache failed, continuing..."
+php artisan view:cache || echo "View cache failed, continuing..."
 
-# Start the application
-echo "Starting PHP server..."
-exec php artisan serve --host=0.0.0.0 --port=${PORT:-80}
+# Start the application (this must succeed)
+echo "Starting PHP server on port ${PORT:-10000}..."
+exec php artisan serve --host=0.0.0.0 --port=${PORT:-10000}
 
