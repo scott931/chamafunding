@@ -207,7 +207,6 @@ databases:
   - name: chamafunding-db
     databaseName: chamafunding
     user: chamafunding
-    plan: free
     region: oregon
     mysqlVersion: "8.0"
 
