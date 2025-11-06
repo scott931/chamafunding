@@ -27,7 +27,7 @@ services:
       - key: LOG_LEVEL
         value: error
       - key: DB_CONNECTION
-        value: postgres
+        value: mysql
       - key: DB_HOST
         fromDatabase:
           name: chamafunding-db
@@ -152,7 +152,7 @@ services:
       - key: LOG_LEVEL
         value: error
       - key: DB_CONNECTION
-        value: postgres
+        value: mysql
       - key: DB_HOST
         fromDatabase:
           name: chamafunding-db
@@ -209,5 +209,4 @@ databases:
     user: chamafunding
     plan: starter
     region: oregon
-    postgresMajorVersion: "16"
 

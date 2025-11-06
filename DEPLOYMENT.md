@@ -112,9 +112,9 @@ The `render.yaml` configuration automatically deploys:
    - Processes background jobs
    - Handles email sending, notifications, etc.
 
-3. **PostgreSQL Database** (`chamafunding-db`)
+3. **MySQL Database** (`chamafunding-db`)
    - Primary database
-   - PostgreSQL 16
+   - MySQL (latest version)
    - Starter plan
 
 4. **Redis** (`chamafunding-redis`)
@@ -127,10 +127,10 @@ The `render.yaml` configuration automatically deploys:
 
 If you prefer to deploy services manually instead of using the Blueprint:
 
-### 1. Create PostgreSQL Database
+### 1. Create MySQL Database
 
 1. Go to Render Dashboard
-2. Click "New +" → "PostgreSQL"
+2. Click "New +" → "MySQL"
 3. Configure:
    - **Name**: `chamafunding-db`
    - **Database**: `chamafunding`
@@ -193,7 +193,7 @@ See `.env.example` for a complete list of all environment variables.
 | `APP_KEY` | Laravel encryption key | Yes |
 | `APP_DEBUG` | Debug mode (`false` for production) | Yes |
 | `APP_URL` | Application URL | Yes |
-| `DB_CONNECTION` | Database driver (`pgsql` for Render) | Yes |
+| `DB_CONNECTION` | Database driver (`mysql` for Render) | Yes |
 | `CACHE_DRIVER` | Cache driver (`redis` for Render) | Yes |
 | `SESSION_DRIVER` | Session driver (`redis` for Render) | Yes |
 | `QUEUE_CONNECTION` | Queue driver (`redis` for Render) | Yes |
@@ -245,7 +245,7 @@ To scale your application:
 2. For high traffic, consider:
    - Upgrading to Standard or Pro plans
    - Adding multiple queue workers
-   - Using a managed PostgreSQL database with backups
+   - Using a managed MySQL database with backups
 
 ## Security Best Practices
 
