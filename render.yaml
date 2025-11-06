@@ -8,7 +8,6 @@ services:
     plan: starter
     region: oregon
     buildCommand: ""
-    startCommand: bash scripts/start.sh
     envVars:
       - key: APP_NAME
         value: ChamaFunding
@@ -65,11 +64,11 @@ services:
           type: redis
           name: chamafunding-redis
           property: port
-      - key: REDIS_PASSWORD
+      - key: REDIS_URL
         fromService:
           type: redis
           name: chamafunding-redis
-          property: password
+          property: connectionString
       - key: BROADCAST_DRIVER
         value: redis
       - key: FILESYSTEM_DISK
@@ -137,17 +136,15 @@ services:
     plan: starter
     region: oregon
     buildCommand: ""
-    startCommand: php artisan queue:work --tries=3 --timeout=90
     envVars:
       - key: APP_NAME
         value: ChamaFunding
       - key: APP_ENV
         value: production
       - key: APP_KEY
-        fromService:
-          type: web
-          name: chamafunding-web
-          property: env.APP_KEY
+        generateValue: true
+      - key: RENDER_SERVICE_TYPE
+        value: worker
       - key: APP_DEBUG
         value: false
       - key: LOG_CHANNEL
@@ -192,11 +189,11 @@ services:
           type: redis
           name: chamafunding-redis
           property: port
-      - key: REDIS_PASSWORD
+      - key: REDIS_URL
         fromService:
           type: redis
           name: chamafunding-redis
-          property: password
+          property: connectionString
 
   # Redis Instance
   - type: redis

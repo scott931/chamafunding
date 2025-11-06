@@ -66,11 +66,22 @@ After deployment, configure these environment variables in the Render dashboard 
 - `AWS_BUCKET` - S3 bucket name
 - `AWS_USE_PATH_STYLE_ENDPOINT` - `false` (default)
 
-### Step 3: Automatic Migrations
+### Step 3: Sync APP_KEY Between Services
+
+⚠️ **Important**: After the first deployment, you need to copy the `APP_KEY` from the web service to the worker service so they share the same encryption key:
+
+1. Go to the **chamafunding-web** service in Render dashboard
+2. Copy the `APP_KEY` value from Environment variables
+3. Go to the **chamafunding-queue** service
+4. Update the `APP_KEY` environment variable with the value from the web service
+
+This ensures both services can encrypt/decrypt data correctly.
+
+### Step 4: Automatic Migrations
 
 ✅ **Migrations run automatically!** The startup script automatically runs database migrations on every deployment and service restart. No manual intervention needed.
 
-### Step 4: Seed Initial Data (Optional)
+### Step 5: Seed Initial Data (Optional)
 
 If you need to seed initial data, run:
 
@@ -78,7 +89,7 @@ If you need to seed initial data, run:
 render run chamafunding-web php artisan db:seed --class=RolesSeeder
 ```
 
-### Step 5: Post-Deployment Setup
+### Step 6: Post-Deployment Setup
 
 ✅ **Storage link and caching are handled automatically!** The startup script creates the storage link and caches configuration, routes, and views automatically.
 

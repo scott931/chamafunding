@@ -56,10 +56,10 @@ RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf
 HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
     CMD curl -f http://localhost:${PORT:-80}/up || exit 1
 
-# For Render, use startup script which handles migrations and starts the server
-# The startCommand in render.yaml will override this
-CMD ["bash", "scripts/start.sh"]
-
-# For traditional Apache deployment, use:
-# CMD ["apache2-foreground"]
+# Default to web service (can be overridden by RENDER_SERVICE_TYPE env var)
+# For web service: runs migrations and starts PHP server
+# For worker service: runs queue worker
+COPY scripts/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 
