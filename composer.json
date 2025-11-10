@@ -13,7 +13,6 @@
         "laravel/sanctum": "^4.2",
         "laravel/tinker": "^2.10.1",
         "nwidart/laravel-modules": "*",
-        "predis/predis": "^2.3",
         "spatie/laravel-permission": "^6.22"
     },
     "require-dev": {
