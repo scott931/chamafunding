@@ -14,20 +14,20 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans antialiased bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+    <body class="font-sans antialiased bg-gradient-to-br from-slate-50 via-indigo-50/30 to-purple-50/20 min-h-screen">
         <div class="min-h-screen">
             <x-sidebar>
                 <!-- Page Heading -->
                 @if(isset($header))
-                    <header class="bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-200/50">
-                        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                    <header class="bg-white/70 backdrop-blur-xl shadow-sm border-b border-slate-200/60 sticky top-0 z-30">
+                        <div class="max-w-[1920px] mx-auto py-4 sm:py-5 px-4 sm:px-6 lg:px-8">
                             {{ $header }}
                         </div>
                     </header>
                 @endif
 
                 <!-- Page Content -->
-                <main class="min-h-screen">
+                <main class="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50/20 to-purple-50/10">
                     @isset($slot)
                         {{ $slot }}
                     @else

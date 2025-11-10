@@ -1,26 +1,29 @@
 <div x-data="{ sidebarOpen: false }" class="min-h-screen flex">
     <!-- Sidebar -->
     <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
-           class="fixed inset-y-0 left-0 z-50 w-64 bg-gradient-to-b from-blue-900 via-indigo-900 to-purple-900 shadow-2xl transform transition-transform duration-300 ease-in-out lg:transition-none">
+           class="fixed inset-y-0 left-0 z-50 w-72 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 shadow-2xl transform transition-transform duration-300 ease-in-out lg:transition-none border-r border-slate-700/50 backdrop-blur-xl">
 
         <!-- Logo Section -->
-        <div class="flex items-center justify-between h-16 px-6 border-b border-white/10">
+        <div class="flex items-center justify-between h-20 px-6 border-b border-slate-700/50 bg-slate-800/50">
             <a href="{{ route('dashboard') }}" class="flex items-center space-x-3 group">
-                <div class="w-10 h-10 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-lg flex items-center justify-center transform group-hover:scale-105 transition-transform shadow-lg shadow-blue-500/30">
-                    <span class="text-white font-bold text-xl">CF</span>
+                <div class="w-12 h-12 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-xl flex items-center justify-center transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg shadow-indigo-500/30 ring-2 ring-indigo-500/20">
+                    <span class="text-white font-bold text-lg">CF</span>
                 </div>
-                <span class="text-xl font-bold text-white">CrowdFunding</span>
+                <div class="flex flex-col">
+                    <span class="text-lg font-bold text-white leading-tight">CrowdFunding</span>
+                    <span class="text-xs text-slate-400 font-medium">Platform</span>
+                </div>
             </a>
             <!-- Close button for mobile -->
-            <button @click="sidebarOpen = false" class="lg:hidden text-gray-300 hover:text-white">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button @click="sidebarOpen = false" class="lg:hidden text-slate-400 hover:text-white p-2 rounded-lg hover:bg-slate-700/50 transition-all duration-200">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
             </button>
         </div>
 
         <!-- Navigation Links -->
-        <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
+        <nav class="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto custom-scrollbar">
             <x-sidebar-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
@@ -92,18 +95,18 @@
         </nav>
 
         <!-- User Section -->
-        <div class="px-4 py-4 border-t border-white/10 relative">
+        <div class="px-4 py-5 border-t border-slate-700/50 bg-slate-800/30 backdrop-blur-sm">
             <x-dropdown align="top" width="48">
                 <x-slot name="trigger">
-                    <button class="flex items-center w-full px-4 py-3 text-sm font-medium text-white hover:bg-white/10 rounded-lg transition-all duration-200">
-                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white font-semibold text-sm mr-3 shadow-lg">
+                    <button class="flex items-center w-full px-4 py-3 text-sm font-medium text-white hover:bg-slate-700/50 rounded-xl transition-all duration-200 group">
+                        <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center text-white font-semibold text-sm mr-3 shadow-lg shadow-indigo-500/30 ring-2 ring-indigo-500/20 group-hover:scale-110 transition-transform duration-200">
                             {{ strtoupper(substr(Auth::user()?->name ?? 'U', 0, 1)) }}
                         </div>
-                        <div class="flex-1 text-left">
-                            <p class="font-medium text-white">{{ Auth::user()?->name ?? 'User' }}</p>
-                            <p class="text-xs text-gray-300">{{ Auth::user()?->email ?? 'No email' }}</p>
+                        <div class="flex-1 text-left min-w-0">
+                            <p class="font-semibold text-white truncate">{{ Auth::user()?->name ?? 'User' }}</p>
+                            <p class="text-xs text-slate-400 truncate">{{ Auth::user()?->email ?? 'No email' }}</p>
                         </div>
-                        <svg class="w-4 h-4 text-gray-300 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4 text-slate-400 ml-2 flex-shrink-0 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                         </svg>
                     </button>
@@ -140,26 +143,26 @@
          x-transition:leave="transition-opacity ease-linear duration-300"
          x-transition:leave-start="opacity-100"
          x-transition:leave-end="opacity-0"
-         class="fixed inset-0 bg-gray-900/50 z-40 lg:hidden"
+         class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 lg:hidden"
          style="display: none;"></div>
 
     <!-- Main Content -->
-    <div class="flex-1 flex flex-col lg:ml-64">
+    <div class="flex-1 flex flex-col lg:ml-72">
         <!-- Top Bar with Menu Button (Mobile Only) -->
-        <div class="bg-white/95 backdrop-blur-md border-b border-gray-200/50 shadow-sm sticky top-0 z-40 lg:hidden">
-            <div class="flex items-center justify-between h-16 px-4">
-                <button @click="sidebarOpen = !sidebarOpen" class="text-gray-600 hover:text-gray-900 focus:outline-none">
+        <div class="bg-white/95 backdrop-blur-xl border-b border-slate-200/60 shadow-sm sticky top-0 z-40 lg:hidden">
+            <div class="flex items-center justify-between h-16 px-4 sm:px-6">
+                <button @click="sidebarOpen = !sidebarOpen" class="text-slate-600 hover:text-slate-900 focus:outline-none p-2 rounded-lg hover:bg-slate-100 transition-colors">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                     </svg>
                 </button>
-                <a href="{{ route('dashboard') }}" class="flex items-center space-x-2">
-                    <div class="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/30">
-                        <span class="text-white font-bold text-lg">CF</span>
+                <a href="{{ route('dashboard') }}" class="flex items-center space-x-2.5">
+                    <div class="w-9 h-9 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/30 ring-2 ring-indigo-500/20">
+                        <span class="text-white font-bold text-base">CF</span>
                     </div>
-                    <span class="text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">CrowdFunding</span>
+                    <span class="text-base font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">CrowdFunding</span>
                 </a>
-                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-semibold text-xs">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center text-white font-semibold text-xs shadow-lg shadow-indigo-500/30 ring-2 ring-indigo-500/20">
                     {{ strtoupper(substr(Auth::user()?->name ?? 'U', 0, 1)) }}
                 </div>
             </div>
