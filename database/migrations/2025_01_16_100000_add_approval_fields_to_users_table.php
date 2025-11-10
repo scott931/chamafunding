@@ -8,7 +8,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->enum('approval_status', ['pending', 'approved', 'declined'])->default('pending')->after('is_verified');
+            $table->enum('approval_status', ['pending', 'approved', 'declined'])->default('pending')->after('email_verified_at');
             $table->boolean('is_approved')->default(false)->after('approval_status');
             $table->timestamp('approved_at')->nullable()->after('is_approved');
             $table->foreignId('approved_by')->nullable()->after('approved_at')->constrained('users')->nullOnDelete();

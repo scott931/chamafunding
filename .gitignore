@@ -22,3 +22,8 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# PHP version helper scripts (local development tools)
+use-php82.ps1
+use-php82.sh
+verify-php-upgrade.ps1
