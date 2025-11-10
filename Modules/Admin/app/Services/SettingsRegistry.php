@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Admin\App\Services;
+namespace Modules\Admin\Services;
 
 /**
  * Registry for managing settings categories and their role-based access permissions.

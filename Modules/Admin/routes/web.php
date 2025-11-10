@@ -1,10 +1,10 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Modules\Admin\App\Http\Controllers\AdminController;
-use Modules\Admin\App\Http\Controllers\UserRoleController;
-use Modules\Admin\App\Http\Controllers\SettingsController;
-use Modules\Admin\App\Http\Controllers\ReportsController;
+use Modules\Admin\Http\Controllers\AdminController;
+use Modules\Admin\Http\Controllers\UserRoleController;
+use Modules\Admin\Http\Controllers\SettingsController;
+use Modules\Admin\Http\Controllers\ReportsController;
 
 // Only Treasurer, Secretary, Auditor can access Admin module
 Route::middleware(['auth', 'verified', 'admin.role'])->group(function () {

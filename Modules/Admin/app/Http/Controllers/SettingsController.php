@@ -1,18 +1,18 @@
 <?php
 
-namespace Modules\Admin\App\Http\Controllers;
+namespace Modules\Admin\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\PlatformSetting;
 use App\Models\SettingsAuditLog;
-use Modules\Admin\App\Http\Requests\UpdateAdvancedSettingsRequest;
-use Modules\Admin\App\Http\Requests\UpdateAppearanceSettingsRequest;
-use Modules\Admin\App\Http\Requests\UpdateCampaignSettingsRequest;
-use Modules\Admin\App\Http\Requests\UpdateCommunicationSettingsRequest;
-use Modules\Admin\App\Http\Requests\UpdateFinancialSettingsRequest;
-use Modules\Admin\App\Http\Requests\UpdatePlatformSettingsRequest;
-use Modules\Admin\App\Http\Requests\UpdateUserSettingsRequest;
-use Modules\Admin\App\Services\SettingsRegistry;
+use Modules\Admin\Http\Requests\UpdateAdvancedSettingsRequest;
+use Modules\Admin\Http\Requests\UpdateAppearanceSettingsRequest;
+use Modules\Admin\Http\Requests\UpdateCampaignSettingsRequest;
+use Modules\Admin\Http\Requests\UpdateCommunicationSettingsRequest;
+use Modules\Admin\Http\Requests\UpdateFinancialSettingsRequest;
+use Modules\Admin\Http\Requests\UpdatePlatformSettingsRequest;
+use Modules\Admin\Http\Requests\UpdateUserSettingsRequest;
+use Modules\Admin\Services\SettingsRegistry;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 

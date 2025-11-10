@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Admin\App\Http\Controllers;
+namespace Modules\Admin\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Campaign;

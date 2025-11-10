@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Modules\Admin\App\Http\Controllers\AdminController;
+use Modules\Admin\Http\Controllers\AdminController;
 
 Route::middleware(['web', 'auth'])->prefix('v1')->group(function () {
     // Admin Dashboard Statistics
