@@ -48,16 +48,18 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     @foreach($campaigns as $campaign)
                         <div class="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 group">
-                            <div class="h-48 bg-gradient-to-br from-blue-400 to-indigo-600 relative overflow-hidden">
-                                <div class="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors"></div>
+                            <div class="h-48 bg-indigo-600 relative overflow-hidden">
+                                <div class="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors"></div>
                                 <div class="absolute top-4 left-4">
-                                    <span class="px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full text-xs font-semibold text-gray-900">
+                                    <span class="px-3 py-1 bg-white rounded-full text-xs font-semibold text-gray-900">
                                         {{ ucfirst($campaign->status) }}
                                     </span>
                                 </div>
                                 <div class="absolute bottom-4 left-4 right-4">
-                                    <h3 class="text-xl font-bold text-white mb-1">{{ $campaign->title }}</h3>
-                                    <p class="text-white/90 text-sm line-clamp-2">{{ Str::limit($campaign->description, 80) }}</p>
+                                    <div class="bg-black/60 backdrop-blur-sm rounded-lg p-3 border border-white/20">
+                                        <h3 class="text-xl font-bold text-white mb-1 drop-shadow-lg">{{ $campaign->title }}</h3>
+                                        <p class="text-white/95 text-sm line-clamp-2">{{ Str::limit($campaign->description, 80) }}</p>
+                                    </div>
                                 </div>
                             </div>
                             <div class="p-6">
@@ -73,7 +75,7 @@
                                 </div>
                                 <div class="mb-4">
                                     <div class="w-full bg-gray-200 rounded-full h-2.5">
-                                        <div class="bg-gradient-to-r from-blue-500 to-indigo-600 h-2.5 rounded-full" style="width: {{ min(100, ($campaign->raised_amount / $campaign->goal_amount) * 100) }}%"></div>
+                                        <div class="bg-indigo-600 h-2.5 rounded-full" style="width: {{ min(100, ($campaign->raised_amount / $campaign->goal_amount) * 100) }}%"></div>
                                     </div>
                                     <p class="text-xs text-gray-500 mt-1">{{ number_format(($campaign->raised_amount / $campaign->goal_amount) * 100, 1) }}% funded</p>
                                 </div>
@@ -102,8 +104,8 @@
                 </div>
             @else
                 <div class="bg-white rounded-2xl shadow-lg p-12 text-center">
-                    <div class="w-24 h-24 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <svg class="w-12 h-12 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="w-24 h-24 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <svg class="w-12 h-12 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>

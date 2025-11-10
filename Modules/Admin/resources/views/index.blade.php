@@ -5,7 +5,7 @@
                 <!-- Top Row: Welcome & Actions -->
                 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6">
                     <div class="flex-1 min-w-0">
-                        <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 bg-clip-text text-transparent">Welcome Back, {{ Auth::user()->name }}</h2>
+                        <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900">Welcome Back, {{ Auth::user()->name }}</h2>
                         <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-slate-600 mt-2 font-medium">
                             <span class="flex items-center gap-1.5">
                                 <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -824,8 +824,8 @@
             <!-- Top Row: 4 Key KPI Cards -->
             <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-5 lg:gap-6">
                 <!-- Total Platform Raised -->
-                <div class="group relative bg-gradient-to-br from-emerald-500 via-emerald-600 to-teal-600 rounded-2xl p-5 sm:p-6 lg:p-7 shadow-xl shadow-emerald-500/20 hover:shadow-2xl hover:shadow-emerald-500/30 transition-all duration-300 transform hover:scale-[1.02] hover:-translate-y-1 border border-emerald-400/20 overflow-hidden">
-                    <div class="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div class="group relative bg-emerald-600 rounded-2xl p-5 sm:p-6 lg:p-7 shadow-xl shadow-emerald-500/20 hover:shadow-2xl hover:shadow-emerald-500/30 transition-all duration-300 transform hover:scale-[1.02] hover:-translate-y-1 border border-emerald-500 overflow-hidden">
+                    <div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     <div class="relative z-10">
                         <div class="flex items-center justify-between mb-3">
                             <p class="text-xs sm:text-sm font-semibold text-white/95 uppercase tracking-wide">Total Platform Raised</p>
@@ -849,8 +849,8 @@
                 </div>
 
                 <!-- Active Campaigns -->
-                <a href="{{ route('admin.campaigns.index', ['status' => 'active']) }}" class="group relative bg-gradient-to-br from-blue-500 via-indigo-600 to-purple-600 rounded-2xl p-5 sm:p-6 lg:p-7 shadow-xl shadow-blue-500/20 hover:shadow-2xl hover:shadow-blue-500/30 transition-all duration-300 transform hover:scale-[1.02] hover:-translate-y-1 border border-blue-400/20 overflow-hidden">
-                    <div class="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <a href="{{ route('admin.campaigns.index', ['status' => 'active']) }}" class="group relative bg-indigo-600 rounded-2xl p-5 sm:p-6 lg:p-7 shadow-xl shadow-blue-500/20 hover:shadow-2xl hover:shadow-blue-500/30 transition-all duration-300 transform hover:scale-[1.02] hover:-translate-y-1 border border-indigo-500 overflow-hidden">
+                    <div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     <div class="relative z-10">
                         <div class="flex items-center justify-between mb-3">
                             <p class="text-xs sm:text-sm font-semibold text-white/95 uppercase tracking-wide">Active Campaigns</p>
@@ -874,8 +874,8 @@
                 </a>
 
                 <!-- Total Backers -->
-                <div class="group relative bg-gradient-to-br from-purple-500 via-purple-600 to-pink-600 rounded-2xl p-5 sm:p-6 lg:p-7 shadow-xl shadow-purple-500/20 hover:shadow-2xl hover:shadow-purple-500/30 transition-all duration-300 transform hover:scale-[1.02] hover:-translate-y-1 border border-purple-400/20 overflow-hidden">
-                    <div class="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div class="group relative bg-purple-600 rounded-2xl p-5 sm:p-6 lg:p-7 shadow-xl shadow-purple-500/20 hover:shadow-2xl hover:shadow-purple-500/30 transition-all duration-300 transform hover:scale-[1.02] hover:-translate-y-1 border border-purple-500 overflow-hidden">
+                    <div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     <div class="relative z-10">
                         <div class="flex items-center justify-between mb-3">
                             <p class="text-xs sm:text-sm font-semibold text-white/95 uppercase tracking-wide">Total Backers</p>
@@ -898,8 +898,8 @@
                     </div>
                 </div>
                 <!-- This Month Contributions -->
-                <div class="group relative bg-gradient-to-br from-teal-500 via-cyan-600 to-blue-600 rounded-2xl p-5 sm:p-6 lg:p-7 shadow-xl shadow-teal-500/20 hover:shadow-2xl hover:shadow-teal-500/30 transition-all duration-300 transform hover:scale-[1.02] hover:-translate-y-1 border border-teal-400/20 overflow-hidden">
-                    <div class="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div class="group relative bg-teal-600 rounded-2xl p-5 sm:p-6 lg:p-7 shadow-xl shadow-teal-500/20 hover:shadow-2xl hover:shadow-teal-500/30 transition-all duration-300 transform hover:scale-[1.02] hover:-translate-y-1 border border-teal-500 overflow-hidden">
+                    <div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     <div class="relative z-10">
                         <div class="flex items-center justify-between mb-3">
                             <p class="text-xs sm:text-sm font-semibold text-white/95 uppercase tracking-wide">This Month Contributions</p>
@@ -931,7 +931,7 @@
                 <div class="lg:col-span-2 bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-200/60 p-6 sm:p-7 lg:p-8 hover:shadow-xl transition-shadow duration-300 flex flex-col">
                     <div class="mb-7">
                         <h3 class="text-2xl sm:text-3xl font-bold text-slate-900 mb-3">Contributions</h3>
-                        <p class="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">${{ number_format($stats['contributions_this_month'] / 1000, 0) }}K</p>
+                        <p class="text-4xl sm:text-5xl font-bold text-indigo-600">${{ number_format($stats['contributions_this_month'] / 1000, 0) }}K</p>
                     </div>
 
                     <!-- Funding Over Time Chart -->
@@ -942,7 +942,7 @@
                                 <input type="date" name="from_date" value="{{ request('from_date') }}" class="border border-slate-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white shadow-sm transition-all" />
                                 <span class="text-xs text-slate-500 font-medium">to</span>
                                 <input type="date" name="to_date" value="{{ request('to_date') }}" class="border border-slate-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white shadow-sm transition-all" />
-                                <button class="text-xs bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-4 py-2 rounded-lg hover:from-indigo-700 hover:to-purple-700 shadow-md hover:shadow-lg transition-all duration-200 font-medium">Apply</button>
+                                <button class="text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 font-medium">Apply</button>
                             </form>
                         </div>
                         <div class="h-56 sm:h-64">
@@ -958,7 +958,7 @@
                                 <span class="text-sm font-bold text-slate-900">${{ number_format($stats['total_raised'] / 1000, 1) }}M</span>
                             </div>
                             <div class="w-full bg-slate-100 rounded-full h-3 shadow-inner">
-                                <div class="bg-gradient-to-r from-indigo-500 to-blue-600 h-3 rounded-full transition-all duration-500 shadow-sm" style="width: 75%"></div>
+                                <div class="bg-indigo-600 h-3 rounded-full transition-all duration-500 shadow-sm" style="width: 75%"></div>
                             </div>
                         </div>
                         <div>
@@ -967,7 +967,7 @@
                                 <span class="text-sm font-bold text-slate-900">${{ number_format($stats['pending_payouts'] / 1000, 1) }}K</span>
                             </div>
                             <div class="w-full bg-slate-100 rounded-full h-3 shadow-inner">
-                                <div class="bg-gradient-to-r from-emerald-500 to-teal-600 h-3 rounded-full transition-all duration-500 shadow-sm" style="width: 45%"></div>
+                                <div class="bg-emerald-600 h-3 rounded-full transition-all duration-500 shadow-sm" style="width: 45%"></div>
                             </div>
                         </div>
                         <div>
@@ -976,7 +976,7 @@
                                 <span class="text-sm font-bold text-slate-900">${{ number_format(($stats['platform_fees_month']) / 1000, 0) }}K</span>
                             </div>
                             <div class="w-full bg-slate-100 rounded-full h-3 shadow-inner">
-                                <div class="bg-gradient-to-r from-orange-500 to-amber-600 h-3 rounded-full transition-all duration-500 shadow-sm" style="width: 60%"></div>
+                                <div class="bg-orange-600 h-3 rounded-full transition-all duration-500 shadow-sm" style="width: 60%"></div>
                             </div>
                         </div>
                     </div>
@@ -984,26 +984,65 @@
 
                 <!-- Right: Two Cards -->
                 <div class="space-y-5 sm:space-y-6 flex flex-col">
-                    <!-- Most Day Active -->
-                    <div class="bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-200/60 p-6 sm:p-7 hover:shadow-xl transition-shadow duration-300 flex flex-col flex-1">
-                        <h3 class="text-lg sm:text-xl font-bold text-slate-900 mb-5">Most Day Active</h3>
-                        <div class="h-64 flex-1">
-                            <canvas id="campaignsByStatusChart"></canvas>
+                    <!-- Campaign Status Distribution -->
+                    <div class="bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-200/60 p-6 sm:p-7 hover:shadow-xl transition-shadow duration-300 flex flex-col">
+                        <div class="flex items-center justify-between mb-5">
+                            <h3 class="text-lg sm:text-xl font-bold text-slate-900">Campaign Status</h3>
+                            <span class="text-xs font-medium text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full">
+                                {{ $campaignsByStatus->sum('count') }} Total
+                            </span>
+                        </div>
+                        <div class="h-64 relative">
+                            @if($campaignsByStatus->sum('count') > 0)
+                                <canvas id="campaignsByStatusChart"></canvas>
+                            @else
+                                <div class="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
+                                    <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-slate-100 flex items-center justify-center">
+                                        <svg class="w-10 h-10 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                        </svg>
+                                    </div>
+                                    <p class="text-sm font-medium text-slate-500">No campaigns yet</p>
+                                    <p class="text-xs text-slate-400 mt-1">Campaign status will appear here</p>
+                                </div>
+                            @endif
                         </div>
                     </div>
 
-                    <!-- Campaign Status Rate -->
-                    <div class="bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-200/60 p-6 sm:p-7 hover:shadow-xl transition-shadow duration-300 flex flex-col flex-1">
-                        <h3 class="text-lg sm:text-xl font-bold text-slate-900 mb-5">Campaign Status Rate</h3>
-                        <div class="h-64 flex items-center justify-center px-2 flex-1">
-                            <canvas id="topCategoriesChart"></canvas>
+                    <!-- Top Categories -->
+                    <div class="bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-200/60 p-6 sm:p-7 hover:shadow-xl transition-shadow duration-300 flex flex-col">
+                        <div class="flex items-center justify-between mb-5">
+                            <h3 class="text-lg sm:text-xl font-bold text-slate-900">Top Categories</h3>
+                            <span class="text-xs font-medium text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full">
+                                By Revenue
+                            </span>
                         </div>
-                        <div class="mt-5 text-center">
-                            <p class="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
-                                {{ $campaignsByStatus->where('status', 'active')->first() ? round(($campaignsByStatus->where('status', 'active')->first()->count / $campaignsByStatus->sum('count')) * 100) : 0 }}%
-                            </p>
-                            <p class="text-sm font-medium text-slate-600 mt-2">Active campaigns</p>
+                        <div class="h-64 relative">
+                            @if($topCategories->count() > 0)
+                                <canvas id="topCategoriesChart"></canvas>
+                            @else
+                                <div class="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
+                                    <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-slate-100 flex items-center justify-center">
+                                        <svg class="w-10 h-10 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                                        </svg>
+                                    </div>
+                                    <p class="text-sm font-medium text-slate-500">No category data</p>
+                                    <p class="text-xs text-slate-400 mt-1">Category performance will appear here</p>
+                                </div>
+                            @endif
                         </div>
+                        @if($campaignsByStatus->sum('count') > 0)
+                            <div class="mt-5 pt-5 border-t border-slate-200/60">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm font-medium text-slate-600">Active Rate</span>
+                                    <span class="text-2xl sm:text-3xl font-bold text-emerald-600">
+                                        {{ $campaignsByStatus->where('status', 'active')->first() && $campaignsByStatus->sum('count') > 0 ? round(($campaignsByStatus->where('status', 'active')->first()->count / $campaignsByStatus->sum('count')) * 100) : 0 }}%
+                                    </span>
+                                </div>
+                                <p class="text-xs text-slate-500 mt-1 text-right">of all campaigns</p>
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -1012,13 +1051,13 @@
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6 lg:gap-8">
                 <!-- Left: Payment History Table -->
                 <div class="lg:col-span-2 bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-200/60 overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col">
-                    <div class="px-5 sm:px-7 lg:px-8 py-5 sm:py-6 border-b border-slate-200/60 bg-gradient-to-r from-slate-50/50 to-transparent">
+                    <div class="px-5 sm:px-7 lg:px-8 py-5 sm:py-6 border-b border-slate-200/60 bg-slate-50">
                         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                             <div>
                                 <h3 class="text-lg sm:text-xl font-bold text-slate-900">Payment History</h3>
                                 <p class="text-xs sm:text-sm text-slate-600 mt-1.5 font-medium">Recent payments preview</p>
                             </div>
-                            <a href="{{ route('admin.transactions.index') }}" class="text-sm font-semibold bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-4 py-2 rounded-lg hover:from-indigo-700 hover:to-purple-700 shadow-md hover:shadow-lg transition-all duration-200 inline-flex items-center gap-2">
+                            <a href="{{ route('admin.transactions.index') }}" class="text-sm font-semibold bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 inline-flex items-center gap-2">
                                 View All
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -1032,12 +1071,14 @@
                         <p class="mt-4 text-gray-500">Loading payment history...</p>
                     </div>
 
-                    <div x-show="!loading && (!paymentHistory || paymentHistory.length === 0)" class="text-center py-12">
-                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                        <p class="mt-4 text-gray-500 font-medium">No payment history found</p>
-                        <p class="mt-2 text-sm text-gray-400">Payment transactions will appear here once users make contributions</p>
+                    <div x-show="!loading && (!paymentHistory || paymentHistory.length === 0)" class="flex flex-col items-center justify-center py-16 px-4">
+                        <div class="w-24 h-24 mx-auto mb-6 rounded-full bg-slate-200 flex items-center justify-center shadow-inner">
+                            <svg class="w-12 h-12 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                        </div>
+                        <p class="text-base font-semibold text-slate-700 mb-2">No payment history found</p>
+                        <p class="text-sm text-slate-500 text-center max-w-xs">Payment transactions will appear here once users make contributions to campaigns</p>
                     </div>
 
                     <!-- Mobile Card View -->
@@ -1125,13 +1166,14 @@
                                 </div>
                             @endforeach
                         @else
-                            <div class="text-center py-12">
-                                <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-slate-100 flex items-center justify-center">
-                                    <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="flex flex-col items-center justify-center py-12 px-4">
+                                <div class="w-20 h-20 mx-auto mb-5 rounded-full bg-slate-200 flex items-center justify-center shadow-inner">
+                                    <svg class="w-10 h-10 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
                                 </div>
-                                <p class="text-sm font-medium text-slate-500">No recent activity</p>
+                                <p class="text-sm font-semibold text-slate-700 mb-1">No recent activity</p>
+                                <p class="text-xs text-slate-500 text-center">Activity will appear here as campaigns and transactions are created</p>
                             </div>
                         @endif
                     </div>
