@@ -611,7 +611,7 @@
                     <div class="relative z-10">
                         <div class="flex items-start justify-between mb-4">
                             <div class="flex-1 pr-6">
-                                <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-3 leading-tight">{{ $campaign->title }}</h2>
+                                <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-3 leading-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.4)]" style="text-shadow: 0 2px 8px rgba(0,0,0,0.5), 0 0 20px rgba(0,0,0,0.3);">{{ $campaign->title }}</h2>
                                 <div class="flex flex-wrap items-center gap-3 sm:gap-4 text-sm text-white/95">
                                     <span class="flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-lg">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -644,8 +644,39 @@
                 <!-- Content -->
                 <div class="px-6 sm:px-8 lg:px-10 py-6 sm:py-8 lg:py-10 max-h-[65vh] sm:max-h-[70vh] overflow-y-auto custom-scrollbar bg-gradient-to-b from-white to-slate-50/30">
                     <div class="prose prose-slate max-w-none">
-                        <div class="bg-white/60 backdrop-blur-sm rounded-2xl p-6 sm:p-8 border border-slate-200/60 shadow-sm">
-                            <p class="text-slate-800 whitespace-pre-line text-base sm:text-lg leading-relaxed font-medium">{{ $campaign->description }}</p>
+                        <div class="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200/60 shadow-sm">
+                            @php
+                                $description = $campaign->description;
+                                // Split by double newlines or numbered sections
+                                $paragraphs = preg_split('/(\n\s*\n+|\d+\.\s+[A-Z][^\.]+:)/', $description, -1, PREG_SPLIT_DELIM_CAPTURE);
+                                $processed = [];
+                                foreach ($paragraphs as $para) {
+                                    $trimmed = trim($para);
+                                    if (empty($trimmed)) continue;
+
+                                    // Check if it's a section header (numbered with colon)
+                                    if (preg_match('/^\d+\.\s+[A-Z][^\.]+:$/', $trimmed)) {
+                                        $processed[] = ['type' => 'header', 'content' => $trimmed];
+                                    } else {
+                                        $processed[] = ['type' => 'paragraph', 'content' => $trimmed];
+                                    }
+                                }
+
+                                // If no processing worked, just use the original
+                                if (empty($processed)) {
+                                    $processed = [['type' => 'paragraph', 'content' => $description]];
+                                }
+                            @endphp
+
+                            <div class="space-y-6">
+                                @foreach($processed as $index => $item)
+                                    @if($item['type'] === 'header')
+                                        <h3 class="text-xl sm:text-2xl font-bold text-slate-900 mt-6 first:mt-0 mb-3 pb-3 border-b-2 border-indigo-200">{{ $item['content'] }}</h3>
+                                    @else
+                                        <p class="text-slate-700 text-base sm:text-lg leading-relaxed mb-4">{{ $item['content'] }}</p>
+                                    @endif
+                                @endforeach
+                            </div>
                         </div>
                     </div>
 

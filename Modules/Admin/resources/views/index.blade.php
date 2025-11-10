@@ -928,7 +928,7 @@
             <!-- Middle Row: Left (Contributions with Chart) & Right (Two Cards) -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6 lg:gap-8">
                 <!-- Left: Contributions Card with Funding Over Time Chart -->
-                <div class="lg:col-span-2 bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-200/60 p-6 sm:p-7 lg:p-8 hover:shadow-xl transition-shadow duration-300">
+                <div class="lg:col-span-2 bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-200/60 p-6 sm:p-7 lg:p-8 hover:shadow-xl transition-shadow duration-300 flex flex-col">
                     <div class="mb-7">
                         <h3 class="text-2xl sm:text-3xl font-bold text-slate-900 mb-3">Contributions</h3>
                         <p class="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">${{ number_format($stats['contributions_this_month'] / 1000, 0) }}K</p>
@@ -983,19 +983,19 @@
                 </div>
 
                 <!-- Right: Two Cards -->
-                <div class="space-y-5 sm:space-y-6">
+                <div class="space-y-5 sm:space-y-6 flex flex-col">
                     <!-- Most Day Active -->
-                    <div class="bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-200/60 p-6 sm:p-7 hover:shadow-xl transition-shadow duration-300">
+                    <div class="bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-200/60 p-6 sm:p-7 hover:shadow-xl transition-shadow duration-300 flex flex-col flex-1">
                         <h3 class="text-lg sm:text-xl font-bold text-slate-900 mb-5">Most Day Active</h3>
-                        <div class="h-64">
+                        <div class="h-64 flex-1">
                             <canvas id="campaignsByStatusChart"></canvas>
                         </div>
                     </div>
 
                     <!-- Campaign Status Rate -->
-                    <div class="bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-200/60 p-6 sm:p-7 hover:shadow-xl transition-shadow duration-300">
+                    <div class="bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-200/60 p-6 sm:p-7 hover:shadow-xl transition-shadow duration-300 flex flex-col flex-1">
                         <h3 class="text-lg sm:text-xl font-bold text-slate-900 mb-5">Campaign Status Rate</h3>
-                        <div class="h-64 flex items-center justify-center px-2">
+                        <div class="h-64 flex items-center justify-center px-2 flex-1">
                             <canvas id="topCategoriesChart"></canvas>
                         </div>
                         <div class="mt-5 text-center">
@@ -1011,7 +1011,7 @@
             <!-- Bottom Row: Payment History Table & Recent Activity -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6 lg:gap-8">
                 <!-- Left: Payment History Table -->
-                <div class="lg:col-span-2 bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-200/60 overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                <div class="lg:col-span-2 bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-200/60 overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col">
                     <div class="px-5 sm:px-7 lg:px-8 py-5 sm:py-6 border-b border-slate-200/60 bg-gradient-to-r from-slate-50/50 to-transparent">
                         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                             <div>
@@ -1091,9 +1091,9 @@
                 </div>
 
                     <!-- Right: Recent Activity / AI Assistant -->
-                <div class="bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-200/60 p-5 sm:p-6 lg:p-7 hover:shadow-xl transition-shadow duration-300">
+                <div class="bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-200/60 p-5 sm:p-6 lg:p-7 hover:shadow-xl transition-shadow duration-300 flex flex-col">
                     <h3 class="text-lg sm:text-xl font-bold text-slate-900 mb-5">Recent Activity</h3>
-                    <div class="space-y-3 max-h-96 overflow-y-auto custom-scrollbar pr-2">
+                    <div class="space-y-3 flex-1 overflow-y-auto custom-scrollbar pr-2">
                         @if($recentActivity->count() > 0)
                             @foreach($recentActivity->take(6) as $activity)
                                 @php
