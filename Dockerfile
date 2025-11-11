@@ -38,8 +38,8 @@ RUN chown -R www-data:www-data /var/www/html \
 # Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
 
-# Install Node dependencies and build assets
-RUN npm ci && npm run build
+# Install Node dependencies and build assets (main app + all modules)
+RUN chmod +x /var/www/html/scripts/build-assets.sh && /var/www/html/scripts/build-assets.sh
 
 # Copy Apache configuration
 COPY docker/apache-config.conf /etc/apache2/sites-available/000-default.conf

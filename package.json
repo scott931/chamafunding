@@ -4,6 +4,8 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
+        "build:all": "npm run build && npm run build:modules",
+        "build:modules": "node scripts/build-modules.js",
         "dev": "vite"
     },
     "devDependencies": {
