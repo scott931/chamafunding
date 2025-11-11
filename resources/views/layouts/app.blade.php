@@ -13,6 +13,10 @@
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+        {{-- Additional versioned assets (if needed) --}}
+        {{-- <link href="{{ asset('css/custom.css') }}?v={{ config('app.version', '1.0') }}" rel="stylesheet"> --}}
+        {{-- <script src="{{ asset('js/custom.js') }}?v={{ time() }}"></script> --}}
     </head>
     <body class="font-sans antialiased bg-gradient-to-br from-slate-50 via-indigo-50/30 to-purple-50/20 min-h-screen">
         <div class="min-h-screen">

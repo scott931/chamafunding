@@ -86,6 +86,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Application Version
+    |--------------------------------------------------------------------------
+    |
+    | This value is used for asset versioning to force browser cache refresh.
+    | Update this value whenever you deploy new assets.
+    |
+    */
+
+    'version' => env('APP_VERSION', '1.0'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Encryption Key
     |--------------------------------------------------------------------------
     |
