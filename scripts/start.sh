@@ -9,6 +9,14 @@ echo "Starting ChamaFunding application..."
 PORT=${PORT:-10000}
 echo "Using port: $PORT"
 
+# Clear all caches to ensure latest changes are reflected
+echo "Clearing all caches..."
+php artisan optimize:clear || true
+php artisan cache:clear || true
+php artisan config:clear || true
+php artisan route:clear || true
+php artisan view:clear || true
+
 # Create storage link if it doesn't exist (non-blocking)
 echo "Creating storage link..."
 php artisan storage:link || true
