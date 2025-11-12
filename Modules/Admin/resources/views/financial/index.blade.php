@@ -1,3 +1,14 @@
+{{-- Page-specific assets with cache busting --}}
+@push('styles')
+    {{-- Uncomment when you have CSS files to load --}}
+    {{-- <link href="{{ asset_versioned('css/financial.css') }}" rel="stylesheet"> --}}
+@endpush
+
+@push('scripts')
+    {{-- Uncomment when you have JS files to load --}}
+    {{-- <script src="{{ asset_versioned('js/financial.js') }}"></script> --}}
+@endpush
+
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">

@@ -31,15 +31,12 @@ class AppServiceProvider extends ServiceProvider
              * Generate a versioned asset URL with cache busting
              *
              * @param string $path
-             * @param string|null $version
              * @return string
              */
-            function asset_versioned(string $path, ?string $version = null): string
+            function asset_versioned($path)
             {
-                $version = $version ?? config('app.version', '1.2');
-                $assetUrl = asset($path);
-                $separator = str_contains($assetUrl, '?') ? '&' : '?';
-                return $assetUrl . $separator . 'v=' . $version;
+                $version = config('app.asset_version', '1.0.0');
+                return asset($path) . '?v=' . $version;
             }
         }
     }

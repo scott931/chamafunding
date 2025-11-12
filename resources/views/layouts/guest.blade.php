@@ -15,7 +15,7 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
 
         {{-- Additional versioned assets with cache busting --}}
-        {{-- Use asset_versioned() helper or add ?v= parameter manually --}}
+        {{-- Use asset_versioned() helper for automatic cache busting --}}
         {{-- <link href="{{ asset_versioned('css/custom.css') }}" rel="stylesheet"> --}}
         {{-- <script src="{{ asset_versioned('js/custom.js') }}"></script> --}}
     </head>

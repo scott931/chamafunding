@@ -631,8 +631,8 @@ class BackerDashboardController extends Controller
                     // Storage path - convert to URL
                     $featuredImageUrl = Storage::disk('public')->url($campaign->featured_image);
                 } else {
-                    // Try as asset path
-                    $featuredImageUrl = asset($campaign->featured_image);
+                    // Try as asset path with cache busting
+                    $featuredImageUrl = asset_versioned($campaign->featured_image);
                 }
             }
 
