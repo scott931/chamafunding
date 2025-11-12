@@ -25,5 +25,19 @@ class AppServiceProvider extends ServiceProvider
             URL::forceScheme('https');
         }
 
+        // Register helper function for versioned assets
+        if (!function_exists('asset_versioned')) {
+            /**
+             * Generate a versioned asset URL with cache busting
+             *
+             * @param string $path
+             * @return string
+             */
+            function asset_versioned($path)
+            {
+                $version = config('app.asset_version', time());
+                return asset($path) . '?v=' . $version;
+            }
+        }
     }
 }
