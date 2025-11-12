@@ -4,7 +4,7 @@
 # ============================================
 # Stage 1: Builder - Install dependencies and build assets
 # ============================================
-FROM php:8.4-apache as builder
+FROM php:8.1-apache as builder
 
 WORKDIR /var/www/html
 
@@ -50,7 +50,7 @@ RUN php artisan config:cache && php artisan route:cache
 # ============================================
 # Stage 2: Runtime - Final production image
 # ============================================
-FROM php:8.4-apache
+FROM php:8.1-apache
 
 WORKDIR /var/www/html
 

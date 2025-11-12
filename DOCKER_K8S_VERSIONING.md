@@ -85,7 +85,7 @@ This works with the `asset_versioned()` helper in `AppServiceProvider.php`.
 1. ✅ Copy dependency files (`composer.json`, `package.json`) before installing
 2. ✅ Use `.dockerignore` to exclude unnecessary files
 3. ✅ Use multi-stage builds for production
-4. ✅ Pin base image versions (e.g., `php:8.4-apache`)
+4. ✅ Pin base image versions (e.g., `php:8.1-apache`)
 
 ### Docker Compose
 1. ✅ Use volume mounts for development (live sync)
