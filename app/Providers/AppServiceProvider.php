@@ -25,6 +25,7 @@ class AppServiceProvider extends ServiceProvider
             URL::forceScheme('https');
         }
 
+<<<<<<< HEAD
         // Register helper function for versioned assets
         if (!function_exists('asset_versioned')) {
             /**
@@ -39,5 +40,7 @@ class AppServiceProvider extends ServiceProvider
                 return asset($path) . '?v=' . $version;
             }
         }
+=======
+>>>>>>> 357a6fa44a33de350307919b854e8f11fe0a65e1
     }
 }
