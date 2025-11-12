@@ -1,0 +1,68 @@
+version: '3.8'
+
+# Production docker-compose (no volume mounts for code)
+# Use this for production deployments where you want immutable containers
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - APP_ENV=production
+    container_name: crowdfunding-app-prod
+    ports:
+      - "${APP_PORT:-80}:80"
+    # Only mount storage and cache volumes (not code)
+    volumes:
+      - storage_data:/var/www/html/storage
+      - cache_data:/var/www/html/bootstrap/cache
+    environment:
+      - APP_ENV=production
+      - APP_DEBUG=false
+      - DB_CONNECTION=${DB_CONNECTION:-mysql}
+      - DB_HOST=${DB_HOST:-db}
+      - DB_PORT=${DB_PORT:-3306}
+      - DB_DATABASE=${DB_DATABASE:-crowdfunding}
+      - DB_USERNAME=${DB_USERNAME:-root}
+      - DB_PASSWORD=${DB_PASSWORD:-}
+    restart: unless-stopped
+    depends_on:
+      - db
+      - redis
+    networks:
+      - crowdfunding-network
+
+  db:
+    image: mysql:8.0
+    container_name: crowdfunding-db-prod
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD:-}
+      - MYSQL_DATABASE=${DB_DATABASE:-crowdfunding}
+      - MYSQL_USER=${DB_USERNAME:-root}
+      - MYSQL_PASSWORD=${DB_PASSWORD:-}
+    volumes:
+      - db_data:/var/lib/mysql
+    restart: unless-stopped
+    networks:
+      - crowdfunding-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: crowdfunding-redis-prod
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    networks:
+      - crowdfunding-network
+
+volumes:
+  db_data:
+  redis_data:
+  storage_data:
+  cache_data:
+
+networks:
+  crowdfunding-network:
+    driver: bridge
+

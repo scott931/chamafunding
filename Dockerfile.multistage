@@ -1,0 +1,96 @@
+# Multi-stage build for production optimization
+# This Dockerfile separates build and runtime stages
+
+# ============================================
+# Stage 1: Builder - Install dependencies and build assets
+# ============================================
+FROM php:8.2-apache as builder
+
+WORKDIR /var/www/html
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    libpng-dev \
+    libonig-dev \
+    libxml2-dev \
+    zip \
+    unzip \
+    libzip-dev \
+    libpq-dev \
+    nodejs \
+    npm \
+    && docker-php-ext-install pdo pdo_pgsql pdo_mysql mbstring exif pcntl bcmath gd zip \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Copy composer files first for layer caching
+COPY composer.json composer.lock ./
+
+# Install PHP dependencies
+RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
+
+# Copy application files
+COPY --chown=www-data:www-data . /var/www/html
+
+# Set permissions
+RUN chmod -R 755 /var/www/html/storage \
+    && chmod -R 755 /var/www/html/bootstrap/cache \
+    && chmod +x /var/www/html/scripts/*.sh
+
+# Build assets
+RUN chmod +x /var/www/html/scripts/build-assets.sh && /var/www/html/scripts/build-assets.sh
+
+# Cache Laravel config and routes (production optimization)
+RUN php artisan config:cache && php artisan route:cache
+
+# ============================================
+# Stage 2: Runtime - Final production image
+# ============================================
+FROM php:8.2-apache
+
+WORKDIR /var/www/html
+
+# Install only runtime dependencies (no build tools)
+RUN apt-get update && apt-get install -y \
+    curl \
+    libpng-dev \
+    libonig-dev \
+    libxml2-dev \
+    libzip-dev \
+    libpq-dev \
+    && docker-php-ext-install pdo pdo_pgsql pdo_mysql mbstring exif pcntl bcmath gd zip \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Enable Apache mod_rewrite
+RUN a2enmod rewrite
+
+# Copy built application from builder stage
+COPY --from=builder --chown=www-data:www-data /var/www/html /var/www/html
+
+# Copy Apache configuration
+COPY docker/apache-config.conf /etc/apache2/sites-available/000-default.conf
+
+# Set environment
+ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
+RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+
+# Expose port
+EXPOSE 80
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
+    CMD curl -f http://localhost:${PORT:-80}/up || exit 1
+
+# Entrypoint
+COPY scripts/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+
+# Note: Changes won't reflect without rebuild
+# Use this for production where you want immutable, optimized containers
+

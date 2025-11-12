@@ -26,7 +26,14 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Enable Apache mod_rewrite
 RUN a2enmod rewrite
 
-# Copy application files
+# Copy composer files first for better layer caching
+# This layer will only rebuild if composer.json or composer.lock changes
+COPY composer.json composer.lock ./
+
+# Install PHP dependencies (cached unless composer files change)
+RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
+
+# Copy application files (this layer gets cached separately)
 COPY . /var/www/html
 
 # Set permissions
@@ -34,9 +41,6 @@ RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html/storage \
     && chmod -R 755 /var/www/html/bootstrap/cache \
     && chmod +x /var/www/html/scripts/*.sh
-
-# Install PHP dependencies
-RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
 
 # Install Node dependencies and build assets (main app + all modules)
 RUN chmod +x /var/www/html/scripts/build-assets.sh && /var/www/html/scripts/build-assets.sh
