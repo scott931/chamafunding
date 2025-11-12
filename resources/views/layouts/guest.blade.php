@@ -13,6 +13,11 @@
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+        {{-- Additional versioned assets with cache busting --}}
+        {{-- Use asset_versioned() helper or add ?v= parameter manually --}}
+        {{-- <link href="{{ asset_versioned('css/custom.css') }}" rel="stylesheet"> --}}
+        {{-- <script src="{{ asset_versioned('js/custom.js') }}"></script> --}}
     </head>
     <body class="font-sans text-gray-900 antialiased bg-gradient-to-br from-gray-50 via-indigo-50 to-purple-50">
                 {{ $slot }}
