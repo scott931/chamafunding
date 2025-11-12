@@ -35,7 +35,7 @@ class AppServiceProvider extends ServiceProvider
              */
             function asset_versioned($path)
             {
-                $version = config('app.asset_version', '1.0.0');
+                $version = config('app.asset_version', time());
                 return asset($path) . '?v=' . $version;
             }
         }
