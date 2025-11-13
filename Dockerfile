@@ -31,10 +31,13 @@ RUN a2enmod rewrite
 COPY composer.json composer.lock ./
 
 # Install PHP dependencies (cached unless composer files change)
-RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
+RUN composer install --no-dev --no-interaction --prefer-dist --no-autoloader
 
 # Copy application files (this layer gets cached separately)
 COPY . /var/www/html
+
+# Generate optimized autoloader now that application files are present
+RUN composer dump-autoload --optimize --no-dev
 
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html \
