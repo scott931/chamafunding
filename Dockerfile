@@ -1,6 +1,9 @@
 # Use PHP 8.2 with Apache
 FROM php:8.2-apache
 
+# Verify PHP version
+RUN php -v
+
 # Set working directory
 WORKDIR /var/www/html
 
@@ -36,8 +39,18 @@ RUN composer install --no-dev --no-interaction --prefer-dist --no-autoloader
 # Copy application files (this layer gets cached separately)
 COPY . /var/www/html
 
+# Set minimal environment for package discovery (Laravel needs APP_KEY during service provider discovery)
+# Create a temporary .env if it doesn't exist to prevent errors during package:discover
+RUN if [ ! -f .env ]; then \
+        echo "APP_NAME=Laravel" > .env && \
+        echo "APP_ENV=production" >> .env && \
+        echo "APP_KEY=" >> .env && \
+        echo "APP_DEBUG=false" >> .env; \
+    fi
+
 # Generate optimized autoloader now that application files are present
-RUN composer dump-autoload --optimize --no-dev
+# Use --classmap-authoritative for better performance and to ensure all files are parsed
+RUN composer dump-autoload --optimize --no-dev --classmap-authoritative
 
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html \
