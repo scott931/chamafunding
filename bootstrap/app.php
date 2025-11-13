@@ -18,6 +18,13 @@ return Application::configure(basePath: dirname(__DIR__))
             'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
             'admin.role' => \Modules\Admin\Http\Middleware\EnsureUserHasAdminRole::class,
         ]);
+
+        // Prevent caching in local/development environment
+        if (app()->environment('local')) {
+            $middleware->web(append: [
+                \App\Http\Middleware\PreventCache::class,
+            ]);
+        }
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

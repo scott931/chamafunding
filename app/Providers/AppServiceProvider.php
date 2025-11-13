@@ -39,5 +39,7 @@ class AppServiceProvider extends ServiceProvider
                 return asset($path) . '?v=' . $version;
             }
         }
+
+        // Note: Cache prevention middleware is registered in bootstrap/app.php
     }
 }
