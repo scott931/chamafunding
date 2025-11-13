@@ -3,6 +3,7 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Support\Env;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -20,7 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         // Prevent caching in local/development environment
-        if (app()->environment('local')) {
+        if (Env::get('APP_ENV') === 'local') {
             $middleware->web(append: [
                 \App\Http\Middleware\PreventCache::class,
             ]);
