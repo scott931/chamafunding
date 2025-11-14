@@ -27,6 +27,10 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::get('/backer/dashboard', function () {
+    // Redirect admin users to admin dashboard
+    if (auth()->user()->isAdmin()) {
+        return redirect()->route('admin.index');
+    }
     return view('backer.dashboard');
 })->middleware(['auth', 'verified'])->name('backer.dashboard');
 
