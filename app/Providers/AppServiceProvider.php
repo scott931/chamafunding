@@ -24,23 +24,5 @@ class AppServiceProvider extends ServiceProvider
         if ($this->app->environment('production') && str_starts_with((string) Config::get('app.url'), 'https://')) {
             URL::forceScheme('https');
         }
-
-<<<<<<< HEAD
-        // Register helper function for versioned assets
-        if (!function_exists('asset_versioned')) {
-            /**
-             * Generate a versioned asset URL with cache busting
-             *
-             * @param string $path
-             * @return string
-             */
-            function asset_versioned($path)
-            {
-                $version = config('app.asset_version', time());
-                return asset($path) . '?v=' . $version;
-            }
-        }
-=======
->>>>>>> 357a6fa44a33de350307919b854e8f11fe0a65e1
     }
 }
