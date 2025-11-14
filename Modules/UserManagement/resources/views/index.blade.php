@@ -12,14 +12,14 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Filters -->
             <div class="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-100">
-                <form method="GET" action="{{ route('admin.users.index') }}" class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div>
+                <form method="GET" action="{{ route('admin.users.index') }}" class="flex flex-wrap items-end gap-4">
+                    <div class="flex-1 min-w-[200px]">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Search</label>
                         <input type="text" name="search" value="{{ request('search') }}"
                                placeholder="Name or email..."
                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                     </div>
-                    <div>
+                    <div class="flex-1 min-w-[180px]">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Approval Status</label>
                         <select name="approval_status" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                             <option value="">All Statuses</option>
@@ -28,7 +28,7 @@
                             <option value="declined" {{ request('approval_status') === 'declined' ? 'selected' : '' }}>Declined</option>
                         </select>
                     </div>
-                    <div>
+                    <div class="flex-1 min-w-[180px]">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Role</label>
                         <select name="role" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                             <option value="">All Roles</option>
@@ -39,11 +39,11 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="flex items-end space-x-2">
-                        <button type="submit" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors">
+                    <div class="flex items-center gap-2 flex-shrink-0">
+                        <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors whitespace-nowrap">
                             Apply Filters
                         </button>
-                        <a href="{{ route('admin.users.index') }}" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors">
+                        <a href="{{ route('admin.users.index') }}" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors whitespace-nowrap">
                             Reset
                         </a>
                     </div>
