@@ -14,7 +14,7 @@ services:
       - key: APP_ENV
         value: production
       - key: APP_KEY
-        generateValue: true
+        value: base64:t6O/l9tLVKveK2N+weL6E3W68krAAnhQ4PyzLIbq1RU=
       - key: APP_DEBUG
         value: false
       - key: APP_URL
@@ -126,7 +126,7 @@ services:
       - key: APP_ENV
         value: production
       - key: APP_KEY
-        generateValue: true
+        value: base64:t6O/l9tLVKveK2N+weL6E3W68krAAnhQ4PyzLIbq1RU=
       - key: RENDER_SERVICE_TYPE
         value: worker
       - key: APP_DEBUG
