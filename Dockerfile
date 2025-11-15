@@ -1,6 +1,9 @@
 # Use PHP 8.2 with Apache
 FROM php:8.2-apache
 
+# Verify PHP version
+RUN php -v
+
 # Set working directory
 WORKDIR /var/www/html
 
@@ -26,17 +29,41 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Enable Apache mod_rewrite
 RUN a2enmod rewrite
 
-# Copy application files
+# Configure OPCache for production (validate timestamps to allow updates)
+RUN echo "opcache.enable=1" >> /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini \
+    && echo "opcache.validate_timestamps=1" >> /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini \
+    && echo "opcache.revalidate_freq=0" >> /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini \
+    && echo "opcache.memory_consumption=128" >> /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini \
+    && echo "opcache.max_accelerated_files=10000" >> /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini
+
+# Copy composer files first for better layer caching
+# This layer will only rebuild if composer.json or composer.lock changes
+COPY composer.json composer.lock ./
+
+# Install PHP dependencies (cached unless composer files change)
+RUN composer install --no-dev --no-interaction --prefer-dist --no-autoloader
+
+# Copy application files (this layer gets cached separately)
 COPY . /var/www/html
+
+# Set minimal environment for package discovery (Laravel needs APP_KEY during service provider discovery)
+# Create a temporary .env if it doesn't exist to prevent errors during package:discover
+RUN if [ ! -f .env ]; then \
+        echo "APP_NAME=Laravel" > .env && \
+        echo "APP_ENV=production" >> .env && \
+        echo "APP_KEY=" >> .env && \
+        echo "APP_DEBUG=false" >> .env; \
+    fi
+
+# Generate optimized autoloader now that application files are present
+# Use --classmap-authoritative for better performance and to ensure all files are parsed
+RUN composer dump-autoload --optimize --no-dev --classmap-authoritative
 
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html/storage \
     && chmod -R 755 /var/www/html/bootstrap/cache \
     && chmod +x /var/www/html/scripts/*.sh
-
-# Install PHP dependencies
-RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
 
 # Install Node dependencies and build assets (main app + all modules)
 RUN chmod +x /var/www/html/scripts/build-assets.sh && /var/www/html/scripts/build-assets.sh

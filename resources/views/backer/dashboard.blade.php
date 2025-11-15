@@ -14,7 +14,7 @@
                 </div>
             </div>
         </div>
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
 
             <!-- Loading State -->
             <div x-show="loading" class="flex items-center justify-center py-20">
@@ -25,33 +25,33 @@
             </div>
 
             <!-- Main Content -->
-            <div x-show="!loading" class="space-y-6">
+            <div x-show="!loading" class="space-y-8">
 
                 <!-- Stats Cards -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div class="bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl p-6 text-white shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 transition-all duration-200 transform hover:scale-105">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm font-medium text-white/90 mb-1">Projects Backed</p>
-                                <p class="text-3xl font-bold text-white" x-text="dashboardData?.summary?.total_projects_backed ?? 0"></p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 lg:gap-8">
+                    <div class="bg-gradient-to-br from-blue-500 to-cyan-600 rounded-2xl p-8 text-white shadow-xl shadow-blue-500/30 hover:shadow-2xl hover:shadow-blue-500/40 transition-all duration-300 transform hover:scale-[1.02] border border-blue-400/20">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex-1">
+                                <p class="text-sm font-semibold text-white/90 uppercase tracking-wide mb-3">Projects Backed</p>
+                                <p class="text-4xl lg:text-5xl font-bold text-white mb-2" x-text="dashboardData?.summary?.total_projects_backed ?? 0"></p>
                             </div>
-                            <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center flex-shrink-0 ml-4">
+                                <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                                 </svg>
                             </div>
                         </div>
                     </div>
 
-                    <div class="bg-gradient-to-br from-emerald-500 to-green-600 rounded-xl p-6 text-white shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/40 transition-all duration-200 transform hover:scale-105">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm font-medium text-white/90 mb-1">Total Pledged</p>
-                                <p class="text-3xl font-bold text-white"
+                    <div class="bg-gradient-to-br from-emerald-500 to-green-600 rounded-2xl p-8 text-white shadow-xl shadow-emerald-500/30 hover:shadow-2xl hover:shadow-emerald-500/40 transition-all duration-300 transform hover:scale-[1.02] border border-emerald-400/20">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex-1">
+                                <p class="text-sm font-semibold text-white/90 uppercase tracking-wide mb-3">Total Pledged</p>
+                                <p class="text-4xl lg:text-5xl font-bold text-white mb-2"
                                    x-text="dashboardData?.summary ? formatCurrency(dashboardData.summary.total_amount_pledged, dashboardData.summary.currency) : '$0.00'"></p>
                             </div>
-                            <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center flex-shrink-0 ml-4">
+                                <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                             </div>

@@ -3,6 +3,7 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Support\Env;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -18,6 +19,13 @@ return Application::configure(basePath: dirname(__DIR__))
             'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
             'admin.role' => \Modules\Admin\Http\Middleware\EnsureUserHasAdminRole::class,
         ]);
+
+        // Prevent caching in local/development environment
+        if (Env::get('APP_ENV') === 'local') {
+            $middleware->web(append: [
+                \App\Http\Middleware\PreventCache::class,
+            ]);
+        }
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
