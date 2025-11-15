@@ -28,10 +28,17 @@ rm -rf bootstrap/cache/*.php 2>/dev/null || true
 touch bootstrap/cache/.gitignore 2>/dev/null || true
 
 # Clear opcache if available (for PHP-FPM or mod_php)
-if [ -f /usr/local/bin/php ]; then
-    echo "Attempting to clear opcache..."
-    php -r "if (function_exists('opcache_reset')) { opcache_reset(); echo 'Opcache cleared\n'; }" || true
-fi
+echo "Clearing OPCache..."
+php -r "if (function_exists('opcache_reset')) { opcache_reset(); echo 'OPCache cleared successfully\n'; } else { echo 'OPCache not available\n'; }" || true
+
+# Also invalidate opcache for all files
+php -r "if (function_exists('opcache_invalidate')) {
+    \$files = get_included_files();
+    foreach (\$files as \$file) {
+        opcache_invalidate(\$file, true);
+    }
+    echo 'OPCache invalidated for loaded files\n';
+}" || true
 
 # Create storage link if it doesn't exist (non-blocking)
 echo "Creating storage link..."

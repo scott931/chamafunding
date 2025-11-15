@@ -64,9 +64,11 @@ Route::get('/checkout/success', function () {
     ]);
 })->name('checkout.success');
 
-// Development route to clear all caches including OPCache
+// Route to clear all caches including OPCache (works in both local and production)
 Route::get('/dev/clear-cache', function () {
-    if (!app()->environment('local')) {
+    // Allow in local environment or if explicitly enabled in production
+    $allowInProduction = env('ALLOW_CACHE_CLEAR_ROUTE', false);
+    if (!app()->environment('local') && !$allowInProduction) {
         abort(404);
     }
 
@@ -86,6 +88,18 @@ Route::get('/dev/clear-cache', function () {
             $results[] = '✓ OPCache cleared';
         } else {
             $results[] = '✗ OPCache reset failed';
+        }
+
+        // Also invalidate opcache for all files
+        if (function_exists('opcache_invalidate')) {
+            $files = get_included_files();
+            $invalidated = 0;
+            foreach ($files as $file) {
+                if (opcache_invalidate($file, true)) {
+                    $invalidated++;
+                }
+            }
+            $results[] = "✓ Invalidated OPCache for $invalidated files";
         }
     } else {
         $results[] = '⚠ OPCache not available (may need web server restart)';
