@@ -28,9 +28,13 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        // Redirect admin users to admin dashboard
-        if (auth()->user()->isAdmin()) {
-            return redirect()->intended(route('admin.index', absolute: false));
+        $user = auth()->user();
+
+        // Redirect admin users to admin dashboard (force redirect, ignore intended URL)
+        if ($user->isAdmin()) {
+            // Clear any intended URL to prevent redirect to user dashboard
+            $request->session()->forget('url.intended');
+            return redirect()->route('admin.index');
         }
 
         // Redirect regular users (backers/contributors) to backer dashboard
