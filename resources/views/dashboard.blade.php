@@ -3,7 +3,7 @@
         <div class="flex items-center justify-between">
             <div>
                 <h2 class="font-bold text-2xl text-gray-900">
-                    {{ __('Welcome back, :name', ['name' => Auth::user()->name]) }}
+                    {{ __('Welcome, :name', ['name' => Auth::user()->name]) }}
                 </h2>
                 <p class="text-sm text-gray-600 mt-1">Here's an overview of your account</p>
             </div>
