@@ -30,15 +30,20 @@ class AuthenticatedSessionController extends Controller
 
         $user = auth()->user();
 
+        // Refresh user roles from database to ensure they're up to date
+        $user->load('roles');
+        $user->refresh();
+
+        // Clear any intended URL first to prevent conflicts
+        $request->session()->forget('url.intended');
+
         // Redirect admin users to admin dashboard (force redirect, ignore intended URL)
         if ($user->isAdmin()) {
-            // Clear any intended URL to prevent redirect to user dashboard
-            $request->session()->forget('url.intended');
             return redirect()->route('admin.index');
         }
 
         // Redirect regular users (backers/contributors) to backer dashboard
-        return redirect()->intended(route('backer.dashboard', absolute: false));
+        return redirect()->route('backer.dashboard', absolute: false);
     }
 
     /**

@@ -822,12 +822,12 @@
     <div class="min-h-screen pb-20 lg:pb-0" x-data="adminDashboard" x-init="init()">
         <div class="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-6 sm:py-8 lg:py-10 space-y-6 sm:space-y-8">
             <!-- Top Row: 4 Key KPI Cards -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-5 lg:gap-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 sm:gap-7 lg:gap-8">
                 <!-- Total Platform Raised -->
-                <div class="group relative bg-emerald-600 rounded-2xl p-5 sm:p-6 lg:p-7 shadow-xl shadow-emerald-500/20 hover:shadow-2xl hover:shadow-emerald-500/30 transition-all duration-300 transform hover:scale-[1.02] hover:-translate-y-1 border border-emerald-500 overflow-hidden">
+                <div class="group relative bg-emerald-600 rounded-2xl p-7 sm:p-8 lg:p-9 shadow-xl shadow-emerald-500/20 hover:shadow-2xl hover:shadow-emerald-500/30 transition-all duration-300 transform hover:scale-[1.02] hover:-translate-y-1 border border-emerald-500 overflow-hidden min-h-[180px] sm:min-h-[200px] flex flex-col justify-between">
                     <div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    <div class="relative z-10">
-                        <div class="flex items-center justify-between mb-3">
+                    <div class="relative z-10 flex flex-col h-full">
+                        <div class="flex items-center justify-between mb-4 sm:mb-5">
                             <p class="text-xs sm:text-sm font-semibold text-white/95 uppercase tracking-wide">Total Platform Raised</p>
                             <button class="text-white/60 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-white/10">
                                 <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -835,9 +835,9 @@
                                 </svg>
                             </button>
                         </div>
-                        <p class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-3 leading-tight">${{ number_format($stats['total_raised'] / 1000, 1) }}K</p>
-                        <div class="flex items-center text-sm">
-                            <span class="text-white/95 font-semibold flex items-center bg-white/20 px-2.5 py-1 rounded-lg">
+                        <p class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 sm:mb-5 leading-tight">${{ number_format($stats['total_raised'] / 1000, 1) }}K</p>
+                        <div class="flex items-center text-sm mt-auto">
+                            <span class="text-white/95 font-semibold flex items-center bg-white/20 px-2.5 py-1.5 rounded-lg">
                                 <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
                                 </svg>
@@ -849,10 +849,10 @@
                 </div>
 
                 <!-- Active Campaigns -->
-                <a href="{{ route('admin.campaigns.index', ['status' => 'active']) }}" class="group relative bg-indigo-600 rounded-2xl p-5 sm:p-6 lg:p-7 shadow-xl shadow-blue-500/20 hover:shadow-2xl hover:shadow-blue-500/30 transition-all duration-300 transform hover:scale-[1.02] hover:-translate-y-1 border border-indigo-500 overflow-hidden">
+                <a href="{{ route('admin.campaigns.index', ['status' => 'active']) }}" class="group relative bg-indigo-600 rounded-2xl p-7 sm:p-8 lg:p-9 shadow-xl shadow-blue-500/20 hover:shadow-2xl hover:shadow-blue-500/30 transition-all duration-300 transform hover:scale-[1.02] hover:-translate-y-1 border border-indigo-500 overflow-hidden min-h-[180px] sm:min-h-[200px] flex flex-col justify-between">
                     <div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    <div class="relative z-10">
-                        <div class="flex items-center justify-between mb-3">
+                    <div class="relative z-10 flex flex-col h-full">
+                        <div class="flex items-center justify-between mb-4 sm:mb-5">
                             <p class="text-xs sm:text-sm font-semibold text-white/95 uppercase tracking-wide">Active Campaigns</p>
                             <button class="text-white/60 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-white/10">
                                 <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -860,9 +860,9 @@
                                 </svg>
                             </button>
                         </div>
-                        <p class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-3 leading-tight">{{ $stats['active_campaigns'] }}</p>
-                        <div class="flex items-center text-sm">
-                            <span class="text-white/95 font-semibold flex items-center bg-white/20 px-2.5 py-1 rounded-lg">
+                        <p class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 sm:mb-5 leading-tight">{{ $stats['active_campaigns'] }}</p>
+                        <div class="flex items-center text-sm mt-auto">
+                            <span class="text-white/95 font-semibold flex items-center bg-white/20 px-2.5 py-1.5 rounded-lg">
                                 <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
                                 </svg>
@@ -874,10 +874,10 @@
                 </a>
 
                 <!-- Total Backers -->
-                <div class="group relative bg-purple-600 rounded-2xl p-5 sm:p-6 lg:p-7 shadow-xl shadow-purple-500/20 hover:shadow-2xl hover:shadow-purple-500/30 transition-all duration-300 transform hover:scale-[1.02] hover:-translate-y-1 border border-purple-500 overflow-hidden">
+                <div class="group relative bg-purple-600 rounded-2xl p-7 sm:p-8 lg:p-9 shadow-xl shadow-purple-500/20 hover:shadow-2xl hover:shadow-purple-500/30 transition-all duration-300 transform hover:scale-[1.02] hover:-translate-y-1 border border-purple-500 overflow-hidden min-h-[180px] sm:min-h-[200px] flex flex-col justify-between">
                     <div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    <div class="relative z-10">
-                        <div class="flex items-center justify-between mb-3">
+                    <div class="relative z-10 flex flex-col h-full">
+                        <div class="flex items-center justify-between mb-4 sm:mb-5">
                             <p class="text-xs sm:text-sm font-semibold text-white/95 uppercase tracking-wide">Total Backers</p>
                             <button class="text-white/60 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-white/10">
                                 <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -885,9 +885,9 @@
                                 </svg>
                             </button>
                         </div>
-                        <p class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-3 leading-tight">{{ number_format($stats['total_backers_alltime']) }}</p>
-                        <div class="flex items-center text-sm">
-                            <span class="text-white/95 font-semibold flex items-center bg-white/20 px-2.5 py-1 rounded-lg">
+                        <p class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 sm:mb-5 leading-tight">{{ number_format($stats['total_backers_alltime']) }}</p>
+                        <div class="flex items-center text-sm mt-auto">
+                            <span class="text-white/95 font-semibold flex items-center bg-white/20 px-2.5 py-1.5 rounded-lg">
                                 <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
                                 </svg>
@@ -898,10 +898,10 @@
                     </div>
                 </div>
                 <!-- This Month Contributions -->
-                <div class="group relative bg-teal-600 rounded-2xl p-5 sm:p-6 lg:p-7 shadow-xl shadow-teal-500/20 hover:shadow-2xl hover:shadow-teal-500/30 transition-all duration-300 transform hover:scale-[1.02] hover:-translate-y-1 border border-teal-500 overflow-hidden">
+                <div class="group relative bg-teal-600 rounded-2xl p-7 sm:p-8 lg:p-9 shadow-xl shadow-teal-500/20 hover:shadow-2xl hover:shadow-teal-500/30 transition-all duration-300 transform hover:scale-[1.02] hover:-translate-y-1 border border-teal-500 overflow-hidden min-h-[180px] sm:min-h-[200px] flex flex-col justify-between">
                     <div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    <div class="relative z-10">
-                        <div class="flex items-center justify-between mb-3">
+                    <div class="relative z-10 flex flex-col h-full">
+                        <div class="flex items-center justify-between mb-4 sm:mb-5">
                             <p class="text-xs sm:text-sm font-semibold text-white/95 uppercase tracking-wide">This Month Contributions</p>
                             <button class="text-white/60 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-white/10">
                                 <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -909,9 +909,9 @@
                                 </svg>
                             </button>
                         </div>
-                        <p class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-3 leading-tight">${{ number_format($stats['contributions_this_month'], 0) }}</p>
-                        <div class="flex items-center text-sm">
-                            <span class="text-white/95 font-semibold flex items-center bg-white/20 px-2.5 py-1 rounded-lg">
+                        <p class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 sm:mb-5 leading-tight">${{ number_format($stats['contributions_this_month'], 0) }}</p>
+                        <div class="flex items-center text-sm mt-auto">
+                            <span class="text-white/95 font-semibold flex items-center bg-white/20 px-2.5 py-1.5 rounded-lg">
                                 <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
                                 </svg>
