@@ -28,7 +28,8 @@ Route::get('/dashboard', function () {
 
 Route::get('/backer/dashboard', function () {
     // Redirect admin users to admin dashboard
-    if (auth()->user()->isAdmin()) {
+    $user = auth()->user();
+    if ($user && $user->isAdmin()) {
         return redirect()->route('admin.index');
     }
     return view('backer.dashboard');
