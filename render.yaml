@@ -22,7 +22,7 @@ services:
       - key: LOG_CHANNEL
         value: stderr
       - key: LOG_LEVEL
-        value: error
+        value: debug
       - key: DB_CONNECTION
         value: pgsql
       - key: DB_HOST
@@ -134,7 +134,7 @@ services:
       - key: LOG_CHANNEL
         value: stderr
       - key: LOG_LEVEL
-        value: error
+        value: debug
       - key: DB_CONNECTION
         value: pgsql
       - key: DB_HOST

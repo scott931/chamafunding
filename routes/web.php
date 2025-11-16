@@ -6,31 +6,61 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\TestMail;
 
 Route::get('/', function () {
+    // Log that we're entering the root route
+    \Log::debug('Root route accessed');
+    
     try {
         // Check if user is authenticated (handle database/session errors gracefully)
         $isAuthenticated = false;
         try {
+            \Log::debug('Checking authentication...');
             $isAuthenticated = auth()->check();
+            \Log::debug('Auth check result: ' . ($isAuthenticated ? 'authenticated' : 'not authenticated'));
         } catch (\Exception $authException) {
             // Log authentication check errors but don't fail
-            \Log::warning('Auth check failed in root route: ' . $authException->getMessage());
+            \Log::error('Auth check failed in root route: ' . $authException->getMessage(), [
+                'exception' => $authException,
+                'file' => $authException->getFile(),
+                'line' => $authException->getLine(),
+                'trace' => $authException->getTraceAsString(),
+            ]);
+            // Also output to stderr directly
+            error_log('ROOT ROUTE AUTH ERROR: ' . $authException->getMessage());
             // Continue to login page
         }
         
         if ($isAuthenticated) {
             try {
+                \Log::debug('Getting authenticated user...');
                 $user = auth()->user();
                 if ($user) {
+                    \Log::debug('User found: ' . $user->id);
                     // Redirect admin users to admin dashboard
-                    if ($user->isAdmin()) {
-                        return redirect()->route('admin.index');
+                    try {
+                        if ($user->isAdmin()) {
+                            \Log::debug('User is admin, redirecting to admin.index');
+                            return redirect()->route('admin.index');
+                        }
+                        // Redirect regular users to backer dashboard
+                        \Log::debug('User is not admin, redirecting to backer.dashboard');
+                        return redirect()->route('backer.dashboard');
+                    } catch (\Exception $redirectException) {
+                        \Log::error('Redirect failed: ' . $redirectException->getMessage(), [
+                            'exception' => $redirectException,
+                        ]);
+                        error_log('ROOT ROUTE REDIRECT ERROR: ' . $redirectException->getMessage());
+                        // Fall through to login
                     }
-                    // Redirect regular users to backer dashboard
-                    return redirect()->route('backer.dashboard');
                 }
             } catch (\Exception $userException) {
                 // Log user-related errors but don't fail
-                \Log::warning('User check failed in root route: ' . $userException->getMessage());
+                \Log::error('User check failed in root route: ' . $userException->getMessage(), [
+                    'exception' => $userException,
+                    'file' => $userException->getFile(),
+                    'line' => $userException->getLine(),
+                    'trace' => $userException->getTraceAsString(),
+                ]);
+                error_log('ROOT ROUTE USER ERROR: ' . $userException->getMessage());
                 // Fall through to login
             }
         }
@@ -40,16 +70,24 @@ Route::get('/', function () {
             'exception' => $e,
             'file' => $e->getFile(),
             'line' => $e->getLine(),
+            'trace' => $e->getTraceAsString(),
         ]);
+        error_log('ROOT ROUTE UNEXPECTED ERROR: ' . $e->getMessage());
         // Fall through to redirect to login
     }
     
     // Always redirect to login if not authenticated or on error
     try {
+        \Log::debug('Redirecting to login page');
         return redirect()->route('login');
     } catch (\Exception $routeException) {
         // If even the login route fails, return a simple response
-        \Log::error('Login route failed: ' . $routeException->getMessage());
+        \Log::error('Login route failed: ' . $routeException->getMessage(), [
+            'exception' => $routeException,
+            'file' => $routeException->getFile(),
+            'line' => $routeException->getLine(),
+        ]);
+        error_log('ROOT ROUTE LOGIN ROUTE ERROR: ' . $routeException->getMessage());
         return response('Service temporarily unavailable. Please try again later.', 503);
     }
 });
