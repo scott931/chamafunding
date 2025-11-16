@@ -48,10 +48,10 @@ COPY . /var/www/html
 
 # Set minimal environment for package discovery (Laravel needs APP_KEY during service provider discovery)
 # Create a temporary .env if it doesn't exist to prevent errors during package:discover
+# NOTE: APP_KEY is intentionally left empty here - it will be provided by Render via environment variables
 RUN if [ ! -f .env ]; then \
         echo "APP_NAME=Laravel" > .env && \
         echo "APP_ENV=production" >> .env && \
-        echo "APP_KEY=" >> .env && \
         echo "APP_DEBUG=false" >> .env; \
     fi
 

@@ -5,6 +5,15 @@
 
 echo "Starting ChamaFunding application..."
 
+# Verify critical environment variables are set
+echo "Verifying environment variables..."
+if [ -z "$APP_KEY" ]; then
+    echo "ERROR: APP_KEY environment variable is not set!"
+    echo "This will cause encryption errors. Please set APP_KEY in Render environment variables."
+    exit 1
+fi
+echo "✓ APP_KEY is set"
+
 # Get the port from environment variable (Render sets this automatically)
 PORT=${PORT:-10000}
 echo "Using port: $PORT"
@@ -29,6 +38,18 @@ php artisan cache:clear || true
 php artisan config:clear || true
 php artisan route:clear || true
 php artisan view:clear || true
+
+# Verify APP_KEY is available to PHP (critical for encryption)
+echo "Verifying APP_KEY is available to PHP..."
+php -r "if (empty(getenv('APP_KEY'))) { echo 'ERROR: APP_KEY not available to PHP!\n'; exit(1); } else { echo '✓ APP_KEY is available to PHP\n'; }"
+
+# Remove .env file if it exists to ensure environment variables from Render are used
+# Laravel's env() function reads .env first, which can override actual environment variables
+if [ -f .env ]; then
+    echo "Removing .env file to ensure Render environment variables are used..."
+    rm -f .env
+    echo "✓ .env file removed"
+fi
 
 
 # Manually remove compiled views to ensure they're regenerated
