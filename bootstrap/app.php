@@ -30,11 +30,31 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions): void {
         // Log all exceptions to help with debugging
         $exceptions->report(function (\Throwable $e) {
-            \Log::error('Unhandled exception: ' . $e->getMessage(), [
+            $message = 'Unhandled exception: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine();
+            
+            // Log via Laravel
+            \Log::error($message, [
                 'exception' => $e,
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
                 'trace' => $e->getTraceAsString(),
             ]);
+            
+            // Also output directly to stderr to ensure we see it
+            error_log($message);
+            error_log('Stack trace: ' . $e->getTraceAsString());
+        });
+        
+        // Render exceptions in a user-friendly way
+        $exceptions->render(function (\Throwable $e, $request) {
+            // For the root route, always redirect to login on error
+            if ($request->is('/')) {
+                error_log('Exception on root route: ' . $e->getMessage());
+                try {
+                    return redirect()->route('login');
+                } catch (\Exception $redirectException) {
+                    return response('Service temporarily unavailable. Please try again later.', 503);
+                }
+            }
         });
     })->create();

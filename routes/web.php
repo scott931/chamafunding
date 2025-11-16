@@ -6,6 +6,9 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\TestMail;
 
 Route::get('/', function () {
+    // Output directly to stderr first to ensure we see it
+    error_log('=== ROOT ROUTE ACCESSED ===');
+    
     // Log that we're entering the root route
     \Log::debug('Root route accessed');
     
