@@ -15,6 +15,13 @@ mkdir -p storage/framework/cache/data storage/framework/sessions storage/framewo
 chown -R www-data:www-data storage bootstrap/cache
 chmod -R 775 storage bootstrap/cache
 
+# Verify session directory is writable
+if [ ! -w storage/framework/sessions ]; then
+    echo "WARNING: Session directory is not writable, attempting to fix..."
+    chmod 775 storage/framework/sessions
+    chown www-data:www-data storage/framework/sessions
+fi
+
 # Clear all caches to ensure latest changes are reflected
 echo "Clearing all caches..."
 php artisan optimize:clear || true

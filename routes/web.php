@@ -7,22 +7,51 @@ use App\Mail\TestMail;
 
 Route::get('/', function () {
     try {
-        if (auth()->check()) {
-            // Redirect admin users to admin dashboard
-            if (auth()->user()->isAdmin()) {
-                return redirect()->route('admin.index');
-            }
-            // Redirect regular users to backer dashboard
-            return redirect()->route('backer.dashboard');
+        // Check if user is authenticated (handle database/session errors gracefully)
+        $isAuthenticated = false;
+        try {
+            $isAuthenticated = auth()->check();
+        } catch (\Exception $authException) {
+            // Log authentication check errors but don't fail
+            \Log::warning('Auth check failed in root route: ' . $authException->getMessage());
+            // Continue to login page
         }
-    } catch (\Exception $e) {
-        // Log the error but don't expose it to users
-        \Log::error('Error in root route: ' . $e->getMessage(), [
+        
+        if ($isAuthenticated) {
+            try {
+                $user = auth()->user();
+                if ($user) {
+                    // Redirect admin users to admin dashboard
+                    if ($user->isAdmin()) {
+                        return redirect()->route('admin.index');
+                    }
+                    // Redirect regular users to backer dashboard
+                    return redirect()->route('backer.dashboard');
+                }
+            } catch (\Exception $userException) {
+                // Log user-related errors but don't fail
+                \Log::warning('User check failed in root route: ' . $userException->getMessage());
+                // Fall through to login
+            }
+        }
+    } catch (\Throwable $e) {
+        // Catch any other unexpected errors
+        \Log::error('Unexpected error in root route: ' . $e->getMessage(), [
             'exception' => $e,
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
         ]);
         // Fall through to redirect to login
     }
-    return redirect()->route('login');
+    
+    // Always redirect to login if not authenticated or on error
+    try {
+        return redirect()->route('login');
+    } catch (\Exception $routeException) {
+        // If even the login route fails, return a simple response
+        \Log::error('Login route failed: ' . $routeException->getMessage());
+        return response('Service temporarily unavailable. Please try again later.', 503);
+    }
 });
 
 Route::get('/dashboard', function () {
