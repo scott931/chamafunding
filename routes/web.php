@@ -6,13 +6,21 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\TestMail;
 
 Route::get('/', function () {
-    if (auth()->check()) {
-        // Redirect admin users to admin dashboard
-        if (auth()->user()->isAdmin()) {
-            return redirect()->route('admin.index');
+    try {
+        if (auth()->check()) {
+            // Redirect admin users to admin dashboard
+            if (auth()->user()->isAdmin()) {
+                return redirect()->route('admin.index');
+            }
+            // Redirect regular users to backer dashboard
+            return redirect()->route('backer.dashboard');
         }
-        // Redirect regular users to backer dashboard
-        return redirect()->route('backer.dashboard');
+    } catch (\Exception $e) {
+        // Log the error but don't expose it to users
+        \Log::error('Error in root route: ' . $e->getMessage(), [
+            'exception' => $e,
+        ]);
+        // Fall through to redirect to login
     }
     return redirect()->route('login');
 });

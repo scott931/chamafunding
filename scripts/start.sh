@@ -54,6 +54,72 @@ php -r "if (function_exists('opcache_invalidate')) {
 # php artisan view:cache || true
 # >>>>>>> main
 
+# Wait for database to be ready and run migrations automatically
+# This runs on every service start, including after deployment
+echo "=========================================="
+echo "Running automatic database migrations..."
+echo "=========================================="
+max_attempts=30
+attempt=0
+db_connected=false
+
+# Test database connection using a simple PHP script
+while [ $attempt -lt $max_attempts ]; do
+    attempt=$((attempt + 1))
+    
+    # Try to connect using a simple PHP one-liner
+    if php -r "
+    try {
+        \$host = getenv('DB_HOST');
+        \$port = getenv('DB_PORT') ?: '5432';
+        \$database = getenv('DB_DATABASE');
+        \$username = getenv('DB_USERNAME');
+        \$password = getenv('DB_PASSWORD');
+        
+        if (empty(\$host) || empty(\$database) || empty(\$username)) {
+            throw new Exception('Database environment variables not set');
+        }
+        
+        \$dsn = \"pgsql:host=\$host;port=\$port;dbname=\$database\";
+        \$pdo = new PDO(\$dsn, \$username, \$password, [PDO::ATTR_TIMEOUT => 5]);
+        \$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        \$pdo->query('SELECT 1');
+        exit(0);
+    } catch (Exception \$e) {
+        exit(1);
+    }
+    " 2>/dev/null; then
+        echo "✓ Database connection successful!"
+        db_connected=true
+        break
+    else
+        echo "Database connection attempt $attempt/$max_attempts..."
+        sleep 2
+    fi
+done
+
+if [ "$db_connected" = true ]; then
+    echo ""
+    echo "Running database migrations (this happens automatically after each deployment)..."
+    php artisan migrate --force
+    migration_exit_code=$?
+    if [ $migration_exit_code -eq 0 ]; then
+        echo "✓ Migrations completed successfully!"
+    else
+        echo "⚠ WARNING: Migrations exited with code $migration_exit_code"
+        echo "This might be normal if migrations were already up to date."
+    fi
+    echo ""
+else
+    echo ""
+    echo "⚠ WARNING: Could not connect to database after $max_attempts attempts."
+    echo "This might be normal if the database is still provisioning."
+    echo "The application will continue, but database features may not work until the database is ready."
+    echo "Migrations will be retried on the next service restart."
+    echo ""
+fi
+echo "=========================================="
+
 # Create storage link if it doesn't exist (non-blocking)
 echo "Creating storage link..."
 php artisan storage:link || true
