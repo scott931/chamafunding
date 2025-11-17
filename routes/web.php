@@ -159,6 +159,24 @@ Route::get('/dev/clear-cache', function () {
     } catch (\Exception $e) {
         $results[] = '✗ Laravel cache clear failed: ' . $e->getMessage();
     }
+    
+    // Aggressively clear compiled views including modules
+    try {
+        $viewPath = storage_path('framework/views');
+        if (is_dir($viewPath)) {
+            $files = glob($viewPath . '/*.php');
+            $deleted = 0;
+            foreach ($files as $file) {
+                if (is_file($file)) {
+                    unlink($file);
+                    $deleted++;
+                }
+            }
+            $results[] = "✓ Deleted $deleted compiled view files";
+        }
+    } catch (\Exception $e) {
+        $results[] = '⚠ View file deletion: ' . $e->getMessage();
+    }
 
     // Clear OPCache
     if (function_exists('opcache_reset')) {

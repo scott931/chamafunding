@@ -19,6 +19,8 @@ services:
         value: false
       - key: APP_URL
         value: https://chamafunding-web.onrender.com
+      - key: ALLOW_CACHE_CLEAR_ROUTE
+        value: "true"
       - key: LOG_CHANNEL
         value: stderr
       - key: LOG_LEVEL
