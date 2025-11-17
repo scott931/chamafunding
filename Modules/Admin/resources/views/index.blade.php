@@ -830,6 +830,7 @@
         })();
     </script>
 
+    <!-- Version: {{ time() }} - Forces cache refresh -->
     <div class="min-h-screen pb-20 lg:pb-0" x-data="adminDashboard" x-init="init()">
         <div class="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-6 sm:py-8 lg:py-10 space-y-6 sm:space-y-8">
             <!-- Top Row: 4 Key KPI Cards -->

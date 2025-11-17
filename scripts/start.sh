@@ -52,9 +52,13 @@ if [ -f .env ]; then
 fi
 
 
-# Manually remove compiled views to ensure they're regenerated
-echo "Removing compiled views..."
+# Aggressively remove ALL compiled views including module views
+echo "Removing ALL compiled views (including modules)..."
 rm -rf storage/framework/views/*.php 2>/dev/null || true
+# Also clear any module-specific compiled views
+find storage/framework/views -name "*.php" -type f -delete 2>/dev/null || true
+# Clear view cache directory completely
+rm -rf storage/framework/views/* 2>/dev/null || true
 
 # Clear bootstrap cache
 echo "Clearing bootstrap cache..."
@@ -72,13 +76,14 @@ if (function_exists('opcache_reset')) {
     echo '⚠ OPCache not available\n';
 }
 
-// Invalidate all cached files in common directories
+// Invalidate all cached files in common directories including Modules
 if (function_exists('opcache_invalidate')) {
     \$dirs = [
         '/var/www/html/app',
         '/var/www/html/config',
         '/var/www/html/routes',
         '/var/www/html/resources/views',
+        '/var/www/html/Modules/Admin/resources/views',
         '/var/www/html/Modules'
     ];
     
