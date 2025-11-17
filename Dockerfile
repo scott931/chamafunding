@@ -41,6 +41,13 @@ RUN echo "opcache.enable=1" >> /usr/local/etc/php/conf.d/docker-php-ext-opcache.
     && echo "opcache.fast_shutdown=1" >> /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini \
     && echo "opcache.enable_cli=0" >> /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini
 
+# Force rebuild by adding a build timestamp
+# This ensures Docker doesn't use cached layers when we need fresh builds
+ARG BUILD_DATE=unknown
+ARG BUILD_VERSION=unknown
+LABEL build.date="${BUILD_DATE}" \
+      build.version="${BUILD_VERSION}"
+
 # Copy composer files first for better layer caching
 # This layer will only rebuild if composer.json or composer.lock changes
 COPY composer.json composer.lock ./

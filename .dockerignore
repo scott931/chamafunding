@@ -7,11 +7,6 @@
 *.md
 !README.md
 
-# Environment files
-.env
-.env.*
-!.env.example
-
 # IDE
 .idea
 .vscode
@@ -23,32 +18,53 @@
 .DS_Store
 Thumbs.db
 
-# Dependencies
-node_modules
-vendor
-
-# Build artifacts
-public/build
-public/hot
-public/storage
-storage/*.key
-storage/logs/*
-!storage/logs/.gitkeep
-storage/framework/cache/*
-!storage/framework/cache/.gitkeep
-storage/framework/sessions/*
-!storage/framework/sessions/.gitkeep
-storage/framework/views/*
-!storage/framework/views/.gitkeep
-
-# Testing
+# Laravel
+.env
+.env.backup
+.env.production
 .phpunit.result.cache
-coverage
-tests
-
-# Misc
-*.log
-*.cache
+Homestead.json
+Homestead.yaml
+auth.json
 npm-debug.log
 yarn-error.log
 
+# Storage (will be created in container)
+storage/*.key
+storage/logs/*
+!storage/logs/.gitignore
+storage/framework/cache/*
+!storage/framework/cache/.gitignore
+storage/framework/sessions/*
+!storage/framework/sessions/.gitignore
+storage/framework/views/*
+!storage/framework/views/.gitignore
+
+# Testing
+.phpunit.cache
+coverage
+
+# Node
+node_modules
+npm-debug.log
+
+# Build artifacts
+public/hot
+public/storage
+public/build
+public/mix-manifest.json
+
+# Docker
+docker-compose.yml
+docker-compose.prod.yml
+Dockerfile.multistage
+
+# Scripts (keep only what's needed)
+scripts/*.ps1
+
+# Kubernetes
+k8s/
+
+# Cache fix docs (not needed in container)
+*_CACHE_FIX.md
+clear-cache.ps1
