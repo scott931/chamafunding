@@ -824,124 +824,136 @@
             <!-- Top Row: 4 Key KPI Cards -->
             <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
                 <!-- Total Platform Raised -->
-                <div class="group relative bg-emerald-600 rounded-2xl p-5 sm:p-6 lg:p-7 shadow-xl shadow-emerald-500/30 hover:shadow-2xl hover:shadow-emerald-500/40 transition-all duration-300 transform hover:scale-[1.02] hover:-translate-y-1 border border-emerald-400/30 overflow-hidden min-w-0">
-                    <!-- Decorative background pattern -->
-                    <div class="absolute inset-0 opacity-10">
-                        <div class="absolute top-0 right-0 w-32 h-32 bg-white rounded-full -mr-16 -mt-16"></div>
-                        <div class="absolute bottom-0 left-0 w-24 h-24 bg-white rounded-full -ml-12 -mb-12"></div>
+                <div class="group relative bg-emerald-600 rounded-3xl p-6 sm:p-7 lg:p-8 shadow-2xl shadow-emerald-500/40 hover:shadow-emerald-500/50 transition-all duration-500 transform hover:scale-[1.03] hover:-translate-y-2 border-2 border-emerald-400/50 overflow-hidden min-w-0">
+                    <!-- Animated background pattern -->
+                    <div class="absolute inset-0 opacity-20">
+                        <div class="absolute top-0 right-0 w-40 h-40 bg-white rounded-full -mr-20 -mt-20 animate-pulse"></div>
+                        <div class="absolute bottom-0 left-0 w-32 h-32 bg-white rounded-full -ml-16 -mb-16 animate-pulse delay-300"></div>
                     </div>
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent"></div>
+                    <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/50 to-transparent"></div>
                     <div class="relative z-10">
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="flex items-center gap-2">
-                                <div class="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
-                                    <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        <div class="flex items-start justify-between mb-5">
+                            <div class="flex items-center gap-3">
+                                <div class="p-3 bg-white/30 rounded-2xl backdrop-blur-md shadow-lg ring-2 ring-white/20">
+                                    <svg class="w-6 h-6 sm:w-7 sm:h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
                                 </div>
-                                <p class="text-xs sm:text-sm font-semibold text-white/95 uppercase tracking-wider">Total Raised</p>
+                                <div>
+                                    <p class="text-xs sm:text-sm font-bold text-white/90 uppercase tracking-widest">Total Raised</p>
+                                    <p class="text-[10px] text-white/70 mt-0.5">All Time</p>
+                                </div>
                             </div>
                         </div>
-                        <p class="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-extrabold text-white mb-4 leading-tight break-words drop-shadow-lg">${{ number_format($stats['total_raised'] / 1000, 1) }}K</p>
-                        <div class="flex items-center gap-2 flex-wrap">
-                            <span class="text-white font-semibold flex items-center bg-white/25 backdrop-blur-sm px-3 py-1.5 rounded-lg text-xs sm:text-sm shadow-sm">
-                                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                        <p class="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-black text-white mb-5 leading-none break-words drop-shadow-2xl">${{ number_format($stats['total_raised'] / 1000, 1) }}K</p>
+                        <div class="flex items-center gap-3 flex-wrap">
+                            <span class="text-white font-bold flex items-center bg-white/30 backdrop-blur-md px-4 py-2 rounded-xl text-sm shadow-lg ring-2 ring-white/20">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 10l7-7m0 0l7 7m-7-7v18" />
                                 </svg>
                                 +2.45%
                             </span>
-                            <span class="text-white/90 text-xs font-medium">vs last month</span>
+                            <span class="text-white/80 text-sm font-semibold">vs last month</span>
                         </div>
                     </div>
                 </div>
 
                 <!-- Active Campaigns -->
-                <a href="{{ route('admin.campaigns.index', ['status' => 'active']) }}" class="group relative bg-indigo-600 rounded-2xl p-5 sm:p-6 lg:p-7 shadow-xl shadow-indigo-500/30 hover:shadow-2xl hover:shadow-indigo-500/40 transition-all duration-300 transform hover:scale-[1.02] hover:-translate-y-1 border border-indigo-400/30 overflow-hidden min-w-0">
-                    <!-- Decorative background pattern -->
-                    <div class="absolute inset-0 opacity-10">
-                        <div class="absolute top-0 right-0 w-32 h-32 bg-white rounded-full -mr-16 -mt-16"></div>
-                        <div class="absolute bottom-0 left-0 w-24 h-24 bg-white rounded-full -ml-12 -mb-12"></div>
+                <a href="{{ route('admin.campaigns.index', ['status' => 'active']) }}" class="group relative bg-indigo-600 rounded-3xl p-6 sm:p-7 lg:p-8 shadow-2xl shadow-indigo-500/40 hover:shadow-indigo-500/50 transition-all duration-500 transform hover:scale-[1.03] hover:-translate-y-2 border-2 border-indigo-400/50 overflow-hidden min-w-0">
+                    <!-- Animated background pattern -->
+                    <div class="absolute inset-0 opacity-20">
+                        <div class="absolute top-0 right-0 w-40 h-40 bg-white rounded-full -mr-20 -mt-20 animate-pulse"></div>
+                        <div class="absolute bottom-0 left-0 w-32 h-32 bg-white rounded-full -ml-16 -mb-16 animate-pulse delay-300"></div>
                     </div>
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent"></div>
+                    <div class="absolute inset-0 bg-gradient-to-br from-indigo-500/50 to-transparent"></div>
                     <div class="relative z-10">
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="flex items-center gap-2">
-                                <div class="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
-                                    <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        <div class="flex items-start justify-between mb-5">
+                            <div class="flex items-center gap-3">
+                                <div class="p-3 bg-white/30 rounded-2xl backdrop-blur-md shadow-lg ring-2 ring-white/20">
+                                    <svg class="w-6 h-6 sm:w-7 sm:h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z" />
                                     </svg>
                                 </div>
-                                <p class="text-xs sm:text-sm font-semibold text-white/95 uppercase tracking-wider">Active Campaigns</p>
+                                <div>
+                                    <p class="text-xs sm:text-sm font-bold text-white/90 uppercase tracking-widest">Active</p>
+                                    <p class="text-[10px] text-white/70 mt-0.5">Campaigns</p>
+                                </div>
                             </div>
                         </div>
-                        <p class="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-extrabold text-white mb-4 leading-tight break-words drop-shadow-lg">{{ $stats['active_campaigns'] }}</p>
-                        <div class="flex items-center gap-2 flex-wrap">
-                            <span class="text-white font-semibold flex items-center bg-white/25 backdrop-blur-sm px-3 py-1.5 rounded-lg text-xs sm:text-sm shadow-sm">
-                                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                        <p class="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-black text-white mb-5 leading-none break-words drop-shadow-2xl">{{ $stats['active_campaigns'] }}</p>
+                        <div class="flex items-center gap-3 flex-wrap">
+                            <span class="text-white font-bold flex items-center bg-white/30 backdrop-blur-md px-4 py-2 rounded-xl text-sm shadow-lg ring-2 ring-white/20">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 10l7-7m0 0l7 7m-7-7v18" />
                                 </svg>
                                 +1.20%
                             </span>
-                            <span class="text-white/90 text-xs font-medium">Live right now</span>
+                            <span class="text-white/80 text-sm font-semibold">Live right now</span>
                         </div>
                     </div>
                 </a>
 
                 <!-- Total Backers -->
-                <div class="group relative bg-purple-600 rounded-2xl p-5 sm:p-6 lg:p-7 shadow-xl shadow-purple-500/30 hover:shadow-2xl hover:shadow-purple-500/40 transition-all duration-300 transform hover:scale-[1.02] hover:-translate-y-1 border border-purple-400/30 overflow-hidden min-w-0">
-                    <!-- Decorative background pattern -->
-                    <div class="absolute inset-0 opacity-10">
-                        <div class="absolute top-0 right-0 w-32 h-32 bg-white rounded-full -mr-16 -mt-16"></div>
-                        <div class="absolute bottom-0 left-0 w-24 h-24 bg-white rounded-full -ml-12 -mb-12"></div>
+                <div class="group relative bg-purple-600 rounded-3xl p-6 sm:p-7 lg:p-8 shadow-2xl shadow-purple-500/40 hover:shadow-purple-500/50 transition-all duration-500 transform hover:scale-[1.03] hover:-translate-y-2 border-2 border-purple-400/50 overflow-hidden min-w-0">
+                    <!-- Animated background pattern -->
+                    <div class="absolute inset-0 opacity-20">
+                        <div class="absolute top-0 right-0 w-40 h-40 bg-white rounded-full -mr-20 -mt-20 animate-pulse"></div>
+                        <div class="absolute bottom-0 left-0 w-32 h-32 bg-white rounded-full -ml-16 -mb-16 animate-pulse delay-300"></div>
                     </div>
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent"></div>
+                    <div class="absolute inset-0 bg-gradient-to-br from-purple-500/50 to-transparent"></div>
                     <div class="relative z-10">
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="flex items-center gap-2">
-                                <div class="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
-                                    <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        <div class="flex items-start justify-between mb-5">
+                            <div class="flex items-center gap-3">
+                                <div class="p-3 bg-white/30 rounded-2xl backdrop-blur-md shadow-lg ring-2 ring-white/20">
+                                    <svg class="w-6 h-6 sm:w-7 sm:h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                                     </svg>
                                 </div>
-                                <p class="text-xs sm:text-sm font-semibold text-white/95 uppercase tracking-wider">Total Backers</p>
+                                <div>
+                                    <p class="text-xs sm:text-sm font-bold text-white/90 uppercase tracking-widest">Total</p>
+                                    <p class="text-[10px] text-white/70 mt-0.5">Backers</p>
+                                </div>
                             </div>
                         </div>
-                        <p class="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-extrabold text-white mb-4 leading-tight break-words drop-shadow-lg">{{ number_format($stats['total_backers_alltime']) }}</p>
-                        <div class="flex items-center gap-2 flex-wrap">
-                            <span class="text-white font-semibold flex items-center bg-white/25 backdrop-blur-sm px-3 py-1.5 rounded-lg text-xs sm:text-sm shadow-sm">
-                                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                        <p class="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-black text-white mb-5 leading-none break-words drop-shadow-2xl">{{ number_format($stats['total_backers_alltime']) }}</p>
+                        <div class="flex items-center gap-3 flex-wrap">
+                            <span class="text-white font-bold flex items-center bg-white/30 backdrop-blur-md px-4 py-2 rounded-xl text-sm shadow-lg ring-2 ring-white/20">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
                                 </svg>
                                 -0.50%
                             </span>
-                            <span class="text-white/90 text-xs font-medium">{{ $stats['total_backers_month'] }} this month</span>
+                            <span class="text-white/80 text-sm font-semibold">{{ $stats['total_backers_month'] }} this month</span>
                         </div>
                     </div>
                 </div>
                 <!-- This Month Contributions -->
-                <div class="group relative bg-teal-600 rounded-2xl p-5 sm:p-6 lg:p-7 shadow-xl shadow-teal-500/30 hover:shadow-2xl hover:shadow-teal-500/40 transition-all duration-300 transform hover:scale-[1.02] hover:-translate-y-1 border border-teal-400/30 overflow-hidden min-w-0">
-                    <!-- Decorative background pattern -->
-                    <div class="absolute inset-0 opacity-10">
-                        <div class="absolute top-0 right-0 w-32 h-32 bg-white rounded-full -mr-16 -mt-16"></div>
-                        <div class="absolute bottom-0 left-0 w-24 h-24 bg-white rounded-full -ml-12 -mb-12"></div>
+                <div class="group relative bg-teal-600 rounded-3xl p-6 sm:p-7 lg:p-8 shadow-2xl shadow-teal-500/40 hover:shadow-teal-500/50 transition-all duration-500 transform hover:scale-[1.03] hover:-translate-y-2 border-2 border-teal-400/50 overflow-hidden min-w-0">
+                    <!-- Animated background pattern -->
+                    <div class="absolute inset-0 opacity-20">
+                        <div class="absolute top-0 right-0 w-40 h-40 bg-white rounded-full -mr-20 -mt-20 animate-pulse"></div>
+                        <div class="absolute bottom-0 left-0 w-32 h-32 bg-white rounded-full -ml-16 -mb-16 animate-pulse delay-300"></div>
                     </div>
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent"></div>
+                    <div class="absolute inset-0 bg-gradient-to-br from-teal-500/50 to-transparent"></div>
                     <div class="relative z-10">
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="flex items-center gap-2">
-                                <div class="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
-                                    <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        <div class="flex items-start justify-between mb-5">
+                            <div class="flex items-center gap-3">
+                                <div class="p-3 bg-white/30 rounded-2xl backdrop-blur-md shadow-lg ring-2 ring-white/20">
+                                    <svg class="w-6 h-6 sm:w-7 sm:h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                     </svg>
                                 </div>
-                                <p class="text-xs sm:text-sm font-semibold text-white/95 uppercase tracking-wider">This Month</p>
+                                <div>
+                                    <p class="text-xs sm:text-sm font-bold text-white/90 uppercase tracking-widest">This Month</p>
+                                    <p class="text-[10px] text-white/70 mt-0.5">Contributions</p>
+                                </div>
                             </div>
                         </div>
-                        <p class="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-extrabold text-white mb-4 leading-tight break-words drop-shadow-lg">${{ number_format($stats['contributions_this_month'], 0) }}</p>
-                        <div class="flex items-center gap-2 flex-wrap">
-                            <span class="text-white font-semibold flex items-center bg-white/25 backdrop-blur-sm px-3 py-1.5 rounded-lg text-xs sm:text-sm shadow-sm">
-                                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                        <p class="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-black text-white mb-5 leading-none break-words drop-shadow-2xl">${{ number_format($stats['contributions_this_month'], 0) }}</p>
+                        <div class="flex items-center gap-3 flex-wrap">
+                            <span class="text-white font-bold flex items-center bg-white/30 backdrop-blur-md px-4 py-2 rounded-xl text-sm shadow-lg ring-2 ring-white/20">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 10l7-7m0 0l7 7m-7-7v18" />
                                 </svg>
                                 This month
                             </span>
@@ -956,10 +968,17 @@
             <!-- Middle Row: Left (Contributions with Chart) & Right (Two Cards) -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-6 lg:gap-8">
                 <!-- Left: Contributions Card with Funding Over Time Chart -->
-                <div class="lg:col-span-2 bg-white backdrop-blur-xl rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-300/60 p-5 sm:p-6 lg:p-7 hover:shadow-xl transition-shadow duration-300 flex flex-col min-w-0">
+                <div class="lg:col-span-2 bg-white backdrop-blur-xl rounded-3xl shadow-2xl shadow-slate-200/60 border-2 border-slate-200/80 p-6 sm:p-7 lg:p-8 hover:shadow-slate-300/70 transition-all duration-500 flex flex-col min-w-0 hover:scale-[1.01]">
                     <div class="mb-7">
-                        <h3 class="text-2xl sm:text-3xl font-bold text-slate-800 mb-3">Contributions</h3>
-                        <p class="text-4xl sm:text-5xl font-bold text-indigo-700 drop-shadow-sm">${{ number_format($stats['contributions_this_month'] / 1000, 0) }}K</p>
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="p-3 bg-indigo-100 rounded-xl">
+                                <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <h3 class="text-2xl sm:text-3xl font-black text-slate-900">Contributions</h3>
+                        </div>
+                        <p class="text-5xl sm:text-6xl font-black text-indigo-600 drop-shadow-lg">${{ number_format($stats['contributions_this_month'] / 1000, 0) }}K</p>
                     </div>
 
                     <!-- Funding Over Time Chart -->
@@ -1013,10 +1032,17 @@
                 <!-- Right: Two Cards -->
                 <div class="space-y-5 sm:space-y-6 flex flex-col min-w-0">
                     <!-- Campaign Status Distribution -->
-                    <div class="bg-slate-50 backdrop-blur-xl rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-300/60 p-6 sm:p-7 hover:shadow-xl transition-shadow duration-300 flex flex-col min-w-0">
-                        <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-lg sm:text-xl font-bold text-slate-800">Campaign Status</h3>
-                            <span class="text-xs font-semibold text-slate-700 bg-white/80 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-sm border border-slate-200/60">
+                    <div class="bg-white backdrop-blur-xl rounded-3xl shadow-2xl shadow-slate-200/60 border-2 border-slate-200/80 p-6 sm:p-7 hover:shadow-slate-300/70 transition-all duration-500 flex flex-col min-w-0 hover:scale-[1.02]">
+                        <div class="flex items-center justify-between mb-5">
+                            <div class="flex items-center gap-3">
+                                <div class="p-2.5 bg-indigo-100 rounded-xl">
+                                    <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                    </svg>
+                                </div>
+                                <h3 class="text-lg sm:text-xl font-black text-slate-900">Campaign Status</h3>
+                            </div>
+                            <span class="text-xs font-bold text-slate-800 bg-slate-100 px-3 py-1.5 rounded-full shadow-sm border border-slate-200">
                                 {{ $campaignsByStatus->sum('count') }} Total
                             </span>
                         </div>
@@ -1038,10 +1064,17 @@
                     </div>
 
                     <!-- Top Categories -->
-                    <div class="bg-slate-50 backdrop-blur-xl rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-300/60 p-6 sm:p-7 hover:shadow-xl transition-shadow duration-300 flex flex-col min-w-0">
-                        <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-lg sm:text-xl font-bold text-slate-800">Top Categories</h3>
-                            <span class="text-xs font-semibold text-slate-700 bg-white/80 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-sm border border-slate-200/60">
+                    <div class="bg-white backdrop-blur-xl rounded-3xl shadow-2xl shadow-slate-200/60 border-2 border-slate-200/80 p-6 sm:p-7 hover:shadow-slate-300/70 transition-all duration-500 flex flex-col min-w-0 hover:scale-[1.02]">
+                        <div class="flex items-center justify-between mb-5">
+                            <div class="flex items-center gap-3">
+                                <div class="p-2.5 bg-purple-100 rounded-xl">
+                                    <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                                    </svg>
+                                </div>
+                                <h3 class="text-lg sm:text-xl font-black text-slate-900">Top Categories</h3>
+                            </div>
+                            <span class="text-xs font-bold text-slate-800 bg-slate-100 px-3 py-1.5 rounded-full shadow-sm border border-slate-200">
                                 By Revenue
                             </span>
                         </div>

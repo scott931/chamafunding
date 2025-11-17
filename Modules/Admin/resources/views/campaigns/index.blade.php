@@ -75,125 +75,145 @@
                 </div>
             </div>
 
-            <!-- Campaigns Table -->
-            <div class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Campaign</th>
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Creator</th>
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Category</th>
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Goal</th>
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Raised</th>
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">% Funded</th>
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Backers</th>
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Status</th>
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Created</th>
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            @forelse($campaigns as $campaign)
-                                <tr class="hover:bg-gray-50 transition-colors">
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex items-center">
-                                            <div class="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-lg flex items-center justify-center mr-3">
-                                                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                </svg>
-                                            </div>
-                                            <div>
-                                                <div class="font-medium text-gray-900">{{ Str::limit($campaign->title, 40) }}</div>
-                                                <div class="text-xs text-gray-500">ID: {{ $campaign->id }}</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm text-gray-900">{{ $campaign->creator->name ?? 'N/A' }}</div>
-                                        <div class="text-xs text-gray-500">{{ $campaign->creator->email ?? '' }}</div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs font-medium capitalize">
-                                            {{ str_replace('_', ' ', $campaign->category) }}
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        ${{ number_format($campaign->goal_amount / 100, 2) }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                        ${{ number_format($campaign->raised_amount / 100, 2) }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex items-center">
-                                            <div class="w-16 bg-gray-200 rounded-full h-2 mr-2">
-                                                <div class="bg-gradient-to-r from-blue-500 to-indigo-600 h-2 rounded-full"
-                                                     style="width: {{ min(100, $campaign->progress_percentage) }}%"></div>
-                                            </div>
-                                            <span class="text-sm text-gray-700">{{ number_format($campaign->progress_percentage, 1) }}%</span>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        {{ $campaign->contributions_count ?? 0 }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        @if($campaign->status === 'active')
-                                            <span class="px-2 py-1 bg-green-100 text-green-800 rounded text-xs font-semibold">Active</span>
-                                        @elseif($campaign->status === 'successful')
-                                            <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-semibold">Successful</span>
-                                        @elseif($campaign->status === 'draft' || $campaign->status === 'pending')
-                                            <span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs font-semibold">Under Review</span>
-                                        @elseif($campaign->status === 'suspended')
-                                            <span class="px-2 py-1 bg-red-100 text-red-800 rounded text-xs font-semibold">Suspended</span>
-                                        @else
-                                            <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded text-xs font-semibold capitalize">{{ $campaign->status }}</span>
-                                        @endif
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        {{ $campaign->created_at->format('M d, Y') }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        <div class="flex items-center space-x-2">
-                                            <a href="{{ route('admin.campaigns.show', $campaign->id) }}"
-                                               class="text-blue-600 hover:text-blue-900">View</a>
-                                            <span class="text-gray-300">|</span>
-                                            <form method="POST" action="{{ route('admin.campaigns.update-status', $campaign->id) }}" class="inline">
-                                                @csrf
-                                                @method('PATCH')
-                                                @if($campaign->status !== 'active')
-                                                    <button type="submit" name="status" value="active"
-                                                            class="text-green-600 hover:text-green-900">Approve</button>
-                                                @endif
-                                                @if($campaign->status !== 'suspended')
-                                                    <button type="submit" name="status" value="suspended"
-                                                            class="text-red-600 hover:text-red-900 ml-2">Suspend</button>
-                                                @endif
-                                            </form>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="10" class="px-6 py-12 text-center text-gray-500">
-                                        <svg class="w-12 h-12 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+            <!-- Campaigns Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                @forelse($campaigns as $campaign)
+                    <div class="group bg-white rounded-3xl shadow-xl shadow-slate-200/60 border-2 border-slate-200/80 overflow-hidden hover:shadow-2xl hover:shadow-slate-300/70 transition-all duration-500 transform hover:scale-[1.02] hover:-translate-y-1">
+                        <!-- Card Header -->
+                        <div class="p-6 pb-4 border-b border-slate-100">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-center gap-3 flex-1 min-w-0">
+                                    <div class="flex-shrink-0 w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center ring-2 ring-indigo-50">
+                                        <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
-                                        <p class="text-lg font-medium">No campaigns found</p>
-                                        <p class="text-sm">Try adjusting your filters</p>
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <h3 class="font-black text-slate-900 text-lg mb-1 truncate">{{ Str::limit($campaign->title, 35) }}</h3>
+                                        <p class="text-xs text-slate-500 font-medium">ID: {{ $campaign->id }}</p>
+                                    </div>
+                                </div>
+                                @if($campaign->status === 'active')
+                                    <span class="px-3 py-1 bg-green-100 text-green-800 rounded-xl text-xs font-bold border border-green-200">Active</span>
+                                @elseif($campaign->status === 'successful')
+                                    <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-xl text-xs font-bold border border-blue-200">Successful</span>
+                                @elseif($campaign->status === 'draft' || $campaign->status === 'pending')
+                                    <span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-xl text-xs font-bold border border-yellow-200">Review</span>
+                                @elseif($campaign->status === 'suspended')
+                                    <span class="px-3 py-1 bg-red-100 text-red-800 rounded-xl text-xs font-bold border border-red-200">Suspended</span>
+                                @else
+                                    <span class="px-3 py-1 bg-gray-100 text-gray-800 rounded-xl text-xs font-bold border border-gray-200 capitalize">{{ $campaign->status }}</span>
+                                @endif
+                            </div>
 
-                <!-- Pagination -->
-                @if($campaigns->hasPages())
-                    <div class="px-6 py-4 border-t border-gray-200">
+                            <!-- Creator Info -->
+                            <div class="flex items-center gap-2 text-sm">
+                                <div class="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                    </svg>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="font-bold text-slate-900 truncate">{{ $campaign->creator->name ?? 'N/A' }}</p>
+                                    <p class="text-xs text-slate-500 truncate">{{ $campaign->creator->email ?? '' }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card Body -->
+                        <div class="p-6 space-y-4">
+                            <!-- Category -->
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-semibold text-slate-600 uppercase tracking-wide">Category</span>
+                                <span class="px-3 py-1 bg-slate-100 text-slate-700 rounded-lg text-xs font-bold capitalize">
+                                    {{ str_replace('_', ' ', $campaign->category) }}
+                                </span>
+                            </div>
+
+                            <!-- Funding Progress -->
+                            <div>
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-xs font-semibold text-slate-600 uppercase tracking-wide">Progress</span>
+                                    <span class="text-sm font-black text-slate-900">{{ number_format($campaign->progress_percentage, 1) }}%</span>
+                                </div>
+                                <div class="w-full bg-slate-200 rounded-full h-3 shadow-inner">
+                                    <div class="bg-indigo-600 h-3 rounded-full transition-all duration-500 shadow-sm"
+                                         style="width: {{ min(100, $campaign->progress_percentage) }}%"></div>
+                                </div>
+                            </div>
+
+                            <!-- Stats Grid -->
+                            <div class="grid grid-cols-3 gap-3 pt-2">
+                                <div class="text-center p-3 bg-slate-50 rounded-xl border border-slate-100">
+                                    <p class="text-xs font-semibold text-slate-600 mb-1">Goal</p>
+                                    <p class="text-sm font-black text-slate-900">${{ number_format($campaign->goal_amount / 100, 0) }}</p>
+                                </div>
+                                <div class="text-center p-3 bg-emerald-50 rounded-xl border border-emerald-100">
+                                    <p class="text-xs font-semibold text-emerald-700 mb-1">Raised</p>
+                                    <p class="text-sm font-black text-emerald-900">${{ number_format($campaign->raised_amount / 100, 0) }}</p>
+                                </div>
+                                <div class="text-center p-3 bg-purple-50 rounded-xl border border-purple-100">
+                                    <p class="text-xs font-semibold text-purple-700 mb-1">Backers</p>
+                                    <p class="text-sm font-black text-purple-900">{{ $campaign->contributions_count ?? 0 }}</p>
+                                </div>
+                            </div>
+
+                            <!-- Date -->
+                            <div class="flex items-center gap-2 text-xs text-slate-500 pt-2 border-t border-slate-100">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                                <span class="font-medium">Created {{ $campaign->created_at->format('M d, Y') }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Card Footer -->
+                        <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between gap-2">
+                            <a href="{{ route('admin.campaigns.show', $campaign->id) }}"
+                               class="flex-1 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-sm text-center transition-colors shadow-md hover:shadow-lg">
+                                View Details
+                            </a>
+                            <form method="POST" action="{{ route('admin.campaigns.update-status', $campaign->id) }}" class="flex gap-2">
+                                @csrf
+                                @method('PATCH')
+                                @if($campaign->status !== 'active')
+                                    <button type="submit" name="status" value="active"
+                                            class="px-3 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold text-xs transition-colors shadow-md hover:shadow-lg"
+                                            title="Approve">
+                                        ✓
+                                    </button>
+                                @endif
+                                @if($campaign->status !== 'suspended')
+                                    <button type="submit" name="status" value="suspended"
+                                            class="px-3 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-xs transition-colors shadow-md hover:shadow-lg"
+                                            title="Suspend">
+                                        ⚠
+                                    </button>
+                                @endif
+                            </form>
+                        </div>
+                    </div>
+                @empty
+                    <div class="col-span-full">
+                        <div class="bg-white rounded-3xl shadow-xl border-2 border-slate-200 p-12 text-center">
+                            <svg class="w-16 h-16 mx-auto mb-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                            </svg>
+                            <p class="text-xl font-black text-slate-900 mb-2">No campaigns found</p>
+                            <p class="text-sm text-slate-600">Try adjusting your filters</p>
+                        </div>
+                    </div>
+                @endforelse
+            </div>
+
+            <!-- Pagination -->
+            @if($campaigns->hasPages())
+                <div class="mt-6 flex justify-center">
+                    <div class="bg-white rounded-2xl shadow-lg border border-slate-200 p-4">
                         {{ $campaigns->links() }}
                     </div>
-                @endif
-            </div>
+                </div>
+            @endif
         </div>
     </div>
 </x-app-layout>
