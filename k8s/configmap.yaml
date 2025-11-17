@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: laravel-config
+  labels:
+    app: laravel-app
+data:
+  APP_ENV: "production"
+  APP_DEBUG: "false"
+  APP_NAME: "Laravel Crowdfunding"
+  # APP_KEY should be in secrets, not configmap
+  ASSET_VERSION: "123456789"  # Update this to bust asset cache
+  # Add other non-sensitive configuration here
+  LOG_LEVEL: "info"
+  CACHE_DRIVER: "redis"
+  SESSION_DRIVER: "redis"
+  QUEUE_CONNECTION: "redis"
+

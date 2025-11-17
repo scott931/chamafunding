@@ -15,6 +15,22 @@ php artisan config:clear || true
 php artisan route:clear || true
 php artisan view:clear || true
 
+# Manually remove compiled views to ensure they're regenerated
+echo "Removing compiled views..."
+rm -rf storage/framework/views/*.php 2>/dev/null || true
+
+# Clear bootstrap cache
+echo "Clearing bootstrap cache..."
+rm -rf bootstrap/cache/*.php 2>/dev/null || true
+# Keep the .gitignore file
+touch bootstrap/cache/.gitignore 2>/dev/null || true
+
+# Clear opcache if available
+if [ -f /usr/local/bin/php ]; then
+    echo "Attempting to clear opcache..."
+    php -r "if (function_exists('opcache_reset')) { opcache_reset(); echo 'Opcache cleared\n'; }" || true
+fi
+
 # Run database migrations
 echo "Running database migrations..."
 php artisan migrate --force

@@ -98,6 +98,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Asset Version
+    |--------------------------------------------------------------------------
+    |
+    | This value is used for asset versioning to force browser cache refresh.
+    | Update this value (or set ASSET_VERSION in .env) whenever you deploy new assets.
+    | In development, this can be set to time() for automatic cache busting.
+    |
+    */
+
+    'asset_version' => env('ASSET_VERSION', env('APP_ENV') === 'local' ? time() : '1.0'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Encryption Key
     |--------------------------------------------------------------------------
     |

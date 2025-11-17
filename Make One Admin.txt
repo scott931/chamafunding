@@ -1,0 +1,53 @@
+I can see the issue - the user doesn't have any roles assigned, which is why isAdmin() and hasRole('Super Admin') are returning false. You're also trying to run PHP commands in bash shell instead of Artisan Tinker.
+
+Here's how to fix this:
+
+1. Assign the Super Admin role to the user
+Go back into Artisan Tinker and assign the role:
+
+bash
+php artisan tinker
+Then run these commands in the tinker shell:
+
+php
+// Find the user
+$user = \App\Models\User::where('email', 'scottmkari@example.com')->first();
+
+// Assign the Super Admin role
+$user->assignRole('Super Admin');
+
+// Verify the role was assigned
+$user->roles; // Should now show the Super Admin role
+$user->isAdmin(); // Should return true
+$user->hasRole('Super Admin'); // Should return true
+2. If the role doesn't exist yet, create it first
+If you get an error that the role doesn't exist, create it:
+
+php
+// In tinker, create the role if it doesn't exist
+$role = \Spatie\Permission\Models\Role::create(['name' => 'Super Admin']);
+
+// Then assign it to the user
+$user->assignRole('Super Admin');
+3. Alternative: Use permission seeder (recommended)
+If you have a roles and permissions seeder, run it:
+
+bash
+php artisan db:seed --class=RolePermissionSeeder
+4. Clear cache and reset permissions (you already did this, but good practice)
+bash
+php artisan permission:cache-reset
+php artisan cache:clear
+php artisan config:clear
+5. Verify in tinker
+After assigning the role, verify everything works:
+
+php
+$user = \App\Models\User::where('email', 'scottmkari@example.com')->first();
+$user->roles; // Should show Super Admin role
+$user->isAdmin(); // Should return true
+$user->hasRole('Super Admin'); // Should return true
+$user->getRoleNames(); // Alternative way to check roles
+The key issue was that you exited tinker (^C) and then tried to run PHP commands in bash. Always run user/role operations within the Artisan Tinker environment or in your application code.
+
+Let me know if you encounter any errors when assigning the role!

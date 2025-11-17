@@ -23,3 +23,28 @@
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
 </IfModule>
+
+# Cache Control Headers for Static Assets
+<IfModule mod_headers.c>
+    # Disable caching for HTML files in development
+    <FilesMatch "\.(html|htm)$">
+        Header set Cache-Control "no-cache, no-store, must-revalidate"
+        Header set Pragma "no-cache"
+        Header set Expires "0"
+    </FilesMatch>
+
+    # Cache static assets with versioning (Vite handles this automatically)
+    # But allow revalidation for CSS/JS in development
+    <FilesMatch "\.(css|js)$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+        # In development, use no-cache to force revalidation
+        <If "%{ENV:APP_ENV} == 'local'">
+            Header set Cache-Control "no-cache, must-revalidate"
+        </If>
+    </FilesMatch>
+
+    # Images and fonts can be cached longer
+    <FilesMatch "\.(jpg|jpeg|png|gif|ico|svg|woff|woff2|ttf|eot)$">
+        Header set Cache-Control "public, max-age=31536000"
+    </FilesMatch>
+</IfModule>

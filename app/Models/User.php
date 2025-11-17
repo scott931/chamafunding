@@ -170,6 +170,11 @@ class User extends Authenticatable
      */
     public function isAdmin(): bool
     {
+        // Ensure roles are loaded
+        if (!$this->relationLoaded('roles')) {
+            $this->load('roles');
+        }
+
         return $this->hasAnyRole(self::getAdminRoles());
     }
 }
