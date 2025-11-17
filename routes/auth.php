@@ -43,11 +43,16 @@ Route::middleware('guest')->group(function () {
         try { \Mail::to($email)->send(new \App\Mail\OtpCodeMail($otp, $ttlMinutes)); } catch (\Throwable $e) {}
         return back()->with('status', 'Verification code resent.');
     })->name('register.otp.resend');
+});
 
-    Route::get('login', [AuthenticatedSessionController::class, 'create'])
-        ->name('login');
+// Login routes outside guest middleware to allow access even when authenticated
+// Users can use ?force=true to logout and login as a different user
+Route::get('login', [AuthenticatedSessionController::class, 'create'])
+    ->name('login');
 
-    Route::post('login', [AuthenticatedSessionController::class, 'store']);
+Route::post('login', [AuthenticatedSessionController::class, 'store']);
+
+Route::middleware('guest')->group(function () {
 
     Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
         ->name('password.request');

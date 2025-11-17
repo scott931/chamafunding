@@ -16,6 +16,22 @@ class AuthenticatedSessionController extends Controller
      */
     public function create(): View
     {
+        // If user is already authenticated and wants to login again (force logout)
+        // Allow access to login page but clear the session first
+        if (auth()->check() && request()->has('force')) {
+            Auth::guard('web')->logout();
+            request()->session()->invalidate();
+            request()->session()->regenerateToken();
+
+            return view('auth.login')->with('status', 'You have been logged out. Please login again.');
+        }
+
+        // If user is already authenticated but no force parameter, show login page with info
+        // They can still login again which will regenerate their session
+        if (auth()->check()) {
+            return view('auth.login')->with('info', 'You are already logged in. You can login again to refresh your session, or use ?force=true to logout first.');
+        }
+
         return view('auth.login');
     }
 
@@ -57,6 +73,12 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        // Return a response that will clear client-side storage
+        $response = redirect('/');
+
+        // Add JavaScript to clear client-side storage
+        $response->with('clear_storage', true);
+
+        return $response;
     }
 }

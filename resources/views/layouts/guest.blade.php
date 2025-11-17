@@ -21,5 +21,48 @@
     </head>
     <body class="font-sans text-gray-900 antialiased bg-gradient-to-br from-gray-50 via-indigo-50 to-purple-50">
                 {{ $slot }}
+
+        @if(session('clear_storage'))
+        <script>
+            // Clear all authentication tokens from client-side storage after logout
+            (function() {
+                // Clear localStorage tokens
+                try {
+                    localStorage.removeItem('auth_token');
+                    localStorage.removeItem('authToken');
+                    localStorage.removeItem('token');
+                    // Clear any other potential token keys
+                    Object.keys(localStorage).forEach(key => {
+                        if (key.toLowerCase().includes('token') || key.toLowerCase().includes('auth')) {
+                            localStorage.removeItem(key);
+                        }
+                    });
+                } catch (e) {
+                    console.warn('Could not clear localStorage:', e);
+                }
+
+                // Clear sessionStorage tokens
+                try {
+                    sessionStorage.removeItem('auth_token');
+                    sessionStorage.removeItem('authToken');
+                    sessionStorage.removeItem('token');
+                    // Clear any other potential token keys
+                    Object.keys(sessionStorage).forEach(key => {
+                        if (key.toLowerCase().includes('token') || key.toLowerCase().includes('auth')) {
+                            sessionStorage.removeItem(key);
+                        }
+                    });
+                } catch (e) {
+                    console.warn('Could not clear sessionStorage:', e);
+                }
+
+                // Clear window.authToken if it exists
+                if (window.authToken) {
+                    window.authToken = null;
+                    delete window.authToken;
+                }
+            })();
+        </script>
+        @endif
     </body>
 </html>
