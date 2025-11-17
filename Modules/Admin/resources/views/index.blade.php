@@ -1,34 +1,42 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="bg-white/70 backdrop-blur-xl border-b border-slate-200/60">
-            <div class="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-5 sm:py-6">
+        <div class="bg-gradient-to-r from-slate-50 via-white to-slate-50 backdrop-blur-xl border-b-2 border-slate-200/80 shadow-sm">
+            <div class="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-6 sm:py-7">
                 <!-- Top Row: Welcome & Actions -->
-                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 sm:gap-6">
                     <div class="flex-1 min-w-0">
-                        <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900">Welcome Back, {{ Auth::user()->name }}</h2>
-                        <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-slate-600 mt-2 font-medium">
-                            <span class="flex items-center gap-1.5">
-                                <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="p-2.5 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl shadow-lg">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                                 </svg>
-                                {{ now()->subDays(30)->format('M j, Y') }} - {{ now()->format('M j, Y') }}
-                            </span>
-                            <span class="hidden sm:inline text-slate-300">•</span>
-                            <span class="flex items-center gap-1.5">
-                                <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                Last 30 days
-                            </span>
+                            </div>
+                            <div>
+                                <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight">Welcome Back, {{ Auth::user()->name }}</h2>
+                                <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-slate-600 mt-1.5 font-semibold">
+                                    <span class="flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 rounded-lg">
+                                        <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                        {{ now()->subDays(30)->format('M j, Y') }} - {{ now()->format('M j, Y') }}
+                                    </span>
+                                    <span class="flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 rounded-lg">
+                                        <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        Last 30 days
+                                    </span>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Right side: Search, Notifications, Profile -->
-                    <div class="flex items-center space-x-2 sm:space-x-3 w-full sm:w-auto">
+                    <!-- Right side: Search, Notifications -->
+                    <div class="flex items-center space-x-3 w-full sm:w-auto">
                         <!-- Search Bar -->
                         <div class="relative flex-1 sm:flex-none sm:block hidden md:block">
-                            <input type="text" placeholder="Search anything..." class="w-full sm:w-72 pl-11 pr-4 py-2.5 bg-slate-50/80 border border-slate-200/60 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:bg-white text-sm transition-all duration-200 shadow-sm hover:shadow-md">
-                            <svg class="absolute left-3.5 top-3.5 h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <input type="text" placeholder="Search anything..." class="w-full sm:w-80 pl-11 pr-4 py-3 bg-white border-2 border-slate-200 rounded-2xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm font-medium transition-all duration-200 shadow-md hover:shadow-lg">
+                            <svg class="absolute left-4 top-3.5 h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                             </svg>
                         </div>
@@ -37,13 +45,13 @@
                         <div class="relative" x-data="notificationDropdown()" @click.away="dropdownOpen = false">
                             <button
                                 @click="toggleDropdown()"
-                                class="relative p-2.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md"
+                                class="relative p-3 text-slate-700 hover:text-indigo-600 hover:bg-indigo-50 rounded-2xl transition-all duration-200 shadow-md hover:shadow-lg border-2 border-transparent hover:border-indigo-200"
                             >
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                                 </svg>
-                                <span x-show="unreadCount > 0" class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-                                <span x-show="unreadCount > 0" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center" x-text="unreadCount > 99 ? '99+' : unreadCount"></span>
+                                <span x-show="unreadCount > 0" class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full ring-2 ring-white"></span>
+                                <span x-show="unreadCount > 0" class="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center shadow-lg ring-2 ring-white" x-text="unreadCount > 99 ? '99+' : unreadCount"></span>
                             </button>
 
                             <!-- Dropdown Panel -->
@@ -55,15 +63,15 @@
                                 x-transition:leave="transition ease-in duration-150"
                                 x-transition:leave-start="transform opacity-100 scale-100"
                                 x-transition:leave-end="transform opacity-0 scale-95"
-                                class="absolute right-0 mt-2 w-[calc(100vw-2rem)] sm:w-96 max-w-md bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-slate-200/60 z-50 max-h-[600px] overflow-hidden flex flex-col"
+                                class="absolute right-0 mt-3 w-[calc(100vw-2rem)] sm:w-96 max-w-md bg-white backdrop-blur-xl rounded-3xl shadow-2xl border-2 border-slate-200/80 z-50 max-h-[600px] overflow-hidden flex flex-col"
                                 style="display: none;"
                             >
                                 <!-- Header -->
-                                <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-                                    <h3 class="text-lg font-semibold text-gray-900">Transaction Notifications</h3>
+                                <div class="px-5 py-4 border-b-2 border-slate-200 bg-gradient-to-r from-slate-50 to-white flex items-center justify-between">
+                                    <h3 class="text-lg font-black text-slate-900">Transaction Notifications</h3>
                                     <button
                                         @click="markAllAsRead()"
-                                        class="text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors"
+                                        class="text-sm text-indigo-600 hover:text-indigo-800 font-bold transition-colors px-3 py-1.5 rounded-lg hover:bg-indigo-50"
                                         x-show="unreadCount > 0"
                                     >
                                         Mark all read
@@ -71,35 +79,37 @@
                                 </div>
 
                                 <!-- Loading State -->
-                                <div x-show="loading" class="p-8 text-center">
-                                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                                    <p class="mt-2 text-sm text-gray-500">Loading notifications...</p>
+                                <div x-show="loading" class="p-10 text-center">
+                                    <div class="inline-block animate-spin rounded-full h-10 w-10 border-4 border-indigo-200 border-t-indigo-600"></div>
+                                    <p class="mt-3 text-sm text-slate-600 font-semibold">Loading notifications...</p>
                                 </div>
 
                                 <!-- Empty State -->
-                                <div x-show="!loading && notifications.length === 0" class="p-8 text-center">
-                                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                                    </svg>
-                                    <p class="mt-2 text-sm text-gray-500">No transaction notifications</p>
+                                <div x-show="!loading && notifications.length === 0" class="p-10 text-center">
+                                    <div class="w-20 h-20 mx-auto mb-4 rounded-3xl bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center shadow-lg border-2 border-slate-200">
+                                        <svg class="h-10 w-10 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                        </svg>
+                                    </div>
+                                    <p class="text-sm font-black text-slate-800">No transaction notifications</p>
                                 </div>
 
                                 <!-- Notifications List -->
                                 <div x-show="!loading && notifications.length > 0" class="overflow-y-auto flex-1">
                                     <template x-for="(campaign, index) in notifications" :key="campaign.campaign_id">
-                                        <div class="border-b border-gray-50 last:border-b-0 hover:bg-gray-50 transition-colors">
+                                        <div class="border-b-2 border-slate-100 last:border-b-0 hover:bg-slate-50 transition-all duration-200">
                                             <!-- Campaign Header -->
-                                            <div class="px-4 py-3 bg-gray-50 border-b border-gray-100 flex items-center justify-between">
+                                            <div class="px-5 py-4 bg-gradient-to-r from-slate-50 to-white border-b-2 border-slate-100 flex items-center justify-between">
                                                 <div class="flex-1 min-w-0">
-                                                    <h4 class="text-sm font-semibold text-gray-900 truncate" x-text="campaign.campaign_name"></h4>
-                                                    <p class="text-xs text-gray-500 mt-1">
+                                                    <h4 class="text-sm font-black text-slate-900 truncate" x-text="campaign.campaign_name"></h4>
+                                                    <p class="text-xs text-slate-600 mt-1.5 font-semibold">
                                                         <span x-text="campaign.total_transactions"></span> transaction<span x-show="campaign.total_transactions > 1">s</span> •
                                                         <span x-text="campaign.formatted_total_amount"></span> <span x-text="campaign.currency"></span>
                                                     </p>
                                                 </div>
                                                 <button
                                                     @click="markCampaignAsRead(campaign.campaign_id)"
-                                                    class="ml-2 text-xs text-blue-600 hover:text-blue-800 font-medium transition-colors"
+                                                    class="ml-3 p-2 text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded-xl font-bold transition-all duration-200"
                                                     title="Mark as read"
                                                 >
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -109,29 +119,29 @@
                                             </div>
 
                                             <!-- Transactions in Campaign -->
-                                            <div class="px-4 py-2">
+                                            <div class="px-5 py-3">
                                                 <template x-for="(transaction, tIndex) in campaign.transactions" :key="transaction.id">
-                                                    <div class="py-2 border-b border-gray-50 last:border-b-0">
+                                                    <div class="py-3 border-b-2 border-slate-50 last:border-b-0">
                                                         <div class="flex items-start justify-between">
                                                             <div class="flex-1 min-w-0">
-                                                                <div class="flex items-center space-x-2">
-                                                                    <span class="text-sm font-medium text-gray-900" x-text="transaction.user_name"></span>
-                                                                    <span class="text-xs text-gray-500" x-text="transaction.formatted_date"></span>
+                                                                <div class="flex items-center space-x-2 mb-1">
+                                                                    <span class="text-sm font-bold text-slate-900" x-text="transaction.user_name"></span>
+                                                                    <span class="text-xs text-slate-500 font-semibold" x-text="transaction.formatted_date"></span>
                                                                 </div>
-                                                                <p class="text-xs text-gray-500 mt-1" x-text="transaction.reference"></p>
+                                                                <p class="text-xs text-slate-500 font-medium" x-text="transaction.reference"></p>
                                                             </div>
                                                             <div class="ml-4 text-right">
-                                                                <p class="text-sm font-semibold text-gray-900" x-text="transaction.formatted_amount"></p>
-                                                                <p class="text-xs text-gray-500" x-text="transaction.currency"></p>
+                                                                <p class="text-sm font-black text-slate-900" x-text="transaction.formatted_amount"></p>
+                                                                <p class="text-xs text-slate-500 font-semibold" x-text="transaction.currency"></p>
                                                             </div>
                                                         </div>
-                                                        <div class="mt-1">
+                                                        <div class="mt-2">
                                                             <span
-                                                                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
+                                                                class="inline-flex items-center px-2.5 py-1 rounded-xl text-xs font-bold shadow-sm"
                                                                 :class="{
-                                                                    'bg-green-100 text-green-800': transaction.status === 'completed' || transaction.status === 'succeeded',
-                                                                    'bg-yellow-100 text-yellow-800': transaction.status === 'pending' || transaction.status === 'processing',
-                                                                    'bg-red-100 text-red-800': transaction.status === 'failed'
+                                                                    'bg-emerald-100 text-emerald-800 border-emerald-200': transaction.status === 'completed' || transaction.status === 'succeeded',
+                                                                    'bg-amber-100 text-amber-800 border-amber-200': transaction.status === 'pending' || transaction.status === 'processing',
+                                                                    'bg-red-100 text-red-800 border-red-200': transaction.status === 'failed'
                                                                 }"
                                                                 x-text="transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1)"
                                                             ></span>
@@ -139,8 +149,8 @@
                                                     </div>
                                                 </template>
 
-                                                <div x-show="campaign.total_transactions > campaign.transactions.length" class="pt-2 text-center">
-                                                    <p class="text-xs text-gray-500">
+                                                <div x-show="campaign.total_transactions > campaign.transactions.length" class="pt-3 text-center">
+                                                    <p class="text-xs text-slate-600 font-semibold">
                                                         +<span x-text="campaign.total_transactions - campaign.transactions.length"></span> more transaction<span x-show="(campaign.total_transactions - campaign.transactions.length) > 1">s</span>
                                                     </p>
                                                 </div>
@@ -150,8 +160,8 @@
                                 </div>
 
                                 <!-- Footer -->
-                                <div class="px-4 py-3 border-t border-gray-100 bg-gray-50">
-                                    <a href="{{ route('admin.transactions.index') }}" class="block text-center text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors">
+                                <div class="px-5 py-4 border-t-2 border-slate-200 bg-gradient-to-r from-slate-50 to-white">
+                                    <a href="{{ route('admin.transactions.index') }}" class="block text-center text-sm text-indigo-600 hover:text-indigo-800 font-bold transition-colors">
                                         View all transactions
                                     </a>
                                 </div>
@@ -340,12 +350,13 @@
 
                     getStatusBadgeClass(status) {
                         const classes = {
-                            'completed': 'bg-green-100 text-green-800',
-                            'pending': 'bg-yellow-100 text-yellow-800',
-                            'failed': 'bg-red-100 text-red-800',
-                            'processing': 'bg-blue-100 text-blue-800',
+                            'completed': 'bg-emerald-100 text-emerald-800 border-emerald-200',
+                            'succeeded': 'bg-emerald-100 text-emerald-800 border-emerald-200',
+                            'pending': 'bg-amber-100 text-amber-800 border-amber-200',
+                            'failed': 'bg-red-100 text-red-800 border-red-200',
+                            'processing': 'bg-blue-100 text-blue-800 border-blue-200',
                         };
-                        return classes[status?.toLowerCase()] || 'bg-gray-100 text-gray-800';
+                        return classes[status?.toLowerCase()] || 'bg-slate-100 text-slate-800 border-slate-200';
                     },
 
                     initFundingChart() {
@@ -1111,14 +1122,21 @@
             <!-- Bottom Row: Payment History Table & Recent Activity -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-6 lg:gap-8">
                 <!-- Left: Payment History Table -->
-                <div class="lg:col-span-2 bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-200/60 overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col min-w-0">
-                    <div class="px-5 sm:px-7 lg:px-8 py-5 sm:py-6 border-b border-slate-200/60 bg-slate-50">
-                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                            <div>
-                                <h3 class="text-lg sm:text-xl font-bold text-slate-900">Payment History</h3>
-                                <p class="text-xs sm:text-sm text-slate-600 mt-1.5 font-medium">Recent payments preview</p>
+                <div class="lg:col-span-2 bg-white backdrop-blur-xl rounded-3xl shadow-2xl shadow-slate-200/60 border-2 border-slate-200/80 overflow-hidden hover:shadow-slate-300/70 transition-all duration-500 flex flex-col min-w-0 hover:scale-[1.01]">
+                    <div class="px-6 sm:px-8 lg:px-9 py-6 sm:py-7 border-b-2 border-slate-200/80 bg-gradient-to-r from-slate-50 to-white">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                            <div class="flex items-center gap-3">
+                                <div class="p-2.5 bg-emerald-100 rounded-xl">
+                                    <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg sm:text-xl font-black text-slate-900">Payment History</h3>
+                                    <p class="text-xs sm:text-sm text-slate-600 mt-1 font-semibold">Recent payments preview</p>
+                                </div>
                             </div>
-                            <a href="{{ route('admin.transactions.index') }}" class="text-sm font-semibold bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 inline-flex items-center gap-2">
+                            <a href="{{ route('admin.transactions.index') }}" class="text-sm font-bold bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white px-5 py-2.5 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 inline-flex items-center gap-2">
                                 View All
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -1127,36 +1145,36 @@
                         </div>
                     </div>
 
-                    <div x-show="loading" class="text-center py-12">
-                        <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                        <p class="mt-4 text-gray-500">Loading payment history...</p>
+                    <div x-show="loading" class="text-center py-16">
+                        <div class="inline-block animate-spin rounded-full h-10 w-10 border-4 border-indigo-200 border-t-indigo-600"></div>
+                        <p class="mt-4 text-slate-600 font-semibold">Loading payment history...</p>
                     </div>
 
-                    <div x-show="!loading && (!paymentHistory || paymentHistory.length === 0)" class="flex flex-col items-center justify-center py-16 px-4">
-                        <div class="w-24 h-24 mx-auto mb-6 rounded-full bg-slate-200 flex items-center justify-center shadow-inner">
-                            <svg class="w-12 h-12 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div x-show="!loading && (!paymentHistory || paymentHistory.length === 0)" class="flex flex-col items-center justify-center py-20 px-4">
+                        <div class="w-28 h-28 mx-auto mb-6 rounded-3xl bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center shadow-lg border-2 border-slate-200">
+                            <svg class="w-14 h-14 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
                         </div>
-                        <p class="text-base font-semibold text-slate-700 mb-2">No payment history found</p>
-                        <p class="text-sm text-slate-500 text-center max-w-xs">Payment transactions will appear here once users make contributions to campaigns</p>
+                        <p class="text-lg font-black text-slate-800 mb-2">No payment history found</p>
+                        <p class="text-sm text-slate-600 text-center max-w-xs font-medium">Payment transactions will appear here once users make contributions to campaigns</p>
                     </div>
 
                     <!-- Mobile Card View -->
-                    <div class="lg:hidden space-y-2 px-4 py-3" x-show="!loading && paymentHistory && paymentHistory.length > 0" x-transition>
+                    <div class="lg:hidden space-y-3 px-6 py-4" x-show="!loading && paymentHistory && paymentHistory.length > 0" x-transition>
                         <template x-for="(payment, index) in paymentHistory" :key="payment.id || index">
-                            <div class="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
+                            <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border-2 border-slate-200 hover:border-indigo-300 transition-all duration-200">
                                 <div class="flex-1 min-w-0 pr-3">
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-sm font-medium text-gray-900 truncate" x-text="payment.user ? (payment.user.name || 'N/A') : 'N/A'"></span>
-                                        <span class="px-2 py-0.5 inline-flex rounded-full text-xs font-medium flex-shrink-0"
+                                    <div class="flex items-center gap-2 mb-1.5">
+                                        <span class="text-sm font-bold text-slate-900 truncate" x-text="payment.user ? (payment.user.name || 'N/A') : 'N/A'"></span>
+                                        <span class="px-2.5 py-1 inline-flex rounded-xl text-xs font-bold flex-shrink-0 shadow-sm"
                                               :class="getStatusBadgeClass(payment.status || 'pending')"
                                               x-text="(payment.status || 'pending').charAt(0).toUpperCase() + (payment.status || 'pending').slice(1)"></span>
                                     </div>
-                                    <p class="text-xs text-gray-500 mt-0.5" x-text="formatDate(payment.created_at)"></p>
+                                    <p class="text-xs text-slate-500 font-semibold" x-text="formatDate(payment.created_at)"></p>
                                 </div>
                                 <div class="text-right flex-shrink-0">
-                                    <span class="text-sm font-bold text-gray-900" x-text="formatCurrency((payment.amount || 0) / 100, payment.currency || 'USD')"></span>
+                                    <span class="text-base font-black text-slate-900" x-text="formatCurrency((payment.amount || 0) / 100, payment.currency || 'USD')"></span>
                                 </div>
                             </div>
                         </template>
@@ -1164,24 +1182,24 @@
 
                     <!-- Desktop Table View -->
                     <div class="hidden lg:block" x-show="!loading && paymentHistory && paymentHistory.length > 0" x-transition>
-                        <div class="px-4 sm:px-6 py-3 space-y-2">
+                        <div class="px-6 sm:px-8 py-4 space-y-2">
                             <template x-for="(payment, index) in paymentHistory" :key="payment.id || index">
-                                <div class="flex items-center justify-between py-2.5 border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors rounded px-2">
-                                    <div class="flex items-center gap-4 flex-1 min-w-0">
-                                        <div class="flex-shrink-0 w-24">
-                                            <p class="text-xs text-gray-500" x-text="formatDate(payment.created_at)"></p>
+                                <div class="flex items-center justify-between py-4 px-4 border-2 border-slate-100 last:border-0 hover:bg-indigo-50 hover:border-indigo-200 transition-all duration-200 rounded-2xl">
+                                    <div class="flex items-center gap-5 flex-1 min-w-0">
+                                        <div class="flex-shrink-0 w-28">
+                                            <p class="text-xs text-slate-600 font-semibold" x-text="formatDate(payment.created_at)"></p>
                                         </div>
                                         <div class="flex-1 min-w-0">
-                                            <div class="flex items-center gap-2">
-                                                <p class="text-sm font-medium text-gray-900 truncate" x-text="payment.user ? (payment.user.name || 'N/A') : 'N/A'"></p>
+                                            <div class="flex items-center gap-2 mb-1">
+                                                <p class="text-sm font-bold text-slate-900 truncate" x-text="payment.user ? (payment.user.name || 'N/A') : 'N/A'"></p>
                                             </div>
-                                            <p x-show="payment.campaign" class="text-xs text-gray-500 truncate mt-0.5" x-text="payment.campaign ? (payment.campaign.title.length > 40 ? payment.campaign.title.substring(0, 40) + '...' : payment.campaign.title) : ''"></p>
+                                            <p x-show="payment.campaign" class="text-xs text-slate-500 truncate font-medium" x-text="payment.campaign ? (payment.campaign.title.length > 40 ? payment.campaign.title.substring(0, 40) + '...' : payment.campaign.title) : ''"></p>
                                         </div>
                                         <div class="flex-shrink-0 text-right">
-                                            <p class="text-sm font-bold text-gray-900" x-text="formatCurrency((payment.amount || 0) / 100, payment.currency || 'USD')"></p>
+                                            <p class="text-base font-black text-slate-900" x-text="formatCurrency((payment.amount || 0) / 100, payment.currency || 'USD')"></p>
                                         </div>
-                                        <div class="flex-shrink-0 w-24 text-right">
-                                            <span class="px-2 py-1 inline-flex rounded-full text-xs font-medium"
+                                        <div class="flex-shrink-0 w-28 text-right">
+                                            <span class="px-3 py-1.5 inline-flex rounded-xl text-xs font-bold shadow-sm"
                                                   :class="getStatusBadgeClass(payment.status || 'pending')"
                                                   x-text="(payment.status || 'pending').charAt(0).toUpperCase() + (payment.status || 'pending').slice(1)"></span>
                                         </div>
@@ -1192,9 +1210,16 @@
                     </div>
                 </div>
 
-                    <!-- Right: Recent Activity / AI Assistant -->
-                <div class="bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-200/60 p-5 sm:p-6 lg:p-6 hover:shadow-xl transition-shadow duration-300 flex flex-col min-w-0">
-                    <h3 class="text-lg sm:text-xl font-bold text-slate-900 mb-5">Recent Activity</h3>
+                    <!-- Right: Recent Activity -->
+                <div class="bg-white backdrop-blur-xl rounded-3xl shadow-2xl shadow-slate-200/60 border-2 border-slate-200/80 p-6 sm:p-7 hover:shadow-slate-300/70 transition-all duration-500 flex flex-col min-w-0 hover:scale-[1.02]">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="p-2.5 bg-purple-100 rounded-xl">
+                            <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-lg sm:text-xl font-black text-slate-900">Recent Activity</h3>
+                    </div>
                     <div class="space-y-3 flex-1 overflow-y-auto custom-scrollbar pr-2">
                         @if($recentActivity->count() > 0)
                             @foreach($recentActivity->take(6) as $activity)
@@ -1212,29 +1237,29 @@
                                     ];
                                     $color = $colorMap[$activity['type']] ?? 'bg-slate-500';
                                 @endphp
-                                <div class="flex items-start space-x-3 pb-4 border-b border-slate-100 last:border-0 group hover:bg-slate-50/50 rounded-lg p-2 -ml-2 transition-colors">
-                                    <div class="w-2.5 h-2.5 {{ $color }} rounded-full mt-2 shadow-sm ring-2 ring-white"></div>
+                                <div class="flex items-start space-x-3 pb-4 border-b-2 border-slate-100 last:border-0 group hover:bg-slate-50 rounded-2xl p-3 transition-all duration-200">
+                                    <div class="w-3 h-3 {{ $color }} rounded-full mt-2 shadow-md ring-2 ring-white flex-shrink-0"></div>
                                     <div class="flex-1 min-w-0">
                                         @if(isset($activity['url']) && $activity['url'])
-                                            <a href="{{ $activity['url'] }}" class="text-sm font-medium text-slate-900 hover:text-indigo-600 transition-colors block">
+                                            <a href="{{ $activity['url'] }}" class="text-sm font-bold text-slate-900 hover:text-indigo-600 transition-colors block">
                                                 {{ $activity['message'] }}
                                             </a>
                                         @else
-                                            <p class="text-sm font-medium text-slate-900">{{ $activity['message'] }}</p>
+                                            <p class="text-sm font-bold text-slate-900">{{ $activity['message'] }}</p>
                                         @endif
-                                        <p class="text-xs text-slate-500 mt-1.5 font-medium">{{ $activity['time']->diffForHumans() }}</p>
+                                        <p class="text-xs text-slate-500 mt-1.5 font-semibold">{{ $activity['time']->diffForHumans() }}</p>
                                     </div>
                                 </div>
                             @endforeach
                         @else
-                            <div class="flex flex-col items-center justify-center py-12 px-4">
-                                <div class="w-20 h-20 mx-auto mb-5 rounded-full bg-slate-200 flex items-center justify-center shadow-inner">
-                                    <svg class="w-10 h-10 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="flex flex-col items-center justify-center py-16 px-4">
+                                <div class="w-24 h-24 mx-auto mb-6 rounded-3xl bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center shadow-lg border-2 border-slate-200">
+                                    <svg class="w-12 h-12 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
                                 </div>
-                                <p class="text-sm font-semibold text-slate-700 mb-1">No recent activity</p>
-                                <p class="text-xs text-slate-500 text-center">Activity will appear here as campaigns and transactions are created</p>
+                                <p class="text-base font-black text-slate-800 mb-2">No recent activity</p>
+                                <p class="text-sm text-slate-600 text-center font-medium">Activity will appear here as campaigns and transactions are created</p>
                             </div>
                         @endif
                     </div>
