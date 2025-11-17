@@ -25,11 +25,46 @@ rm -rf bootstrap/cache/*.php 2>/dev/null || true
 # Keep the .gitignore file
 touch bootstrap/cache/.gitignore 2>/dev/null || true
 
-# Clear opcache if available
-if [ -f /usr/local/bin/php ]; then
-    echo "Attempting to clear opcache..."
-    php -r "if (function_exists('opcache_reset')) { opcache_reset(); echo 'Opcache cleared\n'; }" || true
-fi
+# Aggressively clear OPCache - critical for seeing changes immediately after deployment
+echo "Aggressively clearing OPCache..."
+php -r "
+if (function_exists('opcache_reset')) {
+    opcache_reset();
+    echo '✓ OPCache reset successfully\n';
+} else {
+    echo '⚠ OPCache not available\n';
+}
+
+// Invalidate all cached files in common directories
+if (function_exists('opcache_invalidate')) {
+    \$dirs = [
+        '/var/www/html/app',
+        '/var/www/html/config',
+        '/var/www/html/routes',
+        '/var/www/html/resources/views',
+        '/var/www/html/Modules'
+    ];
+    
+    \$invalidated = 0;
+    foreach (\$dirs as \$dir) {
+        if (is_dir(\$dir)) {
+            \$iterator = new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator(\$dir, RecursiveDirectoryIterator::SKIP_DOTS),
+                RecursiveIteratorIterator::SELF_FIRST
+            );
+            
+            foreach (\$iterator as \$file) {
+                if (\$file->isFile() && \$file->getExtension() === 'php') {
+                    if (opcache_invalidate(\$file->getRealPath(), true)) {
+                        \$invalidated++;
+                    }
+                }
+            }
+        }
+    }
+    echo \"✓ Invalidated OPCache for \$invalidated PHP files\n\";
+}
+" || true
 
 # Run database migrations
 echo "Running database migrations..."

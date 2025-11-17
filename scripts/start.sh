@@ -62,18 +62,46 @@ rm -rf bootstrap/cache/*.php 2>/dev/null || true
 # Keep the .gitignore file
 touch bootstrap/cache/.gitignore 2>/dev/null || true
 
-# Clear opcache if available (for PHP-FPM or mod_php)
-echo "Clearing OPCache..."
-php -r "if (function_exists('opcache_reset')) { opcache_reset(); echo 'OPCache cleared successfully\n'; } else { echo 'OPCache not available\n'; }" || true
+# Aggressively clear OPCache - this is critical for seeing changes immediately
+echo "Aggressively clearing OPCache..."
+php -r "
+if (function_exists('opcache_reset')) {
+    opcache_reset();
+    echo '✓ OPCache reset successfully\n';
+} else {
+    echo '⚠ OPCache not available\n';
+}
 
-# Also invalidate opcache for all files
-php -r "if (function_exists('opcache_invalidate')) {
-    \$files = get_included_files();
-    foreach (\$files as \$file) {
-        opcache_invalidate(\$file, true);
+// Invalidate all cached files in common directories
+if (function_exists('opcache_invalidate')) {
+    \$dirs = [
+        '/var/www/html/app',
+        '/var/www/html/config',
+        '/var/www/html/routes',
+        '/var/www/html/resources/views',
+        '/var/www/html/Modules'
+    ];
+    
+    \$invalidated = 0;
+    foreach (\$dirs as \$dir) {
+        if (is_dir(\$dir)) {
+            \$iterator = new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator(\$dir, RecursiveDirectoryIterator::SKIP_DOTS),
+                RecursiveIteratorIterator::SELF_FIRST
+            );
+            
+            foreach (\$iterator as \$file) {
+                if (\$file->isFile() && \$file->getExtension() === 'php') {
+                    if (opcache_invalidate(\$file->getRealPath(), true)) {
+                        \$invalidated++;
+                    }
+                }
+            }
+        }
     }
-    echo 'OPCache invalidated for loaded files\n';
-}" || true
+    echo \"✓ Invalidated OPCache for \$invalidated PHP files\n\";
+}
+" || true
 # =======
 # # Optionally warm caches to speed up responses
 # echo "Rebuilding optimized caches..."

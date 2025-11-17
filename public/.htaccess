@@ -26,9 +26,19 @@
 
 # Cache Control Headers for Static Assets
 <IfModule mod_headers.c>
-    # Disable caching for HTML files in development
+    # Aggressively disable caching for HTML files (both development and production)
+    # This ensures changes are reflected immediately without browser/proxy caching
     <FilesMatch "\.(html|htm)$">
-        Header set Cache-Control "no-cache, no-store, must-revalidate"
+        Header set Cache-Control "no-cache, no-store, must-revalidate, max-age=0, private"
+        Header set Pragma "no-cache"
+        Header set Expires "0"
+        Header unset ETag
+        Header unset Last-Modified
+    </FilesMatch>
+    
+    # Also prevent caching of index.php responses (Laravel routes)
+    <FilesMatch "^index\.php$">
+        Header set Cache-Control "no-cache, no-store, must-revalidate, max-age=0, private"
         Header set Pragma "no-cache"
         Header set Expires "0"
     </FilesMatch>

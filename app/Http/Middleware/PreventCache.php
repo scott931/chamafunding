@@ -17,14 +17,21 @@ class PreventCache
     {
         $response = $next($request);
 
-        // Only apply in local/development environment
-        if (app()->environment('local')) {
-            // Prevent caching of HTML responses
-            if ($response->headers->get('Content-Type') && str_contains($response->headers->get('Content-Type'), 'text/html')) {
-                $response->headers->set('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0');
-                $response->headers->set('Pragma', 'no-cache');
-                $response->headers->set('Expires', '0');
-            }
+        // Apply aggressive cache prevention in both local and production
+        // This ensures changes are reflected immediately without browser caching
+        $isHtml = $response->headers->get('Content-Type') && str_contains($response->headers->get('Content-Type'), 'text/html');
+        
+        if ($isHtml) {
+            // Aggressive cache prevention headers
+            $response->headers->set('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0, private');
+            $response->headers->set('Pragma', 'no-cache');
+            $response->headers->set('Expires', '0');
+            $response->headers->set('Last-Modified', gmdate('D, d M Y H:i:s') . ' GMT');
+            $response->headers->set('ETag', md5($response->getContent() . time()));
+            
+            // Additional headers to prevent proxy caching
+            $response->headers->set('X-Accel-Expires', '0');
+            $response->headers->set('Vary', 'Accept-Encoding');
         }
 
         return $response;
