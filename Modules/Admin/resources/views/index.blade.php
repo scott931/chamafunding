@@ -824,7 +824,7 @@
             <!-- Top Row: 4 Key KPI Cards -->
             <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
                 <!-- Total Platform Raised -->
-                <div class="group relative bg-gradient-to-br from-emerald-500 via-emerald-600 to-emerald-700 rounded-2xl p-5 sm:p-6 lg:p-7 shadow-xl shadow-emerald-500/30 hover:shadow-2xl hover:shadow-emerald-500/40 transition-all duration-300 transform hover:scale-[1.02] hover:-translate-y-1 border border-emerald-400/30 overflow-hidden min-w-0">
+                <div class="group relative bg-emerald-600 rounded-2xl p-5 sm:p-6 lg:p-7 shadow-xl shadow-emerald-500/30 hover:shadow-2xl hover:shadow-emerald-500/40 transition-all duration-300 transform hover:scale-[1.02] hover:-translate-y-1 border border-emerald-400/30 overflow-hidden min-w-0">
                     <!-- Decorative background pattern -->
                     <div class="absolute inset-0 opacity-10">
                         <div class="absolute top-0 right-0 w-32 h-32 bg-white rounded-full -mr-16 -mt-16"></div>
@@ -856,7 +856,7 @@
                 </div>
 
                 <!-- Active Campaigns -->
-                <a href="{{ route('admin.campaigns.index', ['status' => 'active']) }}" class="group relative bg-gradient-to-br from-indigo-500 via-indigo-600 to-blue-600 rounded-2xl p-5 sm:p-6 lg:p-7 shadow-xl shadow-indigo-500/30 hover:shadow-2xl hover:shadow-indigo-500/40 transition-all duration-300 transform hover:scale-[1.02] hover:-translate-y-1 border border-indigo-400/30 overflow-hidden min-w-0">
+                <a href="{{ route('admin.campaigns.index', ['status' => 'active']) }}" class="group relative bg-indigo-600 rounded-2xl p-5 sm:p-6 lg:p-7 shadow-xl shadow-indigo-500/30 hover:shadow-2xl hover:shadow-indigo-500/40 transition-all duration-300 transform hover:scale-[1.02] hover:-translate-y-1 border border-indigo-400/30 overflow-hidden min-w-0">
                     <!-- Decorative background pattern -->
                     <div class="absolute inset-0 opacity-10">
                         <div class="absolute top-0 right-0 w-32 h-32 bg-white rounded-full -mr-16 -mt-16"></div>
@@ -888,7 +888,7 @@
                 </a>
 
                 <!-- Total Backers -->
-                <div class="group relative bg-gradient-to-br from-purple-500 via-purple-600 to-pink-600 rounded-2xl p-5 sm:p-6 lg:p-7 shadow-xl shadow-purple-500/30 hover:shadow-2xl hover:shadow-purple-500/40 transition-all duration-300 transform hover:scale-[1.02] hover:-translate-y-1 border border-purple-400/30 overflow-hidden min-w-0">
+                <div class="group relative bg-purple-600 rounded-2xl p-5 sm:p-6 lg:p-7 shadow-xl shadow-purple-500/30 hover:shadow-2xl hover:shadow-purple-500/40 transition-all duration-300 transform hover:scale-[1.02] hover:-translate-y-1 border border-purple-400/30 overflow-hidden min-w-0">
                     <!-- Decorative background pattern -->
                     <div class="absolute inset-0 opacity-10">
                         <div class="absolute top-0 right-0 w-32 h-32 bg-white rounded-full -mr-16 -mt-16"></div>
@@ -919,7 +919,7 @@
                     </div>
                 </div>
                 <!-- This Month Contributions -->
-                <div class="group relative bg-gradient-to-br from-teal-500 via-cyan-600 to-blue-600 rounded-2xl p-5 sm:p-6 lg:p-7 shadow-xl shadow-teal-500/30 hover:shadow-2xl hover:shadow-teal-500/40 transition-all duration-300 transform hover:scale-[1.02] hover:-translate-y-1 border border-teal-400/30 overflow-hidden min-w-0">
+                <div class="group relative bg-teal-600 rounded-2xl p-5 sm:p-6 lg:p-7 shadow-xl shadow-teal-500/30 hover:shadow-2xl hover:shadow-teal-500/40 transition-all duration-300 transform hover:scale-[1.02] hover:-translate-y-1 border border-teal-400/30 overflow-hidden min-w-0">
                     <!-- Decorative background pattern -->
                     <div class="absolute inset-0 opacity-10">
                         <div class="absolute top-0 right-0 w-32 h-32 bg-white rounded-full -mr-16 -mt-16"></div>
@@ -956,7 +956,7 @@
             <!-- Middle Row: Left (Contributions with Chart) & Right (Two Cards) -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-6 lg:gap-8">
                 <!-- Left: Contributions Card with Funding Over Time Chart -->
-                <div class="lg:col-span-2 bg-gradient-to-br from-white to-slate-50/80 backdrop-blur-xl rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-300/60 p-5 sm:p-6 lg:p-7 hover:shadow-xl transition-shadow duration-300 flex flex-col min-w-0">
+                <div class="lg:col-span-2 bg-white backdrop-blur-xl rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-300/60 p-5 sm:p-6 lg:p-7 hover:shadow-xl transition-shadow duration-300 flex flex-col min-w-0">
                     <div class="mb-7">
                         <h3 class="text-2xl sm:text-3xl font-bold text-slate-800 mb-3">Contributions</h3>
                         <p class="text-4xl sm:text-5xl font-bold text-indigo-700 drop-shadow-sm">${{ number_format($stats['contributions_this_month'] / 1000, 0) }}K</p>
@@ -1013,7 +1013,7 @@
                 <!-- Right: Two Cards -->
                 <div class="space-y-5 sm:space-y-6 flex flex-col min-w-0">
                     <!-- Campaign Status Distribution -->
-                    <div class="bg-gradient-to-br from-slate-50 to-slate-100/80 backdrop-blur-xl rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-300/60 p-6 sm:p-7 hover:shadow-xl transition-shadow duration-300 flex flex-col min-w-0">
+                    <div class="bg-slate-50 backdrop-blur-xl rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-300/60 p-6 sm:p-7 hover:shadow-xl transition-shadow duration-300 flex flex-col min-w-0">
                         <div class="flex items-center justify-between mb-4">
                             <h3 class="text-lg sm:text-xl font-bold text-slate-800">Campaign Status</h3>
                             <span class="text-xs font-semibold text-slate-700 bg-white/80 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-sm border border-slate-200/60">
@@ -1038,7 +1038,7 @@
                     </div>
 
                     <!-- Top Categories -->
-                    <div class="bg-gradient-to-br from-slate-50 to-slate-100/80 backdrop-blur-xl rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-300/60 p-6 sm:p-7 hover:shadow-xl transition-shadow duration-300 flex flex-col min-w-0">
+                    <div class="bg-slate-50 backdrop-blur-xl rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-300/60 p-6 sm:p-7 hover:shadow-xl transition-shadow duration-300 flex flex-col min-w-0">
                         <div class="flex items-center justify-between mb-4">
                             <h3 class="text-lg sm:text-xl font-bold text-slate-800">Top Categories</h3>
                             <span class="text-xs font-semibold text-slate-700 bg-white/80 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-sm border border-slate-200/60">
