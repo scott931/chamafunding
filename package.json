@@ -6,7 +6,11 @@
         "build": "vite build",
         "build:all": "npm run build && npm run build:modules",
         "build:modules": "node scripts/build-modules.js",
-        "dev": "vite"
+        "dev": "vite",
+        "dev:frontend": "cd frontend && npm run dev",
+        "dev:all": "concurrently \"npm run dev\" \"npm run dev:frontend\"",
+        "build:frontend": "cd frontend && npm run build",
+        "install:frontend": "cd frontend && npm install"
     },
     "devDependencies": {
         "@tailwindcss/forms": "^0.5.2",

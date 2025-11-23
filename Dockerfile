@@ -80,6 +80,21 @@ RUN chown -R www-data:www-data /var/www/html \
 # Install Node dependencies and build assets (main app + all modules)
 RUN chmod +x /var/www/html/scripts/build-assets.sh && /var/www/html/scripts/build-assets.sh
 
+# Build Next.js frontend (if frontend directory exists)
+RUN if [ -d "frontend" ]; then \
+        echo "Building Next.js frontend..." && \
+        cd frontend && \
+        if [ -f "package-lock.json" ]; then \
+            npm ci; \
+        else \
+            npm install; \
+        fi && \
+        npm run build && \
+        cd ..; \
+    else \
+        echo "Frontend directory not found, skipping Next.js build"; \
+    fi
+
 # Copy Apache configuration
 COPY docker/apache-config.conf /etc/apache2/sites-available/000-default.conf
 

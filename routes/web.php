@@ -5,142 +5,30 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\TestMail;
 
-Route::get('/', function () {
-    // Output directly to stderr first to ensure we see it
-    error_log('=== ROOT ROUTE ACCESSED ===');
-    
-    // Log that we're entering the root route
-    \Log::debug('Root route accessed');
-    
-    try {
-        // Check if user is authenticated (handle database/session errors gracefully)
-        $isAuthenticated = false;
-        try {
-            \Log::debug('Checking authentication...');
-            $isAuthenticated = auth()->check();
-            \Log::debug('Auth check result: ' . ($isAuthenticated ? 'authenticated' : 'not authenticated'));
-        } catch (\Exception $authException) {
-            // Log authentication check errors but don't fail
-            \Log::error('Auth check failed in root route: ' . $authException->getMessage(), [
-                'exception' => $authException,
-                'file' => $authException->getFile(),
-                'line' => $authException->getLine(),
-                'trace' => $authException->getTraceAsString(),
-            ]);
-            // Also output to stderr directly
-            error_log('ROOT ROUTE AUTH ERROR: ' . $authException->getMessage());
-            // Continue to login page
-        }
-        
-        if ($isAuthenticated) {
-            try {
-                \Log::debug('Getting authenticated user...');
-                $user = auth()->user();
-                if ($user) {
-                    \Log::debug('User found: ' . $user->id);
-                    // Redirect admin users to admin dashboard
-                    try {
-                        if ($user->isAdmin()) {
-                            \Log::debug('User is admin, redirecting to admin.index');
-                            return redirect()->route('admin.index');
-                        }
-                        // Redirect regular users to backer dashboard
-                        \Log::debug('User is not admin, redirecting to backer.dashboard');
-                        return redirect()->route('backer.dashboard');
-                    } catch (\Exception $redirectException) {
-                        \Log::error('Redirect failed: ' . $redirectException->getMessage(), [
-                            'exception' => $redirectException,
-                        ]);
-                        error_log('ROOT ROUTE REDIRECT ERROR: ' . $redirectException->getMessage());
-                        // Fall through to login
-                    }
-                }
-            } catch (\Exception $userException) {
-                // Log user-related errors but don't fail
-                \Log::error('User check failed in root route: ' . $userException->getMessage(), [
-                    'exception' => $userException,
-                    'file' => $userException->getFile(),
-                    'line' => $userException->getLine(),
-                    'trace' => $userException->getTraceAsString(),
-                ]);
-                error_log('ROOT ROUTE USER ERROR: ' . $userException->getMessage());
-                // Fall through to login
-            }
-        }
-    } catch (\Throwable $e) {
-        // Catch any other unexpected errors
-        \Log::error('Unexpected error in root route: ' . $e->getMessage(), [
-            'exception' => $e,
-            'file' => $e->getFile(),
-            'line' => $e->getLine(),
-            'trace' => $e->getTraceAsString(),
-        ]);
-        error_log('ROOT ROUTE UNEXPECTED ERROR: ' . $e->getMessage());
-        // Fall through to redirect to login
-    }
-    
-    // Always redirect to login if not authenticated or on error
-    try {
-        \Log::debug('Redirecting to login page');
-        return redirect()->route('login');
-    } catch (\Exception $routeException) {
-        // If even the login route fails, return a simple response
-        \Log::error('Login route failed: ' . $routeException->getMessage(), [
-            'exception' => $routeException,
-            'file' => $routeException->getFile(),
-            'line' => $routeException->getLine(),
-        ]);
-        error_log('ROOT ROUTE LOGIN ROUTE ERROR: ' . $routeException->getMessage());
-        return response('Service temporarily unavailable. Please try again later.', 503);
-    }
+// API-only routes - frontend is handled by Next.js
+// Health check endpoint (used by Render)
+Route::get('/up', function () {
+    return response()->json(['status' => 'ok']);
 });
 
-Route::get('/dashboard', function () {
-    // Redirect admin users to admin dashboard
-    if (auth()->user()->isAdmin()) {
-        return redirect()->route('admin.index');
-    }
-    // Redirect regular users to backer dashboard
-    return redirect()->route('backer.dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
-
-Route::get('/backer/dashboard', function () {
-    // Redirect admin users to admin dashboard
-    $user = auth()->user();
-    if ($user && $user->isAdmin()) {
-        return redirect()->route('admin.index');
-    }
-    return view('backer.dashboard');
-})->middleware(['auth', 'verified'])->name('backer.dashboard');
-
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    // Protected test mail route (restricted to admin roles)
-    Route::get('/admin/test-mail', function () {
-        $user = auth()->user();
-        if (!$user || ! $user->isAdmin()) {
-            abort(403);
-        }
-
-        Mail::to($user->email)->send(new TestMail());
-        return back()->with('status', 'Test email sent to '.$user->email);
-    })->name('admin.test-mail');
-});
-
-// PayPal Checkout Routes
-Route::get('/checkout', function () {
-    return view('payments.checkout');
-})->name('checkout');
-
-Route::get('/checkout/success', function () {
-    return view('payments::checkout-success', [
-        'orderId' => request('order_id'),
-        'amount' => request('amount'),
-        'currency' => request('currency')
+// Serve Next.js static files and handle SPA routing
+Route::get('/{any}', function () {
+    // In production, Next.js will be served via reverse proxy or static files
+    // For now, return a simple response indicating API is available
+    return response()->json([
+        'message' => 'ChamaFunding API',
+        'version' => '1.0.0',
+        'frontend' => 'Next.js application should be served separately'
     ]);
-})->name('checkout.success');
+})->where('any', '^(?!api|up).*');
+
+// Dashboard routes removed - handled by Next.js frontend
+// These routes are now API-only
+
+// Profile routes removed - handled by Next.js frontend
+// API endpoints for profile are in API routes
+
+// Checkout routes removed - handled by Next.js frontend
 
 // Route to clear all caches including OPCache (works in both local and production)
 Route::get('/dev/clear-cache', function () {

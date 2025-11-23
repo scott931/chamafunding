@@ -1,30 +1,24 @@
-*.log
-.DS_Store
+/node_modules
+/public/hot
+/public/storage
+/public/build
+/storage/*.key
+/vendor
 .env
 .env.backup
 .env.production
-.env.example
-.phpactor.json
 .phpunit.result.cache
-/.fleet
-/.idea
-/.nova
-/.phpunit.cache
-/.vscode
-/.zed
-/auth.json
-/node_modules
-/public/build
-/public/hot
-/public/storage
-/storage/*.key
-/storage/pail
-/vendor
 Homestead.json
 Homestead.yaml
-Thumbs.db
+auth.json
+npm-debug.log
+yarn-error.log
+/.fleet
+/.idea
+/.vscode
 
-# PHP version helper scripts (local development tools)
-use-php82.ps1
-use-php82.sh
-verify-php-upgrade.ps1
+# Next.js
+/frontend/.next
+/frontend/out
+/frontend/node_modules
+/frontend/.env*.local
