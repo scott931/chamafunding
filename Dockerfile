@@ -45,8 +45,10 @@ RUN echo "opcache.enable=1" >> /usr/local/etc/php/conf.d/docker-php-ext-opcache.
 # This ensures Docker doesn't use cached layers when we need fresh builds
 ARG BUILD_DATE=unknown
 ARG BUILD_VERSION=unknown
+ARG CACHE_BUST=1
 LABEL build.date="${BUILD_DATE}" \
-      build.version="${BUILD_VERSION}"
+      build.version="${BUILD_VERSION}" \
+      cache.bust="${CACHE_BUST}"
 
 # Copy composer files first for better layer caching
 # This layer will only rebuild if composer.json or composer.lock changes
@@ -55,8 +57,25 @@ COPY composer.json composer.lock ./
 # Install PHP dependencies (cached unless composer files change)
 RUN composer install --no-dev --no-interaction --prefer-dist --no-autoloader
 
-# Copy application files (this layer gets cached separately)
+# Generate a unique build identifier to bust cache
+# This ensures application files are always fresh on each deployment
+RUN BUILD_ID=$(date +%s)-$(head -c 8 /dev/urandom | base64 | tr -d "=+/" | cut -c1-8) && \
+    echo "BUILD_ID=${BUILD_ID}" > /tmp/.build-id && \
+    echo "BUILD_TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> /tmp/.build-id && \
+    echo "Generated build ID: ${BUILD_ID}"
+
+# Copy application files
+# IMPORTANT: If changes aren't appearing on Render, use "Clear build cache & deploy" in Render Dashboard
+# This forces Docker to rebuild this layer instead of using cached files
 COPY . /var/www/html
+
+# Verify build and show information
+RUN echo "=== Build Information ===" && \
+    cat /tmp/.build-id && \
+    echo "Files copied at: $(date -u +"%Y-%m-%dT%H:%M:%SZ")" && \
+    echo "PHP files count: $(find /var/www/html -name '*.php' -type f 2>/dev/null | wc -l)" && \
+    echo "Last modified file: $(find /var/www/html/app -name '*.php' -type f -exec stat -c '%y %n' {} \; 2>/dev/null | sort -r | head -1 || echo 'N/A')" && \
+    echo "=== End Build Information ==="
 
 # Set minimal environment for package discovery (Laravel needs APP_KEY during service provider discovery)
 # Create a temporary .env if it doesn't exist to prevent errors during package:discover

@@ -20,12 +20,16 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin.role' => \Modules\Admin\Http\Middleware\EnsureUserHasAdminRole::class,
         ]);
 
-        // Prevent caching in local/development environment
-        if (Env::get('APP_ENV') === 'local') {
-            $middleware->web(append: [
-                \App\Http\Middleware\PreventCache::class,
-            ]);
-        }
+        // Prevent caching in all environments for authenticated routes and API
+        // This ensures logout works properly and prevents back button access
+        $middleware->web(append: [
+            \App\Http\Middleware\PreventCache::class,
+        ]);
+        
+        // Also apply to API routes
+        $middleware->api(append: [
+            \App\Http\Middleware\PreventCache::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // Log all exceptions to help with debugging

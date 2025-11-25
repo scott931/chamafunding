@@ -49,10 +49,47 @@ export const authApi = {
     try {
       await apiClient.post('/v1/auth/logout');
     } finally {
+      // Clear all authentication-related cookies
       Cookies.remove('auth_token');
       Cookies.remove('token');
+      Cookies.remove('XSRF-TOKEN');
+      
+      // Clear all cookies that might be set by the application
+      if (typeof document !== 'undefined' && typeof window !== 'undefined') {
+        // Get all cookies and clear them
+        document.cookie.split(';').forEach((cookie) => {
+          const eqPos = cookie.indexOf('=');
+          const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
+          // Clear cookies that might be related to auth/session
+          if (name.includes('auth') || name.includes('token') || name.includes('session') || name.includes('csrf')) {
+            Cookies.remove(name);
+            // Also try to clear with different path/domain combinations
+            Cookies.remove(name, { path: '/' });
+            try {
+              Cookies.remove(name, { path: '/', domain: window.location.hostname });
+            } catch (e) {
+              // Ignore domain-related errors
+            }
+          }
+        });
+      }
+      
       if (typeof window !== 'undefined') {
-        window.location.href = '/login';
+        // Clear browser cache and prevent back button
+        // Replace current history entry to prevent back navigation
+        window.history.replaceState(null, '', '/login');
+        
+        // Clear any cached data
+        if ('caches' in window) {
+          caches.keys().then((names) => {
+            names.forEach((name) => {
+              caches.delete(name);
+            });
+          });
+        }
+        
+        // Force redirect to login with cache busting
+        window.location.href = '/login?logout=' + Date.now();
       }
     }
   },
@@ -74,7 +111,7 @@ export const authApi = {
 
   async getUser(): Promise<any> {
     const response = await apiClient.get('/v1/auth/user');
-    return response.data.data;
+    return response.data?.data?.user ?? response.data?.data ?? response.data ?? null;
   },
 };
 

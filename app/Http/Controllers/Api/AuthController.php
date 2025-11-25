@@ -25,9 +25,6 @@ class AuthController extends Controller
 
         $user = auth()->user();
         $user->load('roles');
-        
-        // Add is_admin property for frontend
-        $user->setAttribute('is_admin', $user->isAdmin());
 
         return response()->json([
             'success' => true,
@@ -70,9 +67,6 @@ class AuthController extends Controller
 
         Auth::login($user);
         $user->load('roles');
-        
-        // Add is_admin property for frontend
-        $user->setAttribute('is_admin', $user->isAdmin());
 
         return response()->json([
             'success' => true,
@@ -98,9 +92,6 @@ class AuthController extends Controller
         }
 
         $user->load('roles');
-        
-        // Add is_admin property for frontend
-        $user->setAttribute('is_admin', $user->isAdmin());
 
         return response()->json([
             'success' => true,
@@ -120,10 +111,40 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return response()->json([
+        // Clear all cookies related to authentication
+        $response = response()->json([
             'success' => true,
             'message' => 'Logged out successfully',
         ]);
+
+        // Set aggressive cache prevention headers
+        $response->headers->set('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0, private');
+        $response->headers->set('Pragma', 'no-cache');
+        $response->headers->set('Expires', '0');
+        $response->headers->set('X-Accel-Expires', '0');
+        
+        // Clear session cookie by setting it to expire immediately
+        $sessionCookieName = config('session.cookie', 'laravel_session');
+        $response->headers->clearCookie(
+            $sessionCookieName,
+            config('session.path', '/'),
+            config('session.domain'),
+            config('session.secure', false),
+            config('session.http_only', true),
+            config('session.same_site', 'lax')
+        );
+        
+        // Clear XSRF-TOKEN cookie
+        $response->headers->clearCookie(
+            'XSRF-TOKEN',
+            '/',
+            config('session.domain'),
+            config('session.secure', false),
+            false, // httpOnly must be false for XSRF-TOKEN
+            config('session.same_site', 'lax')
+        );
+
+        return $response;
     }
 }
 

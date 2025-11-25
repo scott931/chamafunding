@@ -22,3 +22,10 @@ yarn-error.log
 /frontend/out
 /frontend/node_modules
 /frontend/.env*.local
+
+# Docker build cache busting files
+.docker-cache-bust
+.docker-cache-bust.*
+
+/database/*.sqlite
+/database/*.sqlite.*

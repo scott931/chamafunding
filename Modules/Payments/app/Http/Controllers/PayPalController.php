@@ -7,12 +7,21 @@ use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\JsonResponse;
+use App\Models\PlatformSetting;
 
 class PayPalController extends Controller
 {
     protected function baseUrl(): string
     {
-        $mode = config('services.paypal.mode', 'sandbox');
+        // Check PlatformSetting first, then config, then env
+        $mode = PlatformSetting::getString('payment_gateways.paypal_mode', '');
+        if (empty($mode)) {
+            $mode = config('services.paypal.mode', 'sandbox');
+        }
+        if (empty($mode)) {
+            $mode = env('PAYPAL_MODE', 'sandbox');
+        }
+        
         return $mode === 'live'
             ? 'https://api-m.paypal.com'
             : 'https://api-m.sandbox.paypal.com';
@@ -39,11 +48,19 @@ class PayPalController extends Controller
 
     protected function getAccessToken(): string
     {
-        // Get credentials from config with fallback
-        $clientId = config('services.paypal.client_id');
-        $secret = config('services.paypal.client_secret');
+        // Priority 1: Get credentials from PlatformSetting (database) - where admin settings are stored
+        $clientId = PlatformSetting::getString('payment_gateways.paypal_client_id', '');
+        $secret = PlatformSetting::getString('payment_gateways.paypal_secret', '');
 
-        // Fallback to env variables if config is empty
+        // Priority 2: Fallback to config/services.php (reads from .env)
+        if (empty($clientId)) {
+            $clientId = config('services.paypal.client_id');
+        }
+        if (empty($secret)) {
+            $secret = config('services.paypal.client_secret');
+        }
+
+        // Priority 3: Fallback to env variables directly
         if (empty($clientId)) {
             $clientId = env('PAYPAL_CLIENT_ID');
         }
@@ -51,7 +68,7 @@ class PayPalController extends Controller
             $secret = env('PAYPAL_CLIENT_SECRET');
         }
 
-        // Final fallback to hardcoded test credentials (for development only)
+        // Priority 4: Final fallback to hardcoded test credentials (for development only)
         if (empty($clientId)) {
             $clientId = 'AT16jl6nE2hAKGojRWT8_NsI7iVHl79Q_A7nNkysNVC_M2X0AYHbE_YKD7_YLcXs9X1BkMm7nXo2nEwt';
         }

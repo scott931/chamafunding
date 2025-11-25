@@ -8,6 +8,9 @@ services:
     plan: starter
     region: oregon
     buildCommand: ""
+    # IMPORTANT: To ensure changes are reflected, use "Clear build cache & deploy" in Render Dashboard
+    # This forces Docker to rebuild all layers instead of using cached layers
+    # Alternative: Use Render CLI: render services:deploy chamafunding-web --clear-cache
     envVars:
       - key: APP_NAME
         value: ChamaFunding

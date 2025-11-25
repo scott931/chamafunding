@@ -50,6 +50,15 @@ class User extends Authenticatable
     ];
 
     /**
+     * The accessors to append to the model's array form.
+     *
+     * @var array<string>
+     */
+    protected $appends = [
+        'is_admin',
+    ];
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
@@ -176,5 +185,15 @@ class User extends Authenticatable
         }
 
         return $this->hasAnyRole(self::getAdminRoles());
+    }
+
+    /**
+     * Get the is_admin attribute (accessor for JSON serialization).
+     *
+     * @return bool
+     */
+    public function getIsAdminAttribute(): bool
+    {
+        return $this->isAdmin();
     }
 }

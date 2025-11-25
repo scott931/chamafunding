@@ -1,19 +1,40 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, FormEvent, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { authApi } from '@/lib/api/auth';
 import { isAdmin } from '@/lib/utils';
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [remember, setRemember] = useState(false);
   const [errors, setErrors] = useState<{ email?: string[]; password?: string[] }>({});
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
+
+  // Prevent back button navigation after logout
+  useEffect(() => {
+    // Replace current history entry to prevent back navigation to protected pages
+    if (typeof window !== 'undefined') {
+      window.history.replaceState(null, '', window.location.pathname);
+      
+      // Listen for popstate (back/forward button)
+      const handlePopState = (event: PopStateEvent) => {
+        // If user tries to go back, replace with current page
+        window.history.pushState(null, '', window.location.pathname);
+      };
+      
+      window.addEventListener('popstate', handlePopState);
+      
+      return () => {
+        window.removeEventListener('popstate', handlePopState);
+      };
+    }
+  }, []);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();

@@ -13,6 +13,32 @@ const nextConfig = {
       },
     ];
   },
+  async headers() {
+    return [
+      {
+        // Apply cache prevention headers to all routes
+        source: '/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-cache, no-store, must-revalidate, max-age=0, private',
+          },
+          {
+            key: 'Pragma',
+            value: 'no-cache',
+          },
+          {
+            key: 'Expires',
+            value: '0',
+          },
+          {
+            key: 'X-Accel-Expires',
+            value: '0',
+          },
+        ],
+      },
+    ];
+  },
 };
 
 module.exports = nextConfig;

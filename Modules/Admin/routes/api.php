@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\Admin\Http\Controllers\AdminController;
+use App\Http\Controllers\Api\AdminNotificationsController;
 
 Route::middleware(['web', 'auth'])->prefix('v1')->group(function () {
     // Admin Dashboard Statistics
@@ -12,4 +13,9 @@ Route::middleware(['web', 'auth'])->prefix('v1')->group(function () {
     Route::get('admin/transaction-notifications', [AdminController::class, 'transactionNotifications'])->name('admin.transaction-notifications');
     Route::post('admin/notifications/{campaignId}/mark-read', [AdminController::class, 'markNotificationRead'])->name('admin.notifications.mark-read');
     Route::post('admin/notifications/mark-all-read', [AdminController::class, 'markAllNotificationsRead'])->name('admin.notifications.mark-all-read');
+    
+    // New notifications routes
+    Route::get('admin/notifications/transactions', [AdminNotificationsController::class, 'transactions'])->name('admin.notifications.transactions');
+    Route::get('admin/notifications/support', [AdminNotificationsController::class, 'support'])->name('admin.notifications.support');
+    Route::get('admin/notifications/all', [AdminNotificationsController::class, 'all'])->name('admin.notifications.all');
 });
