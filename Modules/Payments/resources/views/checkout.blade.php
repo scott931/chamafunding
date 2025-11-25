@@ -6,7 +6,24 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Checkout - {{ config('app.name') }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="{{ config('services.paypal.' . config('services.paypal.mode') . '.js_sdk_url') }}?client-id={{ config('services.paypal.client_id') }}&currency=USD&intent=capture&enable-funding=venmo,paylater,card&disable-funding=credit"></script>
+    @php
+        // Get PayPal Client ID with proper fallback
+        $paypalClientId = config('services.paypal.client_id');
+        if (empty($paypalClientId)) {
+            $paypalClientId = env('PAYPAL_CLIENT_ID');
+        }
+        if (empty($paypalClientId)) {
+            // Fallback to hardcoded test client ID
+            $paypalClientId = 'AT16jl6nE2hAKGojRWT8_NsI7iVHl79Q_A7nNkysNVC_M2X0AYHbE_YKD7_YLcXs9X1BkMm7nXo2nEwt';
+        }
+        $paypalCurrency = $currency ?? 'USD';
+    @endphp
+    <!-- PayPal SDK with Venmo support -->
+    <script 
+        src="https://www.paypal.com/sdk/js?client-id={{ $paypalClientId }}&currency={{ $paypalCurrency }}&intent=capture&enable-funding=venmo,paypal"
+        onload="console.log('PayPal SDK loaded successfully');"
+        onerror="console.error('Failed to load PayPal SDK');">
+    </script>
 </head>
 <body class="bg-gray-50">
     <div class="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
@@ -52,6 +69,7 @@
                         <div class="text-center text-sm text-gray-500 mb-2">
                             Or pay with Venmo
                         </div>
+                        <div id="venmo-button-wrapper" class="w-full"></div>
                     </div>
                 </div>
 
@@ -129,57 +147,140 @@
         document.getElementById('order-description').textContent = config.description;
         document.getElementById('order-total').textContent = '$' + config.amount.toFixed(2);
 
-        // PayPal SDK configuration
-        paypal.Buttons({
-            style: {
-                layout: 'vertical',
-                color: 'blue',
-                shape: 'rect',
-                label: 'paypal',
-                height: 50
-            },
-            fundingSource: paypal.FUNDING.PAYPAL,
-            createOrder: function(data, actions) {
-                return createPayPalOrder();
-            },
-            onApprove: function(data, actions) {
-                return capturePayPalOrder(data.orderID);
-            },
-            onError: function(err) {
-                showError('PayPal payment failed: ' + err.message);
-            },
-            onCancel: function(data) {
-                showError('Payment was cancelled');
-            }
-        }).render('#paypal-button-container');
+        let retryCount = 0;
+        const maxRetries = 50; // 5 seconds max wait
 
-        // Venmo button (if available)
-        if (paypal.FUNDING.VENMO) {
-            paypal.Buttons({
-                style: {
-                    layout: 'vertical',
-                    color: 'blue',
-                    shape: 'rect',
-                    label: 'venmo',
-                    height: 50
-                },
-                fundingSource: paypal.FUNDING.VENMO,
-                createOrder: function(data, actions) {
-                    return createPayPalOrder();
-                },
-                onApprove: function(data, actions) {
-                    return capturePayPalOrder(data.orderID);
-                },
-                onError: function(err) {
-                    showError('Venmo payment failed: ' + err.message);
-                },
-                onCancel: function(data) {
-                    showError('Payment was cancelled');
+        // Wait for PayPal SDK to load
+        function initializePayPal() {
+            const container = document.getElementById('paypal-button-container');
+            const venmoContainer = document.getElementById('venmo-button-container');
+
+            if (typeof paypal === 'undefined') {
+                retryCount++;
+                if (retryCount >= maxRetries) {
+                    // Timeout - show error message
+                    if (container) {
+                        container.innerHTML = '<div class="text-red-600 text-sm p-3 bg-red-50 rounded border border-red-200">' +
+                            '<p class="font-semibold mb-1">Unable to load PayPal</p>' +
+                            '<p class="text-xs">The payment button could not be loaded. Please check your internet connection and try refreshing the page.</p>' +
+                            '<button onclick="window.location.reload()" class="mt-2 px-3 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700">Refresh Page</button>' +
+                            '</div>';
+                    }
+                    console.error('PayPal SDK failed to load after ' + maxRetries + ' attempts');
+                    return;
                 }
-            }).render('#venmo-button-container');
+                setTimeout(initializePayPal, 100);
+                return;
+            }
 
-            document.getElementById('venmo-button-container').classList.remove('hidden');
+            // Clear loading message
+            if (container) {
+                container.innerHTML = '';
+            }
+
+            try {
+                console.log('Initializing PayPal buttons...');
+                console.log('PayPal FUNDING available:', typeof paypal.FUNDING !== 'undefined' ? Object.keys(paypal.FUNDING) : 'undefined');
+                console.log('Venmo available:', typeof paypal.FUNDING !== 'undefined' && paypal.FUNDING.VENMO ? 'YES' : 'NO');
+
+                // PayPal Button Integration
+                paypal.Buttons({
+                    style: {
+                        layout: 'vertical',
+                        color: 'blue',
+                        shape: 'rect',
+                        label: 'paypal',
+                        height: 50
+                    },
+                    fundingSource: paypal.FUNDING.PAYPAL,
+                    createOrder: function(data, actions) {
+                        return createPayPalOrder();
+                    },
+                    onApprove: function(data, actions) {
+                        return capturePayPalOrder(data.orderID);
+                    },
+                    onError: function(err) {
+                        showError('PayPal payment failed: ' + err.message);
+                    },
+                    onCancel: function(data) {
+                        showError('Payment was cancelled');
+                    }
+                }).render('#paypal-button-container');
+
+                // Venmo button (if available)
+                if (typeof paypal.FUNDING !== 'undefined' && paypal.FUNDING.VENMO) {
+                    console.log('Attempting to render Venmo button...');
+                    paypal.Buttons({
+                        style: {
+                            layout: 'vertical',
+                            color: 'blue',
+                            shape: 'rect',
+                            label: 'venmo',
+                            height: 50
+                        },
+                        fundingSource: paypal.FUNDING.VENMO,
+                        createOrder: function(data, actions) {
+                            return createPayPalOrder();
+                        },
+                        onApprove: function(data, actions) {
+                            return capturePayPalOrder(data.orderID);
+                        },
+                        onError: function(err) {
+                            showError('Venmo payment failed: ' + err.message);
+                        },
+                        onCancel: function(data) {
+                            showError('Payment was cancelled');
+                        }
+                    }).render('#venmo-button-wrapper')
+                    .then(function() {
+                        // Show Venmo button container if button rendered successfully
+                        console.log('Venmo button rendered successfully');
+                        if (venmoContainer) {
+                            venmoContainer.classList.remove('hidden');
+                        }
+                    })
+                    .catch(function(err) {
+                        // Venmo not available - hide container
+                        console.log('Venmo button render failed:', err);
+                        if (venmoContainer) {
+                            venmoContainer.classList.add('hidden');
+                        }
+                    });
+                } else {
+                    // Venmo not available
+                    console.log('Venmo funding not available in this region/device');
+                    if (venmoContainer) {
+                        venmoContainer.classList.add('hidden');
+                    }
+                }
+            } catch (error) {
+                console.error('Error initializing PayPal:', error);
+                if (container) {
+                    container.innerHTML = '<div class="text-red-600 text-sm p-3 bg-red-50 rounded border border-red-200">' +
+                        '<p class="font-semibold mb-1">Initialization Error</p>' +
+                        '<p class="text-xs">' + error.message + '</p>' +
+                        '</div>';
+                }
+            }
         }
+
+        // Initialize when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                console.log('DOM loaded, initializing PayPal...');
+                initializePayPal();
+            });
+        } else {
+            console.log('DOM ready, initializing PayPal...');
+            initializePayPal();
+        }
+
+        // Also check if script loaded
+        window.addEventListener('load', function() {
+            if (typeof paypal === 'undefined') {
+                console.warn('PayPal SDK still not loaded after window load event');
+            }
+        });
 
         // Create PayPal order
         async function createPayPalOrder() {
@@ -187,29 +288,34 @@
                 showLoading(true);
                 hideMessages();
 
-                const response = await fetch(`${config.apiBaseUrl}/orders`, {
+                const response = await fetch(`${config.apiBaseUrl}/order`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': config.csrfToken,
-                        'Authorization': 'Bearer ' + getAuthToken()
+                        'Accept': 'application/json'
                     },
+                    credentials: 'same-origin',
                     body: JSON.stringify({
                         amount: config.amount,
                         currency: config.currency,
                         description: config.description,
-                        return_url: config.returnUrl,
-                        cancel_url: config.cancelUrl
+                        reference_id: 'CHECKOUT-' + Date.now()
                     })
                 });
 
-                const data = await response.json();
-
                 if (!response.ok) {
-                    throw new Error(data.error || 'Failed to create order');
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Failed to create order');
                 }
 
-                return data.order_id;
+                const data = await response.json();
+
+                // PayPal returns order with 'id' field
+                if (data.id) {
+                    return data.id;
+                }
+                throw new Error('Invalid order response from server');
             } catch (error) {
                 showError('Failed to create payment order: ' + error.message);
                 throw error;
@@ -224,22 +330,29 @@
                 showLoading(true);
                 hideMessages();
 
-                const response = await fetch(`${config.apiBaseUrl}/orders/${orderId}/capture`, {
+                const response = await fetch(`${config.apiBaseUrl}/capture`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': config.csrfToken,
-                        'Authorization': 'Bearer ' + getAuthToken()
-                    }
+                        'Accept': 'application/json'
+                    },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({
+                        orderId: orderId
+                    })
                 });
 
-                const data = await response.json();
-
                 if (!response.ok) {
-                    throw new Error(data.error || 'Failed to capture payment');
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Failed to capture payment');
                 }
 
-                showSuccess(data.order_id);
+                const data = await response.json();
+                
+                // Get order ID from response
+                const orderIdFromResponse = data.id || orderId;
+                showSuccess(orderIdFromResponse);
                 return data;
             } catch (error) {
                 showError('Payment capture failed: ' + error.message);
@@ -249,12 +362,6 @@
             }
         }
 
-        // Get authentication token (you may need to adjust this based on your auth setup)
-        function getAuthToken() {
-            // For demo purposes, we'll try to get from localStorage
-            // In production, you should get this from your auth system
-            return localStorage.getItem('auth_token') || 'demo-token';
-        }
 
         // UI helper functions
         function showLoading(show) {

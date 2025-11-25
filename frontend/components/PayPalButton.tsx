@@ -51,6 +51,9 @@ export default function PayPalButton({
 
   useEffect(() => {
     let script: HTMLScriptElement | null = null;
+    let isMounted = true;
+    let paypalButtonsInstance: any = null;
+    let venmoButtonsInstance: any = null;
 
     const loadPayPal = async () => {
       try {
@@ -59,85 +62,117 @@ export default function PayPalButton({
         // Check if PayPal SDK is already loaded
         if (window.paypal) {
           setPaypalLoaded(true);
-          initializePayPal(clientId);
+          // Wait a bit to ensure DOM is ready
+          setTimeout(() => initializePayPal(clientId), 100);
           return;
         }
 
-        // Load PayPal SDK
+        // Load PayPal SDK with Venmo support
         script = document.createElement('script');
-        script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=${currency}`;
+        script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=${currency}&intent=capture&enable-funding=venmo,paypal`;
         script.async = true;
         
         script.onload = () => {
-          setPaypalLoaded(true);
-          initializePayPal(clientId);
+          if (isMounted) {
+            setPaypalLoaded(true);
+            // Wait a bit to ensure DOM is ready
+            setTimeout(() => initializePayPal(clientId), 100);
+          }
         };
         
         script.onerror = () => {
-          setError('Failed to load PayPal SDK');
-          setLoading(false);
+          if (isMounted) {
+            setError('Failed to load PayPal SDK');
+            setLoading(false);
+          }
         };
         
         document.body.appendChild(script);
       } catch (err) {
         console.error('Error loading PayPal:', err);
-        setError('Failed to initialize PayPal');
-        setLoading(false);
+        if (isMounted) {
+          setError('Failed to initialize PayPal');
+          setLoading(false);
+        }
       }
     };
 
     const initializePayPal = (clientId: string) => {
-      if (!window.paypal || !paypalButtonContainerRef.current) {
+      // Check if component is still mounted and container exists
+      if (!isMounted || !window.paypal || !paypalButtonContainerRef.current) {
+        console.log('PayPal initialization skipped - container not ready or component unmounted');
+        return;
+      }
+
+      // Verify container is still in DOM
+      if (!document.body.contains(paypalButtonContainerRef.current)) {
+        console.error('Container element not in DOM');
+        if (isMounted) {
+          setError('Payment container not available');
+          setLoading(false);
+        }
         return;
       }
 
       try {
         // Clear any existing buttons
-        if (paypalInstanceRef.current) {
-          paypalInstanceRef.current.close();
+        if (paypalButtonsInstance) {
+          try {
+            paypalButtonsInstance.close();
+          } catch (e) {
+            // Ignore cleanup errors
+          }
         }
-        paypalButtonContainerRef.current.innerHTML = '';
+        if (venmoButtonsInstance) {
+          try {
+            venmoButtonsInstance.close();
+          } catch (e) {
+            // Ignore cleanup errors
+          }
+        }
 
-        window.paypal.Buttons({
-          style: {
-            layout: 'vertical',
-            color: 'blue',
-            shape: 'rect',
-            label: 'paypal',
-          },
-          createOrder: async (data: any, actions: any) => {
-            try {
-              const order = await paymentsApi.createPayPalOrder(
-                amount,
-                currency,
-                campaignTitle,
-                `CAMP-${campaignId}-${Date.now()}`
-              );
-              return order.id;
-            } catch (err: any) {
-              console.error('Error creating PayPal order:', err);
+        // Clear container
+        if (paypalButtonContainerRef.current) {
+          paypalButtonContainerRef.current.innerHTML = '';
+        }
+
+        const createOrderHandler = async (data: any, actions: any) => {
+          try {
+            const order = await paymentsApi.createPayPalOrder(
+              amount,
+              currency,
+              campaignTitle,
+              `CAMP-${campaignId}-${Date.now()}`
+            );
+            return order.id;
+          } catch (err: any) {
+            console.error('Error creating PayPal order:', err);
+            if (isMounted) {
               setError(err.response?.data?.message || 'Failed to create payment order');
-              throw err;
             }
-          },
-          onApprove: async (data: any, actions: any) => {
-            try {
-              // Capture the payment
-              const captureData = await paymentsApi.capturePayPalOrder(data.orderID);
-              
-              if (captureData.status === 'COMPLETED') {
-                const capture = captureData.purchase_units[0]?.payments?.captures[0];
-                
-                if (capture) {
-                  // Create contribution record
-                  const contribution = await paymentsApi.createContribution(campaignId, {
-                    amount: parseFloat(capture.amount.value),
-                    currency: capture.amount.currency_code,
-                    payment_processor: 'paypal',
-                    transaction_id: capture.id,
-                    status: 'succeeded',
-                  });
+            throw err;
+          }
+        };
 
+        const onApproveHandler = async (data: any, actions: any) => {
+          try {
+            // Capture the payment
+            const captureData = await paymentsApi.capturePayPalOrder(data.orderID);
+            
+            if (captureData.status === 'COMPLETED') {
+              const capture = captureData.purchase_units[0]?.payments?.captures[0];
+              
+              if (capture) {
+                // Create contribution record
+                const contribution = await paymentsApi.createContribution(campaignId, {
+                  amount: parseFloat(capture.amount.value),
+                  currency: capture.amount.currency_code,
+                  payment_processor: 'paypal',
+                  transaction_id: capture.id,
+                  status: 'succeeded',
+                });
+
+                if (isMounted) {
                   if (onSuccess) {
                     onSuccess({ contribution, capture: captureData });
                   } else {
@@ -147,42 +182,146 @@ export default function PayPalButton({
                   }
                 }
               }
-            } catch (err: any) {
-              console.error('Error capturing PayPal payment:', err);
+            }
+          } catch (err: any) {
+            console.error('Error capturing PayPal payment:', err);
+            if (isMounted) {
               setError(err.response?.data?.message || 'Failed to process payment');
               if (onError) {
                 onError(err);
               }
             }
-          },
-          onError: (err: any) => {
-            console.error('PayPal button error:', err);
+          }
+        };
+
+        const onErrorHandler = (err: any) => {
+          console.error('PayPal button error:', err);
+          if (isMounted) {
             setError('Payment failed. Please try again.');
             if (onError) {
               onError(err);
             }
-          },
-          onCancel: () => {
-            setError(null);
-          },
-        }).render(paypalButtonContainerRef.current);
+          }
+        };
 
-        setLoading(false);
+        // Render PayPal button
+        if (paypalButtonContainerRef.current && document.body.contains(paypalButtonContainerRef.current)) {
+          paypalButtonsInstance = window.paypal.Buttons({
+            style: {
+              layout: 'vertical',
+              color: 'blue',
+              shape: 'rect',
+              label: 'paypal',
+            },
+            fundingSource: window.paypal.FUNDING.PAYPAL,
+            createOrder: createOrderHandler,
+            onApprove: onApproveHandler,
+            onError: onErrorHandler,
+            onCancel: () => {
+              if (isMounted) {
+                setError(null);
+              }
+            },
+          });
+
+          paypalButtonsInstance.render(paypalButtonContainerRef.current).catch((err: any) => {
+            console.error('Error rendering PayPal button:', err);
+            if (isMounted) {
+              setError('Failed to render PayPal button');
+              setLoading(false);
+            }
+          });
+
+          // Render Venmo button if available
+          if (window.paypal.FUNDING && window.paypal.FUNDING.VENMO) {
+            // Find or create Venmo container
+            let venmoContainer = document.getElementById('venmo-button-container');
+            
+            if (venmoContainer && document.body.contains(venmoContainer)) {
+              // Show container
+              venmoContainer.style.display = 'block';
+              
+              venmoButtonsInstance = window.paypal.Buttons({
+                fundingSource: window.paypal.FUNDING.VENMO,
+                style: {
+                  layout: 'vertical',
+                  color: 'blue',
+                  shape: 'rect',
+                  height: 50,
+                },
+                createOrder: createOrderHandler,
+                onApprove: onApproveHandler,
+                onError: onErrorHandler,
+                onCancel: () => {
+                  if (isMounted) {
+                    setError(null);
+                  }
+                },
+              });
+
+              venmoButtonsInstance.render(venmoContainer)
+                .then(() => {
+                  console.log('Venmo button rendered successfully');
+                  if (venmoContainer) {
+                    venmoContainer.style.display = 'block';
+                  }
+                })
+                .catch((err: any) => {
+                  console.log('Venmo not available:', err);
+                  // Hide container if Venmo is not available
+                  if (venmoContainer) {
+                    venmoContainer.style.display = 'none';
+                  }
+                });
+            }
+          } else {
+            // Hide Venmo container if not available
+            const venmoContainer = document.getElementById('venmo-button-container');
+            if (venmoContainer) {
+              venmoContainer.style.display = 'none';
+            }
+          }
+        }
+
+        if (isMounted) {
+          setLoading(false);
+        }
       } catch (err) {
         console.error('Error initializing PayPal buttons:', err);
-        setError('Failed to initialize PayPal button');
-        setLoading(false);
+        if (isMounted) {
+          setError('Failed to initialize PayPal button');
+          setLoading(false);
+        }
       }
     };
 
     loadPayPal();
 
     return () => {
+      isMounted = false;
+      
+      // Cleanup PayPal button instances
+      if (paypalButtonsInstance) {
+        try {
+          paypalButtonsInstance.close();
+        } catch (e) {
+          // Ignore cleanup errors
+        }
+      }
+      if (venmoButtonsInstance) {
+        try {
+          venmoButtonsInstance.close();
+        } catch (e) {
+          // Ignore cleanup errors
+        }
+      }
+
+      // Remove script if still exists
       if (script && script.parentNode) {
         script.parentNode.removeChild(script);
       }
     };
-  }, [amount, currency, campaignId, campaignTitle]);
+  }, [amount, currency, campaignId, campaignTitle, onSuccess, onError]);
 
   if (error && !loading) {
     return (
@@ -211,6 +350,7 @@ export default function PayPalButton({
         </div>
       )}
       <div ref={paypalButtonContainerRef} className="min-h-[50px]"></div>
+      <div id="venmo-button-container" className="mt-4 min-h-[50px]" style={{ display: 'none' }}></div>
     </div>
   );
 }

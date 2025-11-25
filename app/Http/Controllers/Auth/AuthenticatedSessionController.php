@@ -34,6 +34,9 @@ class AuthenticatedSessionController extends Controller
         $user->load('roles');
         $user->refresh();
 
+        // Dispatch login event for activity logging
+        event(new \App\Events\UserLoggedIn($user, $request));
+
         // Clear any intended URL first to prevent conflicts
         $request->session()->forget('url.intended');
 
@@ -51,7 +54,14 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
+        $user = auth()->user();
+        
         Auth::guard('web')->logout();
+
+        // Dispatch logout event for activity logging (before session is invalidated)
+        if ($user) {
+            event(new \App\Events\UserLoggedOut($user, $request));
+        }
 
         $request->session()->invalidate();
 

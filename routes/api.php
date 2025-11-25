@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\AdminFinancialController;
 use App\Http\Controllers\Api\AdminReportsController;
 use App\Http\Controllers\Api\AdminSettingsController;
 use App\Http\Controllers\Api\AdminNotificationsController;
+use App\Http\Controllers\Api\ActivityLogController;
 use Modules\Payments\Http\Controllers\PayPalController;
 
 // Sanctum CSRF cookie route (for SPA authentication)
@@ -51,6 +52,13 @@ Route::prefix('v1')->group(function () {
         Route::post('/auth/register', [AuthController::class, 'register']);
         Route::post('/auth/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
         Route::get('/auth/user', [AuthController::class, 'user'])->middleware('auth:sanctum');
+        
+        // Activity logs routes
+        Route::middleware('auth:sanctum')->prefix('activity-logs')->group(function () {
+            Route::get('/', [ActivityLogController::class, 'index']);
+            Route::get('/statistics', [ActivityLogController::class, 'statistics']);
+            Route::get('/{id}', [ActivityLogController::class, 'show']);
+        });
     });
 
     // Future app-level API endpoints can be added here

@@ -129,6 +129,11 @@ class User extends Authenticatable
         return $this->belongsTo(User::class, 'approved_by');
     }
 
+    public function activityLogs()
+    {
+        return $this->hasMany(ActivityLog::class);
+    }
+
     /**
      * Check if user is approved
      */

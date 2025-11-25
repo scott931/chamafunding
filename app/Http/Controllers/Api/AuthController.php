@@ -26,6 +26,9 @@ class AuthController extends Controller
         $user = auth()->user();
         $user->load('roles');
 
+        // Dispatch login event for activity logging
+        event(new \App\Events\UserLoggedIn($user, $request));
+
         return response()->json([
             'success' => true,
             'message' => 'Login successful',
@@ -106,7 +109,14 @@ class AuthController extends Controller
      */
     public function logout(Request $request): JsonResponse
     {
+        $user = auth()->user();
+        
         Auth::guard('web')->logout();
+
+        // Dispatch logout event for activity logging (before session is invalidated)
+        if ($user) {
+            event(new \App\Events\UserLoggedOut($user, $request));
+        }
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
