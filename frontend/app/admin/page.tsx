@@ -114,7 +114,7 @@ export default function AdminDashboardPage() {
           </div>
 
           {/* Key Metrics Grid */}
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+          <div className="grid grid-cols-1 gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-6 sm:mb-8">
             <MetricCard
               title="Total Raised"
               value={formatCurrency(stats.total_raised || 0)}
@@ -146,10 +146,10 @@ export default function AdminDashboardPage() {
           </div>
 
           {/* Charts and Activity Row */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
             {/* Campaign Status Chart */}
-            <div className="lg:col-span-1 bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Campaign Status</h3>
+            <div className="lg:col-span-1 bg-white rounded-xl shadow-lg p-4 sm:p-6 border border-gray-100">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">Campaign Status</h3>
               {statusData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={200}>
                   <PieChart>
@@ -178,9 +178,9 @@ export default function AdminDashboardPage() {
             </div>
 
             {/* Quick Stats */}
-            <div className="lg:col-span-2 bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Platform Overview</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="lg:col-span-2 bg-white rounded-xl shadow-lg p-4 sm:p-6 border border-gray-100">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">Platform Overview</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
                 <StatBox
                   label="Total Campaigns"
                   value={stats.total_campaigns || 0}
@@ -206,14 +206,14 @@ export default function AdminDashboardPage() {
           </div>
 
           {/* Recent Activity and Notifications */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
             {/* Recent Campaigns */}
-            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+            <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 border border-gray-100">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">Recent Campaigns</h3>
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900">Recent Campaigns</h3>
                 <Link
                   href="/admin/campaigns"
-                  className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                  className="text-xs sm:text-sm text-blue-600 hover:text-blue-700 font-medium"
                 >
                   View all →
                 </Link>
@@ -247,12 +247,12 @@ export default function AdminDashboardPage() {
             </div>
 
             {/* Transaction Notifications */}
-            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+            <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 border border-gray-100">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">Recent Transactions</h3>
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900">Recent Transactions</h3>
                 <Link
                   href="/admin/notifications"
-                  className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                  className="text-xs sm:text-sm text-blue-600 hover:text-blue-700 font-medium"
                 >
                   View all →
                 </Link>
@@ -286,9 +286,9 @@ export default function AdminDashboardPage() {
           </div>
 
           {/* Quick Actions */}
-          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 border border-gray-100">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
               <QuickActionLink
                 href="/admin/campaigns"
                 label="Manage Campaigns"
@@ -325,18 +325,18 @@ export default function AdminDashboardPage() {
 function MetricCard({ title, value, icon, trend, gradient }: any) {
   return (
     <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 hover:shadow-xl transition-shadow">
-      <div className={`bg-gradient-to-br ${gradient} p-6`}>
+      <div className={`bg-gradient-to-br ${gradient} p-4 sm:p-6`}>
         <div className="flex items-center justify-between">
-          <div>
-            <p className="text-white/80 text-sm font-medium mb-1">{title}</p>
-            <p className="text-3xl font-bold text-white">{value}</p>
+          <div className="flex-1 min-w-0">
+            <p className="text-white/80 text-xs sm:text-sm font-medium mb-1 truncate">{title}</p>
+            <p className="text-2xl sm:text-3xl font-bold text-white truncate">{value}</p>
           </div>
-          <div className="text-4xl opacity-80">{icon}</div>
+          <div className="text-3xl sm:text-4xl opacity-80 flex-shrink-0 ml-2">{icon}</div>
         </div>
       </div>
       {trend && (
-        <div className="px-6 py-3 bg-gray-50">
-          <p className="text-xs text-gray-600">{trend}</p>
+        <div className="px-4 sm:px-6 py-2 sm:py-3 bg-gray-50">
+          <p className="text-xs text-gray-600 truncate">{trend}</p>
         </div>
       )}
     </div>
@@ -346,10 +346,10 @@ function MetricCard({ title, value, icon, trend, gradient }: any) {
 // Stat Box Component
 function StatBox({ label, value, icon }: any) {
   return (
-    <div className="text-center p-4 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg">
-      <div className="text-2xl mb-2">{icon}</div>
-      <p className="text-2xl font-bold text-gray-900">{value}</p>
-      <p className="text-xs text-gray-500 mt-1">{label}</p>
+    <div className="text-center p-3 sm:p-4 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg">
+      <div className="text-xl sm:text-2xl mb-2">{icon}</div>
+      <p className="text-xl sm:text-2xl font-bold text-gray-900 truncate">{value}</p>
+      <p className="text-xs text-gray-500 mt-1 line-clamp-2">{label}</p>
     </div>
   );
 }
@@ -366,10 +366,10 @@ function QuickActionLink({ href, label, icon, color }: any) {
   return (
     <Link
       href={href}
-      className={`block p-4 bg-gradient-to-br ${colorClasses[color as keyof typeof colorClasses]} rounded-lg text-white hover:shadow-lg transition-all transform hover:scale-105`}
+      className={`block p-3 sm:p-4 bg-gradient-to-br ${colorClasses[color as keyof typeof colorClasses]} rounded-lg text-white hover:shadow-lg transition-all transform hover:scale-105 touch-target`}
     >
-      <div className="text-3xl mb-2">{icon}</div>
-      <p className="font-semibold">{label}</p>
+      <div className="text-2xl sm:text-3xl mb-2">{icon}</div>
+      <p className="text-sm sm:text-base font-semibold">{label}</p>
     </Link>
   );
 }

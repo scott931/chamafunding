@@ -268,7 +268,109 @@ export default function DashboardPage() {
                     </a>
                   </div>
                 ) : (
-                  <div className="overflow-x-auto">
+                  <>
+                    {/* Mobile Card View */}
+                    <div className="block md:hidden space-y-4">
+                      {dashboardData.active_backing.map((project) => (
+                        <div
+                          key={project.id}
+                          className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                          onClick={() => {
+                            setSelectedProject(project);
+                            setShowProjectModal(true);
+                          }}
+                        >
+                          <div className="flex items-start gap-3 mb-3">
+                            <div className="w-16 h-16 rounded-lg object-cover flex-shrink-0 bg-gray-200 flex items-center justify-center overflow-hidden relative">
+                              {project.campaign.featured_image ? (
+                                <img
+                                  src={project.campaign.featured_image}
+                                  alt={project.campaign.title}
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => {
+                                    (e.target as HTMLImageElement).style.display = 'none';
+                                  }}
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center absolute inset-0">
+                                  <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                  </svg>
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h3 className="text-base font-semibold text-gray-900 mb-1 line-clamp-2">{project.campaign.title}</h3>
+                              {project.creator && (
+                                <p className="text-xs text-gray-500 mb-1">
+                                  by <span className="font-medium">{project.creator.name || 'Unknown'}</span>
+                                </p>
+                              )}
+                              <p className="text-xs text-gray-400">{project.reward_tier?.name || 'General Contribution'}</p>
+                            </div>
+                          </div>
+                          
+                          <div className="space-y-2 mb-3">
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs text-gray-500">Pledge</span>
+                              <span className="text-sm font-bold text-blue-600">
+                                {formatCurrency(project.pledge.amount, project.pledge.currency)}
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs text-gray-500">Date</span>
+                              <span className="text-xs text-gray-600">
+                                {new Date(project.pledge.date).toLocaleDateString()}
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs text-gray-500">Funding Status</span>
+                              <span
+                                className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getFundingStatusBadgeClass(project.campaign.funding_status)}`}
+                              >
+                                {getFundingStatusLabel(project.campaign.funding_status)}
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs text-gray-500">Project Status</span>
+                              <span
+                                className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getProjectStatusBadgeClass(project.campaign.project_status || 'pending')}`}
+                              >
+                                {getProjectStatusLabel(project.campaign.project_status || 'pending')}
+                              </span>
+                            </div>
+                            {project.campaign.funding_status === 'live' && project.campaign.progress_percentage !== undefined && (
+                              <div>
+                                <div className="flex justify-between text-xs mb-1">
+                                  <span className="text-gray-600">Progress</span>
+                                  <span className="font-semibold text-gray-900">{project.campaign.progress_percentage}%</span>
+                                </div>
+                                <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                                  <div
+                                    className="bg-gradient-to-r from-blue-500 to-blue-600 h-full rounded-full transition-all duration-500"
+                                    style={{ width: `${project.campaign.progress_percentage}%` }}
+                                  />
+                                </div>
+                              </div>
+                            )}
+                            {project.campaign.days_remaining !== null && project.campaign.funding_status === 'live' && (
+                              <p className="text-xs text-gray-500 text-right">{project.campaign.days_remaining} days left</p>
+                            )}
+                          </div>
+                          
+                          <a
+                            href={`/campaigns/${project.campaign.id}`}
+                            onClick={(e) => e.stopPropagation()}
+                            className="block w-full text-center px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
+                          >
+                            View Campaign
+                          </a>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Desktop Table View */}
+                    <div className="hidden md:block overflow-x-auto table-responsive">
                     <table className="min-w-full divide-y divide-gray-200">
                       <thead className="bg-gray-50">
                         <tr>
@@ -386,6 +488,7 @@ export default function DashboardPage() {
                       </tbody>
                     </table>
                   </div>
+                  </>
                 )}
               </div>
 
@@ -414,25 +517,25 @@ export default function DashboardPage() {
         {/* Project Details Modal */}
         {showProjectModal && selectedProject && (
           <div
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 sm:p-6"
             onClick={() => setShowProjectModal(false)}
           >
             <div
-              className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
+              className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl mx-2 sm:mx-4"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between z-10">
-                <h3 className="text-xl font-bold text-gray-900">Project Details</h3>
+              <div className="sticky top-0 bg-white border-b border-gray-200 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between z-10">
+                <h3 className="text-lg sm:text-xl font-bold text-gray-900">Project Details</h3>
                 <button
                   onClick={() => setShowProjectModal(false)}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                  className="text-gray-400 hover:text-gray-600 transition-colors touch-target p-1"
                 >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
               </div>
-              <div className="p-6">
+              <div className="p-4 sm:p-6">
                 <div className="space-y-6">
                   {selectedProject.campaign.featured_image && (
                     <div>
@@ -473,16 +576,16 @@ export default function DashboardPage() {
                       {selectedProject.fulfillment?.delivery_status || 'pending'}
                     </span>
                   </div>
-                  <div className="flex gap-3 pt-4 border-t border-gray-200">
+                  <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-200">
                     <a
                       href={`/campaigns/${selectedProject.campaign.id}`}
-                      className="flex-1 text-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors"
+                      className="flex-1 text-center px-4 sm:px-6 py-2.5 sm:py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors touch-target"
                     >
                       View Full Project
                     </a>
                     <button
                       onClick={() => setShowProjectModal(false)}
-                      className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium text-gray-700 transition-colors"
+                      className="px-4 sm:px-6 py-2.5 sm:py-3 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium text-gray-700 transition-colors touch-target"
                     >
                       Close
                     </button>

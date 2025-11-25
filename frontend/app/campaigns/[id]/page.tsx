@@ -118,28 +118,28 @@ export default function CampaignDetailPage() {
                 <img
                   src={campaign.featured_image}
                   alt={campaign.title}
-                  className="w-full h-64 object-cover rounded-lg shadow-md"
+                  className="w-full h-48 sm:h-64 object-cover rounded-lg shadow-md"
                 />
               ) : (
-                <div className="w-full h-64 bg-gradient-to-br from-blue-400 to-purple-500 rounded-lg flex items-center justify-center">
-                  <svg className="w-16 h-16 text-white opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div className="w-full h-48 sm:h-64 bg-gradient-to-br from-blue-400 to-purple-500 rounded-lg flex items-center justify-center">
+                  <svg className="w-12 h-12 sm:w-16 sm:h-16 text-white opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                 </div>
               )}
 
               {/* Campaign Info Card */}
-              <div className="bg-white rounded-lg shadow-md p-6">
-                <div className="flex items-start justify-between mb-4">
+              <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-4 gap-3">
                   <div className="flex-1">
-                    <h1 className="text-2xl font-bold text-gray-900 mb-2">{campaign.title}</h1>
+                    <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">{campaign.title}</h1>
                     {campaign.creator && (
                       <p className="text-sm text-gray-600">
                         by <span className="font-medium">{campaign.creator.name || 'Unknown'}</span>
                       </p>
                     )}
                   </div>
-                  <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ml-4 ${
+                  <span className={`text-xs font-semibold px-2.5 py-1 rounded-full self-start sm:self-auto ${
                     campaign.status === 'active' ? 'bg-green-100 text-green-800' :
                     campaign.status === 'successful' ? 'bg-blue-100 text-blue-800' :
                     campaign.status === 'draft' ? 'bg-yellow-100 text-yellow-800' :
@@ -152,7 +152,7 @@ export default function CampaignDetailPage() {
 
                 {/* Description */}
                 <div className="prose prose-sm max-w-none">
-                  <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
+                  <p className="text-sm sm:text-base text-gray-700 whitespace-pre-wrap leading-relaxed">
                     {campaign.description || campaign.story || 'No description available.'}
                   </p>
                 </div>
@@ -161,20 +161,20 @@ export default function CampaignDetailPage() {
 
             {/* Sidebar */}
             <div className="lg:col-span-1">
-              <div className="bg-white rounded-lg shadow-md p-6 sticky top-6">
+              <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 lg:sticky lg:top-6">
                 {/* Funding Stats */}
                 <div className="mb-6">
-                  <div className="flex items-baseline justify-between mb-2">
-                    <span className="text-2xl font-bold text-gray-900">
+                  <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between mb-2 gap-1">
+                    <span className="text-xl sm:text-2xl font-bold text-gray-900">
                       {formatCurrency(campaign.raised_amount || 0)}
                     </span>
-                    <span className="text-sm text-gray-500">
+                    <span className="text-xs sm:text-sm text-gray-500">
                       of {formatCurrency(campaign.goal_amount || 0)}
                     </span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
+                  <div className="w-full bg-gray-200 rounded-full h-2.5 sm:h-2 mb-2">
                     <div
-                      className={`h-2 rounded-full transition-all ${
+                      className={`h-2.5 sm:h-2 rounded-full transition-all ${
                         progress >= 100 ? 'bg-green-500' : 'bg-blue-600'
                       }`}
                       style={{ width: `${progress}%` }}
@@ -193,7 +193,7 @@ export default function CampaignDetailPage() {
                         <p className="text-sm text-gray-600 mb-3">Please log in to contribute</p>
                         <Link
                           href="/login"
-                          className="w-full inline-block px-4 py-3 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 transition-colors shadow-sm text-center"
+                          className="w-full inline-block px-4 py-3 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 transition-colors shadow-sm text-center touch-target"
                         >
                           Log In to Support
                         </Link>
@@ -204,12 +204,12 @@ export default function CampaignDetailPage() {
                           <label className="block text-sm font-medium text-gray-700 mb-2">
                             Contribution Amount
                           </label>
-                          <div className="flex gap-2 mb-2">
+                          <div className="grid grid-cols-2 gap-2 mb-2">
                             {[25, 50, 100, 250].map((amt) => (
                               <button
                                 key={amt}
                                 onClick={() => setContributionAmount(amt)}
-                                className={`flex-1 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                                className={`px-3 py-2.5 text-sm font-medium rounded-md transition-colors touch-target ${
                                   contributionAmount === amt
                                     ? 'bg-blue-600 text-white'
                                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -225,13 +225,13 @@ export default function CampaignDetailPage() {
                             step="0.01"
                             value={contributionAmount}
                             onChange={(e) => setContributionAmount(parseFloat(e.target.value) || 1)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                            className="w-full px-3 py-2.5 border border-gray-300 rounded-md text-sm touch-target"
                             placeholder="Enter amount"
                           />
                         </div>
                         <button
                           onClick={() => setShowPaymentModal(true)}
-                          className="w-full px-4 py-3 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 transition-colors shadow-sm"
+                          className="w-full px-4 py-3 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 transition-colors shadow-sm touch-target"
                         >
                           Support with ${contributionAmount}
                         </button>
@@ -242,7 +242,7 @@ export default function CampaignDetailPage() {
                           <h3 className="text-sm font-semibold text-gray-900">Complete Payment</h3>
                           <button
                             onClick={() => setShowPaymentModal(false)}
-                            className="text-gray-400 hover:text-gray-600"
+                            className="text-gray-400 hover:text-gray-600 touch-target p-1"
                           >
                             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

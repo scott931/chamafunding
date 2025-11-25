@@ -37,15 +37,15 @@ export default function ProfilePage() {
 
   return (
     <Sidebar>
-      <div className="min-h-screen bg-gray-50 py-8">
+      <div className="min-h-screen bg-gray-50 py-4 sm:py-8">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-white shadow rounded-lg">
-            <div className="px-6 py-5 border-b border-gray-200">
-              <h1 className="text-2xl font-bold text-gray-900">Profile</h1>
-              <p className="mt-1 text-sm text-gray-500">Manage your account information</p>
+            <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-200">
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Profile</h1>
+              <p className="mt-1 text-xs sm:text-sm text-gray-500">Manage your account information</p>
             </div>
-            <div className="px-6 py-5">
-              <dl className="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
+            <div className="px-4 sm:px-6 py-4 sm:py-5">
+              <dl className="grid grid-cols-1 gap-x-4 gap-y-4 sm:gap-y-6 sm:grid-cols-2">
                 <div>
                   <dt className="text-sm font-medium text-gray-500">Name</dt>
                   <dd className="mt-1 text-sm text-gray-900">{user?.name || 'N/A'}</dd>
