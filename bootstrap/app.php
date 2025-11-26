@@ -36,13 +36,22 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->report(function (\Throwable $e) {
             $message = 'Unhandled exception: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine();
             
-            // Log via Laravel
-            \Log::error($message, [
-                'exception' => $e,
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString(),
-            ]);
+            // Log via Laravel (only if Log facade is available - may not be during bootstrap)
+            try {
+                if (class_exists(\Illuminate\Support\Facades\Log::class)) {
+                    $app = app();
+                    if ($app && method_exists($app, 'bound') && $app->bound('log')) {
+                        \Log::error($message, [
+                            'exception' => $e,
+                            'file' => $e->getFile(),
+                            'line' => $e->getLine(),
+                            'trace' => $e->getTraceAsString(),
+                        ]);
+                    }
+                }
+            } catch (\Throwable $logException) {
+                // Log facade not available yet, continue with error_log
+            }
             
             // Also output directly to stderr to ensure we see it
             error_log($message);

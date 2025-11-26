@@ -26,7 +26,17 @@ class AppServiceProvider extends ServiceProvider
         if (empty(config('app.key'))) {
             $appKey = env('APP_KEY');
             if (empty($appKey)) {
-                \Log::error('APP_KEY is not set! This will cause encryption errors.');
+                // Log via Laravel if available, otherwise use error_log
+                try {
+                    if (class_exists(\Illuminate\Support\Facades\Log::class)) {
+                        $app = app();
+                        if ($app && method_exists($app, 'bound') && $app->bound('log')) {
+                            \Log::error('APP_KEY is not set! This will cause encryption errors.');
+                        }
+                    }
+                } catch (\Throwable $logException) {
+                    // Log facade not available, continue with error_log
+                }
                 error_log('CRITICAL: APP_KEY environment variable is not set!');
                 // Don't throw exception here as it would prevent the app from booting
                 // The exception handler will catch encryption errors and handle them gracefully
