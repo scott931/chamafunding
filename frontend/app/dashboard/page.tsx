@@ -75,7 +75,7 @@ export default function DashboardPage() {
     }
   };
 
-  const formatCurrency = (amount: number, currency: string = 'USD') => {
+  const formatCurrency = (amount: number | string, currency: string = 'USD') => {
     if (!amount && amount !== 0) return '$0.00';
     const numAmount = typeof amount === 'string'
       ? parseFloat(amount.replace(/,/g, '')) / 100

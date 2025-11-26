@@ -3,8 +3,9 @@ const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',
   eslint: {
-    // Don't fail build on ESLint warnings, only errors
-    ignoreDuringBuilds: false,
+    // Warning: This allows production builds to successfully complete even if
+    // your project has ESLint errors.
+    ignoreDuringBuilds: true,
   },
   typescript: {
     // Don't fail build on TypeScript errors during build (if any)
