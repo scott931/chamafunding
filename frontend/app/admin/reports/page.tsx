@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Sidebar from '@/components/Sidebar';
-import { reportsApi } from '@/lib/api/reports';
+import { reportsApi, ReportFilters } from '@/lib/api/reports';
 import {
   LineChart,
   Line,
@@ -60,22 +60,32 @@ export default function AdminReportsPage() {
     setActiveReport(reportKey);
     setReportLoading(true);
     try {
+      // Convert filters to match ReportFilters type
+      // campaign_id should be number or undefined, not empty string
+      const apiFilters: ReportFilters = {
+        start_date: filters.start_date || undefined,
+        end_date: filters.end_date || undefined,
+        status: filters.status || undefined,
+        campaign_id: filters.campaign_id ? Number(filters.campaign_id) : undefined,
+        user_type: filters.user_type || undefined,
+      };
+
       let data;
       switch (reportKey) {
         case 'platform_overview':
-          data = await reportsApi.platformOverview(filters);
+          data = await reportsApi.platformOverview(apiFilters);
           break;
         case 'all_projects':
-          data = await reportsApi.allProjects(filters);
+          data = await reportsApi.allProjects(apiFilters);
           break;
         case 'financial_summary':
-          data = await reportsApi.financialSummary(filters);
+          data = await reportsApi.financialSummary(apiFilters);
           break;
         case 'backer_report':
-          data = await reportsApi.backerReport(filters);
+          data = await reportsApi.backerReport(apiFilters);
           break;
         case 'user_management':
-          data = await reportsApi.userManagement(filters);
+          data = await reportsApi.userManagement(apiFilters);
           break;
         case 'support_moderation':
           data = await reportsApi.supportModeration();
