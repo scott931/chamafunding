@@ -204,7 +204,63 @@ echo "=========================================="
 echo "Creating storage link..."
 php artisan storage:link || true
 
-# Start PHP server immediately (this must run in foreground)
-echo "Starting PHP server on 0.0.0.0:$PORT..."
-exec php artisan serve --host=0.0.0.0 --port=$PORT
+# Determine if we should run Next.js frontend
+RUN_FRONTEND=${RUN_FRONTEND:-true}
+LARAVEL_API_PORT=${LARAVEL_API_PORT:-8000}
+
+if [ "$RUN_FRONTEND" = "true" ] && [ -d "frontend" ] && [ -d "frontend/.next" ]; then
+    echo "=========================================="
+    echo "Starting both Laravel API and Next.js Frontend"
+    echo "=========================================="
+    
+    # Start Laravel API server in background on internal port
+    echo "Starting Laravel API server on 0.0.0.0:$LARAVEL_API_PORT..."
+    php artisan serve --host=0.0.0.0 --port=$LARAVEL_API_PORT > /tmp/laravel.log 2>&1 &
+    LARAVEL_PID=$!
+    echo "Laravel API started with PID: $LARAVEL_PID"
+    
+    # Wait a moment for Laravel to start
+    sleep 2
+    
+    # Verify Laravel is running
+    if ! kill -0 $LARAVEL_PID 2>/dev/null; then
+        echo "ERROR: Laravel API failed to start!"
+        cat /tmp/laravel.log
+        exit 1
+    fi
+    
+    echo "✓ Laravel API is running on port $LARAVEL_API_PORT"
+    
+    # Set API URLs for Next.js
+    # NEXT_PUBLIC_API_URL: Used by client-side code (can be relative /api or public URL)
+    # NEXT_PUBLIC_API_URL_INTERNAL: Used by Next.js rewrites to proxy to Laravel (internal)
+    export NEXT_PUBLIC_API_URL="${NEXT_PUBLIC_API_URL:-/api}"
+    export NEXT_PUBLIC_API_URL_INTERNAL="http://localhost:$LARAVEL_API_PORT/api"
+    echo "NEXT_PUBLIC_API_URL (client-side): $NEXT_PUBLIC_API_URL"
+    echo "NEXT_PUBLIC_API_URL_INTERNAL (server-side proxy): $NEXT_PUBLIC_API_URL_INTERNAL"
+    
+    # Start Next.js frontend server on Render's PORT (foreground)
+    echo "Starting Next.js frontend server on port $PORT..."
+    cd frontend
+    
+    # Verify Next.js build exists
+    if [ ! -d ".next" ]; then
+        echo "ERROR: Next.js build not found! Expected .next directory in frontend/"
+        echo "This means the build step failed. Check Dockerfile build logs."
+        exit 1
+    fi
+    
+    # For standalone mode, next start will automatically use the standalone build
+    # Use explicit port flag for Next.js (it also respects PORT env var, but explicit is safer)
+    export PORT=$PORT
+    export HOSTNAME="0.0.0.0"
+    exec npx next start -p $PORT -H 0.0.0.0
+else
+    # Fallback: Run Laravel only (for backward compatibility)
+    echo "=========================================="
+    echo "Starting Laravel API only (frontend not available)"
+    echo "=========================================="
+    echo "Starting PHP server on 0.0.0.0:$PORT..."
+    exec php artisan serve --host=0.0.0.0 --port=$PORT
+fi
 

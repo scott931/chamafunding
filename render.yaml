@@ -114,6 +114,14 @@ services:
         value: "no-reply@chamafunding.com"
       - key: MAIL_FROM_NAME
         value: "ChamaFunding"
+      - key: NEXT_PUBLIC_API_URL
+        value: "/api"
+      - key: NEXT_PUBLIC_API_URL_INTERNAL
+        value: "http://localhost:8000/api"
+      - key: RUN_FRONTEND
+        value: "true"
+      - key: LARAVEL_API_PORT
+        value: "8000"
     healthCheckPath: /up
 
   # Queue Worker Service

@@ -108,6 +108,11 @@ RUN if [ -d "frontend" ]; then \
         else \
             npm install; \
         fi && \
+        # Set default API URLs for build (will be overridden at runtime if needed) \
+        export NEXT_PUBLIC_API_URL="${NEXT_PUBLIC_API_URL:-/api}" && \
+        export NEXT_PUBLIC_API_URL_INTERNAL="${NEXT_PUBLIC_API_URL_INTERNAL:-http://localhost:8000/api}" && \
+        echo "Building with NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL" && \
+        echo "Building with NEXT_PUBLIC_API_URL_INTERNAL=$NEXT_PUBLIC_API_URL_INTERNAL" && \
         npm run build && \
         cd ..; \
     else \
