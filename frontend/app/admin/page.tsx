@@ -110,7 +110,7 @@ export default function AdminDashboardPage() {
             <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               Admin Dashboard
             </h1>
-            <p className="mt-2 text-gray-600">Welcome back! Here's what's happening on your platform.</p>
+            <p className="mt-2 text-gray-600">Welcome back! Here&apos;s what&apos;s happening on your platform.</p>
           </div>
 
           {/* Key Metrics Grid */}

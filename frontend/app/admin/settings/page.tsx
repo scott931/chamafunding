@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Sidebar from '@/components/Sidebar';
 import { settingsApi } from '@/lib/api/settings';
 
@@ -20,11 +20,7 @@ export default function AdminSettingsPage() {
     { key: 'financial', label: 'Financial', icon: '💰' },
   ];
 
-  useEffect(() => {
-    loadSettings();
-  }, [activeTab]);
-
-  const loadSettings = async () => {
+  const loadSettings = useCallback(async () => {
     setLoading(true);
     try {
       let data;
@@ -56,7 +52,11 @@ export default function AdminSettingsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [activeTab]);
+
+  useEffect(() => {
+    loadSettings();
+  }, [loadSettings]);
 
   const handleSave = async () => {
     setSaving(true);

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Sidebar from '@/components/Sidebar';
 import { notificationsApi } from '@/lib/api/notifications';
 
@@ -13,11 +13,7 @@ export default function AdminNotificationsPage() {
   const [showRead, setShowRead] = useState(false);
   const [markingRead, setMarkingRead] = useState<number | null>(null);
 
-  useEffect(() => {
-    loadData();
-  }, [activeTab, showRead]);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoading(true);
     try {
       if (activeTab === 'transactions') {
@@ -33,7 +29,11 @@ export default function AdminNotificationsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [activeTab, showRead]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const handleMarkAsRead = async (campaignId: number) => {
     setMarkingRead(campaignId);

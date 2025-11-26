@@ -2,6 +2,14 @@
 const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',
+  eslint: {
+    // Don't fail build on ESLint warnings, only errors
+    ignoreDuringBuilds: false,
+  },
+  typescript: {
+    // Don't fail build on TypeScript errors during build (if any)
+    ignoreBuildErrors: false,
+  },
   env: {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api',
   },

@@ -245,7 +245,7 @@ export default function DashboardPage() {
               <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                 <div className="px-6 py-5 border-b border-gray-100">
                   <h2 className="text-xl font-semibold text-gray-900">Your Backed Campaigns</h2>
-                  <p className="text-sm text-gray-500 mt-1">All projects you're supporting</p>
+                  <p className="text-sm text-gray-500 mt-1">All projects you&apos;re supporting</p>
                 </div>
 
                 {!dashboardData?.active_backing || dashboardData.active_backing.length === 0 ? (
